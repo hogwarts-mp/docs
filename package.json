@@ -1,0 +1,12 @@
+{
+  "name": "@hogwarts-mp/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.4.1",
+  "scripts": {
+    "docs:sync": "node scripts/sync_contract.mjs",
+    "dev": "node scripts/docs.mjs dev",
+    "build": "node scripts/docs.mjs build"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "servicesCliVersion": "0.6.3",
+  "schemaVersion": 1,
+  "slug": "hogwarts-mp",
+  "title": "HogwartsMP Scripting API",
+  "tagline": "Build multiplayer game modes for Hogwarts Legacy with the HogwartsMP JavaScript runtime.",
+  "accentColor": "#c9a227",
+  "links": [
+    { "label": "HogwartsMP on GitHub", "url": "https://github.com/hogwarts-mp/mod" },
+    { "label": "MafiaHub Framework", "url": "https://github.com/MafiaHub/Framework" }
+  ],
+  "communityContent": {
+    "repository": "https://github.com/hogwarts-mp/docs",
+    "authority": "maintainer",
+    "navigation": "unified",
+    "documents": ["guides/*.md"]
+  },
+  "theme": "src/styles/production.css"
+}
