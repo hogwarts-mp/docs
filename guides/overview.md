@@ -53,8 +53,7 @@ function reward(player, itemId, count) {
 
 ```js
 Events.on("season", (payload) => {
-  const data = JSON.parse(payload);
-  Hud.showPrompt(`The season is now ${data.name}`);
+  Hud.showPrompt(`The season is now ${payload.name}`);
 });
 
 const pos = LocalPlayer.getPosition();
