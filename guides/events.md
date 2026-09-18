@@ -110,7 +110,7 @@ player.emit("questUpdated", JSON.stringify({
 ```js
 // client
 Events.on("questUpdated", (payload) => {
-  Hud.showPrompt(`Quest stage: ${payload.stage}`);
+  Game.notify(`Quest stage: ${payload.stage}`);
 });
 ```
 
@@ -126,7 +126,7 @@ Events.emitAllClients("seasonChanged", { name: "winter" });
 ```js
 // client
 Events.on("seasonChanged", (payload) => {
-  Hud.showPrompt(`The season is now ${payload.name}`);
+  Game.notify(`The season is now ${payload.name}`);
 });
 ```
 
@@ -278,3 +278,7 @@ Events.emit("weather:changed", { preset });
 ```
 
 Do not use a native event name for a different payload. Keep authoritative decisions on the server, and treat client events as requests or observations rather than proof that an action occurred.
+
+## Where to go next
+
+- [Your first resource](/guides/getting-started/) — the manifest, script roles, and the resource lifecycle these events belong to.

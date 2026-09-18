@@ -10,6 +10,16 @@ HogwartsMP resources run JavaScript in one of two environments:
 
 Use the navigation to browse the globals available to the selected environment. The same declarations that generate this reference can be loaded by an editor for autocomplete and type checking.
 
+## Finding your way
+
+**Start here:**
+
+- [Your first resource](/guides/getting-started/) — the manifest, script roles, load order, and sharing code between resources.
+
+**The idea everything builds on:**
+
+- [Events](/guides/events/) — listeners, the client/server bridge, the runtime event catalog, and the trust boundary.
+
 ## Server example
 
 ```js
@@ -53,7 +63,7 @@ function reward(player, itemId, count) {
 
 ```js
 Events.on("season", (payload) => {
-  Hud.showPrompt(`The season is now ${payload.name}`);
+  Game.notify(`The season is now ${payload.name}`);
 });
 
 const pos = LocalPlayer.getPosition();
