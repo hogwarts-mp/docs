@@ -4,6 +4,7 @@ import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createPublicContract } from "./public_contract.mjs";
 import { syncContract } from "./sync_contract.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -51,7 +52,7 @@ const createRenderConfig = async (contractRoot) => {
 };
 
 const generate = async (output) => {
-  const contractRoot = await syncContract();
+  const contractRoot = await createPublicContract(await syncContract());
   const contractManifest = await readFile(path.join(contractRoot, "manifest.json"), "utf8").then(JSON.parse).catch(() => null);
   const contractRevision = contractManifest?.revision ?? "local";
   const contractVersion = contractManifest?.version ?? null;
