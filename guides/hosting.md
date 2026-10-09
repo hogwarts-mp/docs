@@ -14,7 +14,7 @@ This guide takes a fresh machine to a server players can join, then covers keepi
 | | Why |
 | --- | --- |
 | A Windows x64 or Linux x86-64 host | The dedicated server is native on both. Linux needs **glibc 2.38 or newer**: Ubuntu 24.04+ or Debian 13+. |
-| The release ZIP from the official `#builds` channel in the [HogwartsMP Discord](https://discord.gg/RzqENjGe99) | It must be the **same release your players run**. A mismatched client is rejected before it loads in. |
+| The release ZIP from the official `#releases` channel in the [HogwartsMP Discord](https://discord.gg/RzqENjGe99) | It must be the **same release your players run**. A mismatched client is rejected before it loads in. |
 | MySQL 8.x or MariaDB 10.6+ | Foundations stores its data there. A bare server with no resources needs no database. |
 | An [HMP Foundations release](https://github.com/hogwarts-mp/foundations/releases) | The supported starting point for a public server. Its [compatibility matrix](https://github.com/hogwarts-mp/foundations/blob/main/COMPATIBILITY.md) names the HogwartsMP release it pairs with. |
 | Control of the host firewall, and of the router on a home connection | Players reach the server on **UDP 27015**. |
@@ -23,7 +23,7 @@ This guide takes a fresh machine to a server players can join, then covers keepi
 
 ## 1. Get the release
 
-Download the complete ZIP from `#builds` and extract it. It is arranged like this:
+Download the complete ZIP from `#releases` and extract it. It is arranged like this:
 
 ```text
 HogwartsMP-<version>-<commit>/
@@ -32,7 +32,7 @@ HogwartsMP-<version>-<commit>/
 └── server-linux/    # Linux dedicated server
 ```
 
-Do not send the archive or its `client/` directory to players, and do not mirror or modify it. Every player downloads their own copy from `#builds`, and the launcher keeps it updated after that. Do not combine a server directory from one archive with a client from another.
+Do not send the archive or its `client/` directory to players, and do not mirror or modify it. Every player downloads their own copy from `#releases`, and the launcher keeps it updated after that. Do not combine a server directory from one archive with a client from another.
 
 ## 2. Install the server
 
