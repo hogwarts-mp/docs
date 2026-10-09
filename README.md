@@ -11,6 +11,7 @@ The closed-source Mod remains authoritative for generated client and server API 
 - Image directories live beside the Markdown document that references them.
 - `docs.config.json` owns the generator pin, branding, links, navigation, and community-content mapping.
 - `scripts/sync_contract.mjs` downloads and verifies the public scripting contract.
+- `scripts/public_contract.mjs` drops underscore-prefixed declarations, the Mod's internal QA and diagnostic hooks, from a copy of the contract so the site documents only the public API.
 - `scripts/docs.mjs` is the single local and CI generation entrypoint.
 - `src/styles/production.css` is shared by the standalone site and local preview.
 
