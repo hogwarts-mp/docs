@@ -1,6 +1,8 @@
 ---
 title: Events
 group: Guides
+sidebar:
+  order: 3
 ---
 
 `Events` is the asynchronous, named event bus available to both server and client resources. Resources use it to react to runtime activity, communicate with other resources in the same environment, and exchange messages across the client/server boundary.

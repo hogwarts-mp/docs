@@ -1,6 +1,8 @@
 ---
 title: Your first resource
 group: Guides
+sidebar:
+  order: 2
 ---
 
 Everything a game mode does in HogwartsMP lives in a **resource**: a directory containing a `package.json` manifest and one or more JavaScript files. The server discovers every resource directory under `resources/` at startup, runs its server scripts in Node.js, and packages its client scripts and assets for each connecting player, where they run in a sandboxed V8 context.
