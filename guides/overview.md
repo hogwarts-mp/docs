@@ -58,6 +58,12 @@ Use the navigation to browse the globals available to the selected environment. 
 - [Audio](/guides/camera-and-sound/audio/) — the game's sounds from the server or a client, soundbanks and music.
 - [Voice chat](/guides/camera-and-sound/voice-chat/) — who hears whom, voice ranges and tiers, muting, and each player's voice settings.
 
+**Mounts and races:**
+
+- [Brooms and mounts](/guides/mounts-and-races/brooms-and-mounts/) — giving players brooms and creatures, mounting and dismounting, flight overrides, and keeping riders out.
+- [Races](/guides/mounts-and-races/races/) — the game's broom races on tracks of your own, for several players, timed by the server.
+- [Quidditch](/guides/mounts-and-races/quidditch/) — the ball, hoops, bludgers and snitch, with the match run on the server.
+
 **Running a server:**
 
 - [Hosting a server](/guides/hosting-a-server/run-a-server/) — installing on Windows or Linux, Foundations, ports, the masterlist, and updates.
