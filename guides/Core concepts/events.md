@@ -162,7 +162,7 @@ Runtime-generated events use the normal `Events.on` and `Events.once` subscripti
 | `playerInventoryNativeDelta` | `(player, delta)` | A positive native acquisition not yet represented by the authoritative inventory is reported; the first report after connecting establishes a baseline and does not fire this event |
 | `playerInventoryUpdated` | `(player, items, revision)` | The authoritative inventory model changes |
 | `playerInventoryConsumed` | `(player, item, remaining)` | An accepted native consumable use updates authoritative inventory |
-| `playerAppearanceChanged` | `(player, blob, revision)` | The server accepts a newly harvested or explicitly published appearance; `blob` is sanitized and `revision` increases for the connection |
+| `playerAppearanceChanged` | `(player, look, revision)` | The server accepts a new look from the player's game or `player.setLook`; `look` is the checked [look](/guides/players/appearance/#the-look) and `revision` increases for the connection |
 | `playerTeleportComplete` | `(player, requestId, status, completion)` | A `player.teleport` request finishes; `completion` includes the normalized request, client-observed final transform, and ground-snap result |
 | `playerFastTravelComplete` | `(player, requestId, status)` | A `player.fastTravel` request finishes or times out |
 | `npcDied` | `(npcId, enemyId)` | A server-spawned NPC dies |

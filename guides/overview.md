@@ -32,6 +32,7 @@ Use the navigation to browse the globals available to the selected environment. 
 - [Join and spawn](/guides/players/join-and-spawn/) — admitting players, the events of a visit, spawn points, deaths and respawns.
 - [Chat and commands](/guides/players/chat-and-commands/) — sending chat, taking over the chat relay, and slash commands.
 - [Inventory](/guides/players/inventory/) — the server-owned inventory, atomic changes, saving inventories, and items the game hands out.
+- [Appearance](/guides/players/appearance/) — saving and restoring looks, the character creator, clothes, house, size, disguises and props.
 
 **NPCs and creatures:**
 
