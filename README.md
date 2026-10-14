@@ -6,7 +6,7 @@ The closed-source Mod remains authoritative for generated client and server API 
 
 ## Structure
 
-- `guides/` contains scripting concepts and tutorials. Each subdirectory is a sidebar section named after the directory (`guides/Getting started/first-resource.md` is served at `/guides/getting-started/first-resource/`). Sections are ordered by the lowest `sidebar.order` among their pages, so each section owns a range: Getting started 100–199, Core concepts 200–299, Players 300–399, NPCs and creatures 400–449, World 500–549, User interface 600–699, Camera and sound 700–799, Mounts and races 800–849, Hosting a server 900–999. A section added between two takes the free part of a hundred, such as 450–499.
+- `guides/` contains scripting concepts and tutorials. Each subdirectory is a sidebar section named after the directory (`guides/Getting started/first-resource.md` is served at `/guides/getting-started/first-resource/`). Sections are ordered by the lowest `sidebar.order` among their pages, so each section owns a range: Getting started 100–199, Core concepts 200–299, Players 300–399, NPCs and creatures 400–449, World 500–549, Room of Requirement 550–599, User interface 600–699, Camera and sound 700–799, Mounts and races 800–849, Hosting a server 900–999. A section added between two takes the free part of a hundred, such as 450–499.
 - Image directories live beside the Markdown document that references them.
 - `docs.config.json` owns the generator pin, branding, links, navigation, and community-content mapping.
 - `scripts/sync_contract.mjs` downloads and verifies the public scripting contract.
