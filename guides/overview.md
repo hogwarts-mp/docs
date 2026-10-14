@@ -36,8 +36,13 @@ Use the navigation to browse the globals available to the selected environment. 
 
 **NPCs and creatures:**
 
-- [NPCs](/guides/npcs-and-creatures/npcs/) — spawning enemies, controlling their health, targets and size, and their damage and death events.
+- [NPCs](/guides/npcs-and-creatures/npcs/) — spawning enemies, who runs their AI, controlling their health, targets and size, and switching their behaviour off.
 - [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) — tame creatures players care for, and stationary townspeople.
+
+**PvE:**
+
+- [Fighting NPCs](/guides/pve/fighting-npcs/) — how several players fight one NPC, damage and death events, damage multipliers, and bosses.
+- [Rewards and loot](/guides/pve/rewards-and-loot/) — what an NPC's death pays and to whom.
 
 **Encounters:**
 

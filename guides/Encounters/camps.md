@@ -57,7 +57,7 @@ An enemy counts as dead once its NPC is gone, so destroying one from a script co
 
 ## What camps pay
 
-Camp enemies pay out like any NPC. `Camps.setRewardPolicy(policy)` sets what every camp's enemies pay, and `Camps.setRewardPolicy(policy, campId)` what one camp's do. A camp's own policy wins, then the one for every camp, then `NPC.setDefaultRewardPolicy`. `Camps.getRewardPolicy(campId)` reads back what applies.
+Camp enemies pay out like any NPC, by the [reward policies](/guides/pve/rewards-and-loot/) that apply to them. `Camps.setRewardPolicy(policy)` sets what every camp's enemies pay, and `Camps.setRewardPolicy(policy, campId)` what one camp's do. A camp's own policy wins, then the one for every camp, then `NPC.setDefaultRewardPolicy`. `Camps.getRewardPolicy(campId)` reads back what applies.
 
 ```js
 // server/main.js

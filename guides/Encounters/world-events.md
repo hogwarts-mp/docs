@@ -78,7 +78,7 @@ Events.on("worldEventStarted", (spotId, kind) => {
 
 ## What world events pay
 
-`WorldEvents.setRewardPolicy(policy)` sets what every world event's enemies pay, falling back to `NPC.setDefaultRewardPolicy`, and `WorldEvents.getRewardPolicy()` reads it back. There is one policy for all of them.
+`WorldEvents.setRewardPolicy(policy)` sets the [reward policy](/guides/pve/rewards-and-loot/) for every world event's enemies, falling back to `NPC.setDefaultRewardPolicy`, and `WorldEvents.getRewardPolicy()` reads it back. There is one policy for all of them.
 
 ```js
 // server/main.js
