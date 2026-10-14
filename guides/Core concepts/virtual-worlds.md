@@ -35,7 +35,7 @@ The value reads back at once and takes effect on the next server tick. A player'
 
 The world you set is combined with the map the player is in. In Overland, the game's main map, world N is world N. Every other map, such as a dungeon, has worlds of its own: players there share a world with the others in the same map who have the same world number, and never meet anyone in another map.
 
-During a loading screen between maps, each player is alone in a world of their own.
+During a loading screen between maps, each player is alone in a world of their own. In the Room of Requirement, each room is a world of its own, combined with the world number: see [Who sees whom](/guides/room-of-requirement/doors-and-visits/#who-sees-whom).
 
 `player.virtualWorld` returns the number you set, not this combined world.
 

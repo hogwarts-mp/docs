@@ -46,6 +46,11 @@ Use the navigation to browse the globals available to the selected environment. 
 - [Doors](/guides/world/doors/) — holding the game's doors locked or open for everyone, and deciding who gets in.
 - [Loot](/guides/world/loot/) — server-owned chests, moonstones and foragables, per-player contents, and switching off the game's own loot.
 
+**Room of Requirement:**
+
+- [Rooms](/guides/room-of-requirement/rooms/) — loading rooms under ids of your own, letting players decorate them, and saving what they build.
+- [Doors and visits](/guides/room-of-requirement/doors-and-visits/) — where each player's door leads, taking players in, visitors, and who is where.
+
 **User interface:**
 
 - [Web views](/guides/user-interface/web-views/) — HTML interfaces in the game, and messages between the page and your scripts.
