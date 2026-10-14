@@ -2,7 +2,7 @@
 title: Web views
 description: Draw your own interfaces in HTML over the game, ship their pages with your resource, and pass messages between a page and your client script.
 sidebar:
-  order: 60
+  order: 600
 ---
 
 A web view is a browser page drawn over the game. Client scripts create and control views with the `Web` global, and a page talks back to its script through a `callEvent` function the view gives it. Menus, shops and scoreboards are usually web views.

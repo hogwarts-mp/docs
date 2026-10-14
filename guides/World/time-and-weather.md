@@ -2,7 +2,7 @@
 title: Time and weather
 description: Set the shared clock, calendar, season and weather every player sees, change how fast time passes, and pin holiday decor and the Headmaster's office.
 sidebar:
-  order: 50
+  order: 500
 ---
 
 The server owns one world state that every client follows: the clock, the calendar, the season, the weather, holiday decor and the Headmaster's office. Each player's game shows what the server sets, so everyone sees the same sky.

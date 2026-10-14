@@ -2,7 +2,7 @@
 title: Map markers
 description: Put markers, search circles and gold routes on the map and minimap, choose which players get a blip and in what colour, and read what the minimap shows.
 sidebar:
-  order: 62
+  order: 620
 ---
 
 The game's map and minimap draw a blip for every other player, and client scripts can add markers and circles of their own and draw the game's gold route to one. All of this lives on each client, in the `Blips` global, so the server decides what each player should see and tells their client.

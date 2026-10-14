@@ -2,7 +2,7 @@
 title: Virtual worlds
 description: Split players and entities into separate copies of the world, how a player's world combines with the map they are in, and what ignores worlds.
 sidebar:
-  order: 23
+  order: 230
 ---
 
 A virtual world is a number that partitions replication. A player sees the players and entities in their own world and nothing in any other, so several groups can share the same place without meeting: a duel arena, a private event or a tutorial. Players in different worlds do not hear each other on voice chat either.

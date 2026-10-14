@@ -2,7 +2,7 @@
 title: Events
 description: Listen and emit across resources and the client/server boundary, the runtime event catalog, and what to trust.
 sidebar:
-  order: 21
+  order: 210
 ---
 
 `Events` is the asynchronous, named event bus available to both server and client resources. Resources use it to react to runtime activity, communicate with other resources in the same environment, and exchange messages across the client/server boundary.

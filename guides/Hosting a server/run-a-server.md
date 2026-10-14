@@ -3,7 +3,7 @@ title: Hosting a server
 description: Take a fresh Windows or Linux machine to a public server running HMP Foundations, then keep it running and updated.
 sidebar:
   label: Run a server
-  order: 90
+  order: 900
 ---
 
 A HogwartsMP server is one executable plus a `server.json` configuration file and a `resources/` directory. The release ships the runtime only, with no game mode. Public servers run **HMP Foundations**, a complete resource pack that adds characters, inventory, banking, jobs, shops, administration and other common systems on top of a MySQL or MariaDB database.

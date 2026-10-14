@@ -2,7 +2,7 @@
 title: Camera
 description: Take over the player's view with a camera of your own, move it in shots, paths and orbits, fade the screen, and hand the view back.
 sidebar:
-  order: 70
+  order: 700
 ---
 
 Each client has one custom camera that client scripts drive with the `Camera` global. While it is active, the player sees through it instead of the game's own camera, and `Camera.restore()` hands the view back. Positions are world centimetres, rotations are degrees and durations are seconds.

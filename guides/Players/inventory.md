@@ -2,7 +2,7 @@
 title: Inventory
 description: Give, take and move items in a server-owned inventory, change several things at once safely, save inventories between visits, and adopt items the game hands out.
 sidebar:
-  order: 32
+  order: 320
 ---
 
 Every player's inventory belongs to the server. `player.inventory` is the server's model of it: the player's game shows what the server sends, its reads never ask the client, and nothing the client reports adds an item on its own.

@@ -2,7 +2,7 @@
 title: Server configuration
 description: Every server.json key and command-line flag, passwords, required CurseForge mods, respawning, and the information API.
 sidebar:
-  order: 91
+  order: 910
 ---
 
 The server takes its settings from `server.json` in its working directory, and command-line flags can override some of them. This page lists every key and flag. To install a server first, see [Hosting a server](/guides/hosting-a-server/run-a-server/).

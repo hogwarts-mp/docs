@@ -2,7 +2,7 @@
 title: Docker and game panels
 description: Run the public server image with Docker Compose, or on Pterodactyl and Pelican with the official egg.
 sidebar:
-  order: 92
+  order: 920
 ---
 
 Every release publishes the Linux dedicated server as a public container image:

@@ -2,7 +2,7 @@
 title: Run a local server
 description: Run a bare server on your own machine, join it, and reload a resource after every change without restarting.
 sidebar:
-  order: 10
+  order: 100
 ---
 
 To develop a resource you need a server you control and a client to join it with. Both come in the release ZIP, and a server for local work needs nothing else: no Foundations, no database and no open ports.

@@ -2,7 +2,7 @@
 title: Brooms and mounts
 description: Give players brooms and creatures to ride, put them on and take them off from a client script, change how a broom flies, and keep riders out of an area.
 sidebar:
-  order: 80
+  order: 800
 ---
 
 Players fly brooms and ride the game's creatures, and everyone else sees them do it without any script. Client scripts control the local player's riding with `Broom`, `FlyingMount` and `GroundMount`. The server decides what each player owns, through their [inventory](/guides/players/inventory/), and has no call of its own for riding.
