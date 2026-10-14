@@ -1,6 +1,6 @@
 ---
 title: Beasts and characters
-description: Spawn tame beasts players can pet and feed, decide who may care for them, and place stationary townspeople and vendors with nameplates.
+description: Spawn tame beasts players can pet, feed and catch, decide who may care for them, and place stationary townspeople and vendors with nameplates.
 sidebar:
   order: 420
 ---
@@ -51,6 +51,10 @@ Events.on("beastCared", (beast, player, kind) => {
 
 Care is refused on its own across virtual worlds, and the server rate-limits it.
 
+### Catching
+
+Players can catch a beast with the game's Nab-Sack once a script makes it catchable with `beast.capturable` or `beast.setCapturableFor(player, true)`. [Catching beasts](/guides/npcs-and-creatures/catching-beasts/) covers refereeing each catch, the player's bag, keeping it across reconnects and releasing beasts.
+
 ## Characters
 
 A character is a dressed, stationary human placed by the server: a vendor, a townsperson or a quest giver. It has no AI, no owner and no health. `Character.create(key, characterId, options)` creates one under a key of your choosing, and creating again with the same key replaces it:
@@ -80,5 +84,6 @@ The prompt is only text. Handling the interaction it invites, such as opening a 
 
 ## Where to go next
 
+- [Catching beasts](/guides/npcs-and-creatures/catching-beasts/) for the Nab-Sack, the player's bag and releasing beasts.
 - [NPCs](/guides/npcs-and-creatures/npcs/) for enemies and their AI, and [Rewards and loot](/guides/pve/rewards-and-loot/) for what their deaths pay.
 - [Authority](/guides/core-concepts/authority/) for which client runs a creature's AI and what that means.

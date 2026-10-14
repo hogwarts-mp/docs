@@ -36,7 +36,7 @@ Everything a client sends is a claim about its own game, and a modified client c
 | `npcDamaged` | Clamped and rate-capped by the server, but reported by the attacker's client. |
 | `playerInventoryChanged`, `playerInventoryNativeDelta` | The client's account of its game's inventory. Adopt a delta with `player.inventory.adoptNative()` only for items on an allowlist. |
 | `playerLocationChanged`, teleport and fast-travel completions | The client's account of where it is and how a request went. |
-| `housePointsRequest`, `beastCared` | Requests. They take effect unless a handler refuses them by returning `false`. |
+| `housePointsRequest`, `beastCared`, `beastCaptureStart`, `beastCaptureRequest` | Requests. They take effect unless a handler refuses them by returning `false`. |
 | `doorUnlockRequest` | A request. The door stays locked unless a script releases it. |
 | `steamId`, `epicId`, `discordId`, `hardwareId` | Announced by the client. Never authorize anyone with them. |
 
