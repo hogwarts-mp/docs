@@ -136,6 +136,8 @@ Events.on("seasonChanged", (payload) => {
 
 Runtime-generated events use the normal `Events.on` and `Events.once` subscriptions. They are raised by the framework or the native HogwartsMP module rather than by `Events.emit`. Avoid emitting custom events with these names.
 
+The declarations type the handlers of the events in these tables, so an editor knows each argument. Events of your own, and the few native ones the declarations leave out, such as `chatSend` and the voice events, hand a TypeScript handler `unknown` arguments.
+
 `resourceStart(resourceName)` and `resourceStop(resourceName)` are emitted by both the server and client resource managers when a JavaScript resource starts or is about to stop.
 
 ### Native server events
@@ -156,6 +158,8 @@ Runtime-generated events use the normal `Events.on` and `Events.once` subscripti
 | `playerDownedEnd` | `(player)` | A player recovers from the downed state or respawns |
 | `playerHoldEnded` | `(player, owner, reason)` | A server-owned hold ends; `reason` identifies why |
 | `playerHoldStrained` | `(player, owner, distanceCm)` | A held player continues reporting positions beyond the hold boundary |
+| `playerWandChanged` | `(player)` | The player's wand changes |
+| `playerGearChanged` | `(player)` | What the player wears changes |
 | `worldReady` | `(player)` | The player's world, pawn, and replication are ready |
 | `loadingFinished` | `(player)` | The player's load screen is dismissed after `worldReady` |
 | `playerInventoryChanged` | `(player, items)` | The player's reported native inventory changes; `items` is the full native inventory |
@@ -165,9 +169,28 @@ Runtime-generated events use the normal `Events.on` and `Events.once` subscripti
 | `playerAppearanceChanged` | `(player, look, revision)` | The server accepts a new look from the player's game or `player.setLook`; `look` is the checked [look](/guides/players/appearance/#the-look) and `revision` increases for the connection |
 | `playerTeleportComplete` | `(player, requestId, status, completion)` | A `player.teleport` request finishes; `completion` includes the normalized request, client-observed final transform, and ground-snap result |
 | `playerFastTravelComplete` | `(player, requestId, status)` | A `player.fastTravel` request finishes or times out |
-| `npcDied` | `(npcId, enemyId)` | A server-spawned NPC dies |
+| `npcDied` | `(npcId, enemyId, killerId, damagerIds)` | A server-spawned NPC dies; `killerId` is the last player to damage it, or `null`, and `damagerIds` every player who did. See [Fighting NPCs](/guides/pve/fighting-npcs/#damage-and-death) |
 | `npcDamaged` | `(npcId, attackerId, amount)` | A player reports damage to a server-spawned NPC |
+| `beastCared` | `(beast, player, kind)` | A player pets or feeds a beast; return `false` synchronously to refuse it |
+| `campActivated` | `(campId)` | A [camp](/guides/encounters/camps/)'s enemies spawn |
+| `campCleared` | `(campId)` | Every enemy of an active camp is dead |
+| `worldEventStarted` | `(spotId, kind)` | A [world event](/guides/encounters/world-events/) starts |
+| `worldEventCleared` | `(spotId)` | Every enemy of a running world event is dead |
+| `worldEventEnded` | `(spotId)` | A world event ends |
+| `zoneEnter` | `(zone, entity)` | An entity comes into a [zone](/guides/encounters/zones/) |
+| `zoneExit` | `(zone, entity, reason, entityId)` | An entity leaves a zone; `reason` is `"left"` or `"gone"` |
+| `doorUnlockRequest` | `(player, door)` | A player tries to open a lock the server holds shut, by key or Alohomora |
+| `lootableTaken` | `(player, lootableId, items)` | A player takes a server lootable; `items` is what it gave them |
+| `housePointsChange` | `(house, points, previous)` | A house's points change |
+| `housePointsRequest` | `(player, request)` | A player's game asks to change house points; return `false` synchronously to refuse it |
+| `sanctuaryChanged` | `(id, revision, editor)` | An editor changes a [Room of Requirement](/guides/room-of-requirement/rooms/) room |
+| `playerSanctuaryEnter` | `(player, id)` | A player enters a room |
+| `playerSanctuaryLeave` | `(player, id)` | A player leaves a room |
 | `pvpHit` | `(casterId, victimId, spell, damage)` | A PvP hit has passed server arbitration and policy and was relayed to its victim; `damage` is the final amount |
+| `pvpDefeat` | `(victim, killer, kind)` | A player defeats another in [PvP](/guides/pvp/hits-and-defeat/#defeat); `kind` is `"death"` or `"kneel"` |
+| `pvpRulesChanged` | `(rules)` | The PvP rules change |
+| `pvpFlagChanged` | `(player, on)` | A player's PvP flag changes |
+| `wandLinkEnded` | `(link, winner, reason)` | A [wand link](/guides/pvp/duels-and-wand-links/#wand-links) ends |
 | `entityStateChange` | `(entity, key, value, previous)` | A script writes or removes one key of an entity's state or of `World.state`; `value` is `undefined` for a removal |
 
 Some native server events originate in the connected player's game. The reserved `playerDied`, `playerDowned`, and `playerDownedEnd` messages use a dedicated native RPC and cannot be forged through `Events.emitServer`, but they are still client-authored observations. Location context, native inventory reports, request completions, and `npcDamaged` also cross the client/server boundary. Apply server-side validation appropriate to the consequences of the handler. In particular, adopt a `playerInventoryNativeDelta` with `player.inventory.adoptNative()` only under an explicit allowlist. `playerAppearanceChanged` is emitted after the server accepts and sanitizes an appearance, while `pvpHit` is a post-policy informational event; use `Pvp.setPolicy` to veto or reprice PvP hits.
@@ -199,11 +222,18 @@ These events are delivered only inside the client runtime. Receiving a native cl
 | `chatMessage` | `({ author, text, color })` | A chat message arrives from the server |
 | `chatSend` | `(text)` | The local player submits text through the chat overlay |
 | `spellCast` | `(spellPath)` | The local player casts a spell; the path identifies its spell record |
-| `spellProbe` | `(label)` | The native spell hook produces a diagnostic line |
 | `playerRegionChanged` | `(region)` | The local player enters a named region |
-| `creatorOpened` | `()` | The character creator opens |
+| `creatorOpened` | `({})` | The character creator opens |
 | `creatorConfirmed` | `({ first, last })` | The character creator closes after confirmation |
-| `creatorCancelled` | `()` | The character creator closes without confirmation |
+| `creatorCancelled` | `({})` | The character creator closes without confirmation |
+| `creatorChanged` | `(state)` | A creator session's selections change |
+| `abilityStatus` | `(handle)` | An ability the local player plays starts or settles |
+| `spellAssignment` | `({ source, loadout, slot })` | A spell is assigned to a slot, from the game's menu or a script |
+| `spellLearningFinished` | `(result)` | A spell lesson the resource started finishes; it grants no spell |
+| `minimapChanged` | `(state, previous)` | The [minimap](/guides/user-interface/map-markers/#the-minimap) switches map, floor or tile |
+| `pvpRelationChanged` | `(relation)` | The local player's [PvP relation](/guides/pvp/rules-and-relations/) to another player is resolved or changes |
+| `localDowned` | `()` | The local player kneels after a PvP defeat |
+| `localDownedEnd` | `({ wasDead })` | The local player gets up, from a kneel or a respawn |
 | `entityStateChange` | `(entity, key, value, previous)` | A replicated state write or removal arrives on the client; `value` is `undefined` for a removal |
 
 A `chatSend` handler may synchronously return `false` to prevent that line from being sent. An asynchronous return value cannot veto it.
@@ -225,8 +255,6 @@ Call `CombatEvents.arm()` before subscribing to the combat observations below. A
 | `spellHit` | `(spellType, spellPath, victimClass, victimNpcId, victimIsLocal, casterClass, casterIsLocal)` | A watched spell hits an actor |
 | `spellHitPlayer` | `(victimId, spellId, spellPath, damage)` | The local player's native spell impact hits another player's proxy |
 | `damageReceived` | `(damage, targetClass, targetNpcId, targetIsLocal, instigatorClass, instigatorIsLocal)` | A watched actor receives damage |
-| `protegoBlocked` | `(spellPath, targetClass, targetIsLocal)` | Protego blocks a spell |
-| `attackDeflected` | `(deflectorIsLocal)` | Protego deflects an attack |
 | `gameEvent` | `(functionName, objectClass)` | Another explicitly watched native function fires |
 
 ```js
@@ -237,7 +265,7 @@ if (CombatEvents.arm()) {
 }
 ```
 
-`spellHitPlayer` is informational. The native client relays the impact separately for server arbitration; server resources can observe the resulting final hit through `pvpHit`. It does not currently have a typed `ClientEvents.on` overload in the public declarations.
+`spellHitPlayer` is informational. The native client relays the impact separately for server arbitration; server resources can observe the resulting final hit through `pvpHit`.
 
 `gameEvent` is not an unrestricted stream of every Unreal Engine event. It only reports functions installed by the available typed or feature-specific watchers.
 
@@ -250,7 +278,7 @@ The native brewing and herbology hooks currently expose two additional events us
 | `brewingInput` | `(payloadJson)` | `{ action, siteUid, stationUid, potionId, yield }`; `action` is `begin`, `collect`, or `destroy` |
 | `herbInput` | `(payloadJson)` | `{ action, plotUid, plantId, fertilizerId, state }`; `action` is `plant`, `fertilize`, `harvest`, or `destroy` |
 
-These two names are native implementation events but do not yet have typed `ClientEvents.on` overloads in the public declarations.
+`breakableState` fires with an object's id, `"broken"` or `"repaired"`, and its class when the local player breaks or repairs a repairable object, once `Breakables.arm()` has been called.
 
 #### Web-view events
 

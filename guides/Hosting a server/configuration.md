@@ -55,6 +55,8 @@ HogwartsMP's own settings live under the `mod` object, so they can never collide
 | --- | --- | --- |
 | `curseforge.mods` | `[]` | CurseForge project IDs every connecting player must activate. See [Required CurseForge mods](#required-curseforge-mods). |
 | `autoRespawn` | `true` | Whether a dead player respawns on their own after a few seconds. See [Respawning](#respawning). |
+| `broomUpgradeTier` | `0` | The broom upgrades, from 0 to 3, every player starts with. Scripts change it per player with [`player.setBroomUpgradeTier`](/guides/mounts-and-races/brooms-and-mounts/#broom-upgrades-and-speed). |
+| `broomSpeedMultiplier` | `1` | How fast every player's broom flies, from 0.25 to 3, on top of its upgrades. Values outside the range are clamped. |
 
 ### Validation
 

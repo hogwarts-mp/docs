@@ -80,5 +80,5 @@ The prompt is only text. Handling the interaction it invites, such as opening a 
 
 ## Where to go next
 
-- [NPCs](/guides/npcs-and-creatures/npcs/) for enemies, their AI and what their deaths pay.
+- [NPCs](/guides/npcs-and-creatures/npcs/) for enemies and their AI, and [Rewards and loot](/guides/pve/rewards-and-loot/) for what their deaths pay.
 - [Authority](/guides/core-concepts/authority/) for which client runs a creature's AI and what that means.

@@ -1,11 +1,11 @@
 ---
 title: Time and weather
-description: Set the shared clock, calendar, season and weather every player sees, change how fast time passes, and pin holiday decor and the Headmaster's office.
+description: Set the shared clock, calendar, season and weather every player sees, change how fast time passes, and pin holiday decor, the Headmaster's office and the meals in the Great Hall.
 sidebar:
   order: 500
 ---
 
-The server owns one world state that every client follows: the clock, the calendar, the season, the weather, holiday decor and the Headmaster's office. Each player's game shows what the server sets, so everyone sees the same sky.
+The server owns one world state that every client follows: the clock, the calendar, the season, the weather, holiday decor, the Headmaster's office and the meals on the tables. Each player's game shows what the server sets, so everyone sees the same sky.
 
 ## The clock and calendar
 
@@ -66,7 +66,31 @@ Every client re-applies the decor whenever its world loads or a mission changes 
 
 ## The Headmaster's office
 
-`World.setHeadmasterOffice(office)` pins the gargoyle staircase to the Headmaster's office for every player: `"open"` raises it, `"closed"` keeps it down, and `"game"`, the default, leaves it to the story quest. A raised staircase stays up until its part of the castle reloads, so `"closed"` takes effect on a player's next visit there.
+`World.setHeadmasterOffice(office)` pins the gargoyle staircase to the Headmaster's office for every player: `"open"` raises it, `"closed"` keeps it down, and `"game"`, the default, leaves it to the story quest. A loaded staircase follows at once: `"closed"` folds the stairs away, sinks the gargoyle and closes the stairwell off again. Going back to `"game"` leaves the staircase as it is until the quest changes it.
+
+## Meals
+
+`World.setMeal(meal)` sets the food on the tables of the Great Hall and the Kitchens for every player, and `World.meal` reads it back:
+
+| Meal | Tables |
+| --- | --- |
+| `"game"` | Follow the clock, the default: breakfast at 6:00, lunch at 11:00, dinner at 16:00, dessert at 19:00, cleared at 20:00 |
+| `"breakfast"`, `"lunch"`, `"dinner"`, `"dessert"` | That meal, whatever the time |
+| `"prep"` | Plates and goblets, with no food |
+| `"none"` | Bare |
+
+```js
+// server/main.js
+function startFeast() {
+  World.setMeal("dessert");
+}
+
+function endFeast() {
+  World.setMeal("game");
+}
+```
+
+A meal you set holds through mealtimes. Any other value returns `false`.
 
 ## Reacting to changes
 

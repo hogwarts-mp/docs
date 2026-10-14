@@ -43,7 +43,7 @@ Events.on("loadingFinished", async (player) => {
 });
 
 Events.on("playerAppearanceChanged", (player, look) => {
-  if (!restored.has(player.id) || Object.keys(look.presets).length === 0) return;
+  if (!look || !restored.has(player.id) || Object.keys(look.presets).length === 0) return;
   saveLook(player, JSON.stringify(look));
 });
 
@@ -58,7 +58,7 @@ Events.on("playerDisconnect", (player) => restored.delete(player.id));
 
 `player.setLook(look, callback)` takes a look or its JSON text. The callback runs with `(error, result)` once the player's game has rebuilt their character, within 20 seconds, and `result.revision` is the revision it produced. Without a callback, a malformed look throws `INVALID_APPEARANCE`. The server checks a look's shape, not that its ids exist in the game, and the player's game leaves out ids it does not know, so read the look back if it matters.
 
-A look's `gear` and `house` show how other players see the player, but do not dress the player themselves. Restore clothes from their [inventory](/guides/players/inventory/#saving-inventories), and the house with [`player.house`](#house-and-gender).
+A look's `gear`, `hood` and `house` show how other players see the player, but do not dress the player themselves. What they wear, their hood and the look a worn item shows all come from their [inventory](/guides/players/inventory/#saving-inventories), so restoring it restores them. Restore the house with [`player.house`](#house-and-gender).
 
 ## The character creator
 
@@ -113,7 +113,7 @@ A look saved while a player is resized carries the size, and restoring it resize
 
 ## Disguises
 
-`player.setTransmog(characterId)` makes a player look like one of the game's characters, to everyone including themselves, and `player.setTransmog("")` takes it off. Check an id with `Character.isAllowed(characterId)`: the server accepts any well-formed id, and only the game's human characters work. `player.getTransmog()` reads it back.
+`player.setTransmog(characterId)` makes a player look like one of the game's characters, to everyone including themselves, and `player.setTransmog("")` takes it off. The server accepts any well-formed id. `Character.isAllowed(characterId)` checks it against the human characters [`Character.create`](/guides/npcs-and-creatures/beasts-and-characters/#characters) can place. The game's ghosts work as disguises too, though most of them fail that check, and a ghost disguise looks ghostly to the player as well. `player.getTransmog()` reads it back.
 
 A disguise is not part of the look: `getLook` never includes it, and `setLook` takes it off.
 
@@ -131,6 +131,10 @@ function handApple(player) {
 ```
 
 A prop handed to a player before they have a body is dropped, so wait for `loadingFinished`.
+
+## Hiding your own body
+
+On the client, `LocalPlayer.setVisibility(false)` hides the player's own body, wand and held prop on their screen only, for a first-person camera or a cutscene. Everyone else still sees them, unless the server hides them with `player.setVisible(false)`. It lasts through respawns and travel until you change it.
 
 ## What a visit keeps
 

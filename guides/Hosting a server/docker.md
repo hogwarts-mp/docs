@@ -13,7 +13,7 @@ ghcr.io/hogwarts-mp/hogwartsmp-server:<version>
 
 The image holds the same native server the release ZIP ships, repackaged on Ubuntu 24.04 for `linux/amd64`. It is not a source build, and like the ZIP it carries **no game-mode resources**. Pulling it needs no login.
 
-Tags are exact release versions with no leading `v`, such as `1.8.0`. There is no `latest`, `stable` or `testing` tag, because the server must match the release your players run: a mismatched client is rejected before it loads in. Changing the tag is how you update.
+Tags are exact release versions with no leading `v`, such as `1.9.0`. There is no `latest`, `stable` or `testing` tag, because the server must match the release your players run: a mismatched client is rejected before it loads in. Changing the tag is how you update.
 
 This page covers the container. Configuration, Foundations, ports and the masterlist work exactly as in [Hosting a server](/guides/hosting-a-server/run-a-server/).
 
@@ -42,7 +42,7 @@ volumes:
 Next to it, create a `.env` that pins the release:
 
 ```dotenv
-HOGWARTSMP_VERSION=1.8.0
+HOGWARTSMP_VERSION=1.9.0
 ```
 
 Start it and follow the log:
@@ -61,7 +61,7 @@ Without Compose, the same container is:
 docker run -d --name hogwartsmp --init --restart unless-stopped \
   -p 27015:27015/udp -p 127.0.0.1:27016:27016/tcp \
   -v hogwartsmp-data:/home/container \
-  ghcr.io/hogwarts-mp/hogwartsmp-server:1.8.0
+  ghcr.io/hogwarts-mp/hogwartsmp-server:1.9.0
 ```
 
 ## Data and resources
@@ -112,7 +112,7 @@ Arguments after the image name go straight to the server, as the [command-line f
 docker run -d --name hogwartsmp --init --restart unless-stopped \
   -p 28015:28015/udp -p 127.0.0.1:28016:28016/tcp \
   -v hogwartsmp-data:/home/container \
-  ghcr.io/hogwarts-mp/hogwartsmp-server:1.8.0 --port 28015 --apiport 28016
+  ghcr.io/hogwarts-mp/hogwartsmp-server:1.9.0 --port 28015 --apiport 28016
 ```
 
 In Compose, edit `command` and `ports` together:
@@ -146,7 +146,7 @@ The server handles `SIGTERM` and `SIGINT` by shutting down cleanly: every resour
 Each release has a ready-made egg that points at that release's exact image, so importing it pins the version. The egg ships inside the image, so you can extract it from any machine with Docker:
 
 ```sh
-docker run --rm --user 0 --entrypoint cat ghcr.io/hogwarts-mp/hogwartsmp-server:1.8.0 \
+docker run --rm --user 0 --entrypoint cat ghcr.io/hogwarts-mp/hogwartsmp-server:1.9.0 \
   /usr/share/hogwartsmp/egg-hogwartsmp.json > egg-hogwartsmp.json
 ```
 
