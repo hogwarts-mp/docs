@@ -39,6 +39,19 @@ Use the navigation to browse the globals available to the selected environment. 
 - [NPCs](/guides/npcs-and-creatures/npcs/) — spawning enemies, controlling their health, targets and size, and their damage and death events.
 - [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) — tame creatures players care for, and stationary townspeople.
 
+**Encounters:**
+
+- [Encounter policy](/guides/encounters/encounter-policy/) — whether Overland's camps and roaming encounters are off, spawned by each player's game, or run by the server.
+- [Camps](/guides/encounters/camps/) — server-run enemy camps, how they come back, and when they are cleared.
+- [World events](/guides/encounters/world-events/) — the roaming encounters, their cooldowns, and starting or resetting one yourself.
+- [Zones](/guides/encounters/zones/) — areas the server watches for players and other entities coming and going.
+
+**PvP:**
+
+- [Rules and relations](/guides/pvp/rules-and-relations/) — which players may fight: the rules, pairs, flags and teams.
+- [Hits and defeat](/guides/pvp/hits-and-defeat/) — how a hit lands, what it costs, the policy hook, kneeling and death, and health recovery.
+- [Duels and wand links](/guides/pvp/duels-and-wand-links/) — one-on-one duels and the game's beam contest.
+
 **World:**
 
 - [Time and weather](/guides/world/time-and-weather/) — the shared clock, calendar, season and weather, holiday decor and the Headmaster's office.
