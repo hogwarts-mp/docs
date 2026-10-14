@@ -55,7 +55,8 @@ Use the navigation to browse the globals available to the selected environment. 
 **World:**
 
 - [Time and weather](/guides/world/time-and-weather/) — the shared clock, calendar, season and weather, holiday decor and the Headmaster's office.
-- [Objects and effects](/guides/world/objects-and-effects/) — placing props from the game's meshes and visual effects.
+- [Objects and effects](/guides/world/objects-and-effects/) — placing and moving props from the game's meshes and Blueprints, and visual effects that can follow an entity.
+- [Physics objects](/guides/world/physics-objects/) — objects that fall, roll and fly, pushing and throwing them, and letting players carry them.
 - [Doors](/guides/world/doors/) — holding the game's doors locked or open for everyone, and deciding who gets in.
 - [Loot](/guides/world/loot/) — server-owned chests, moonstones and foragables, per-player contents, and switching off the game's own loot.
 
@@ -81,7 +82,10 @@ Use the navigation to browse the globals available to the selected environment. 
 
 - [Brooms and mounts](/guides/mounts-and-races/brooms-and-mounts/) — giving players brooms and creatures, mounting and dismounting, flight overrides, and keeping riders out.
 - [Races](/guides/mounts-and-races/races/) — the game's broom races on tracks of your own, for several players, timed by the server.
-- [Quidditch](/guides/mounts-and-races/quidditch/) — the ball, hoops, bludgers and snitch, with the match run on the server.
+
+**Quidditch:**
+
+- [Running a match](/guides/quidditch/running-a-match/) — hoops, a quaffle players carry and throw, bludgers and the snitch, all run on the server.
 
 **Running a server:**
 
