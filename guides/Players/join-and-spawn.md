@@ -2,7 +2,7 @@
 title: Join and spawn
 description: Admit or turn away joining players, the events a join raises, putting players where you want them, deaths and respawns, and leaving.
 sidebar:
-  order: 30
+  order: 300
 ---
 
 A player's visit raises a fixed series of events on the server. This page follows it from the request to join to the moment they leave.

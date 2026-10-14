@@ -2,7 +2,7 @@
 title: Objects and effects
 description: Place props from the game's meshes and visual effects from its effect systems, keyed so you can replace or remove them later.
 sidebar:
-  order: 51
+  order: 510
 ---
 
 The server can place two kinds of decoration that every nearby player sees: world objects, built from the game's static meshes, and effects, built from its particle systems. Both are created under a key of your choosing: creating again with the same key replaces the old one, and the key removes it later.

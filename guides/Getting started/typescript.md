@@ -2,7 +2,7 @@
 title: Use TypeScript
 description: Get autocomplete and type checking for the whole API, either in plain JavaScript or by compiling TypeScript.
 sidebar:
-  order: 12
+  order: 120
 ---
 
 The runtime runs JavaScript, but every release also publishes the API's TypeScript declarations on npm as [`@hogwartsmp/types`](https://www.npmjs.com/package/@hogwartsmp/types). Install them in a resource and your editor knows every global, its members and their types. It autocompletes them and flags a misspelled method, or a client-only global used on the server, before you start the server.

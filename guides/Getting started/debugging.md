@@ -2,7 +2,7 @@
 title: Debugging
 description: Where console output and errors go on the server and the client, what each kind of error does to a resource, and what to attach to a bug report.
 sidebar:
-  order: 13
+  order: 130
 ---
 
 The release server and client have no debugger to attach to resource scripts, so you debug with what your scripts log and what the runtime logs about them. This page covers where that output goes on each side and how to read it.

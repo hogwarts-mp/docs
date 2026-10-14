@@ -2,7 +2,7 @@
 title: NPCs
 description: Spawn the game's enemies as replicated NPCs, control their health, targets and size, and react when they are hurt or die.
 sidebar:
-  order: 40
+  order: 400
 ---
 
 `NPC.create` spawns one of the game's enemies as a replicated NPC that every nearby player sees and fights. The server decides that it exists and holds what you set on it; its AI runs on one nearby player's client.

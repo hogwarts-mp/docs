@@ -2,7 +2,7 @@
 title: Voice chat
 description: Who hears whom in proximity voice chat, how far voices carry, whispering and shouting, muting players, and the voice settings each player controls.
 sidebar:
-  order: 72
+  order: 720
 ---
 
 Players talk to the people near them, holding push-to-talk, which is V by default. The server's `Voice` global decides how far voices carry and who may talk or listen, and each client's `Voice` controls that player's own microphone and volume. Ranges are world centimetres.

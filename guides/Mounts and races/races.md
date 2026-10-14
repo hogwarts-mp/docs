@@ -2,7 +2,7 @@
 title: Races
 description: Run the game's broom races on tracks of your own, for several players at once, with the server keeping the time.
 sidebar:
-  order: 81
+  order: 810
 ---
 
 The game has broom races of its own, with rings to fly through, turbo bubbles and a pace ghost. Client scripts can take one of these races, give it a track of your own and start it, with the `Races` global. `Races` is experimental, and it works on the local player only: each racer's client runs its own copy of the race, and the server ties them together.

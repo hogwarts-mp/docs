@@ -2,7 +2,7 @@
 title: Chat and commands
 description: Send chat to everyone or one player, take over relaying players' chat, handle slash commands, and replace the chat on the client.
 sidebar:
-  order: 31
+  order: 310
 ---
 
 The game's chat overlay carries both chat and slash commands. The server sees every line a player sends and decides what everyone else reads.

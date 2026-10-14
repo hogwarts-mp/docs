@@ -2,7 +2,7 @@
 title: Doors
 description: Hold the game's doors locked, unlocked, open or closed for every player, find a door's name, and decide when a locked door opens for someone.
 sidebar:
-  order: 52
+  order: 520
 ---
 
 Hogwarts and Overland are full of the game's own doors and locks, and each player's game normally keeps their state in that player's save. The server can take over any of them, so that a door is locked or open for everyone.

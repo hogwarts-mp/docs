@@ -2,7 +2,7 @@
 title: Keys and menus
 description: Bind keyboard and mouse keys, lock the game's controls while players use your interface, and keep the game's own menus closed so your resource can replace them.
 sidebar:
-  order: 63
+  order: 630
 ---
 
 Client scripts can listen for keys of their own, take the game's controls away while players use an interface, and keep the game's own menus from opening so the keys behind them can open yours.

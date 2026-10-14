@@ -2,7 +2,7 @@
 title: Quidditch
 description: Spawn a ball, hoops, bludgers, the snitch and house banners on players' clients, and run the match itself on the server.
 sidebar:
-  order: 82
+  order: 820
 ---
 
 The `Quidditch` global spawns the pieces of a match on a client: a ball, hoops, bludgers, the game's snitch and house banners. It is a box of props, not a game. Nothing in it notices a goal, a catch or a hit, and each client spawns its own copy, so the server runs the match: it decides where everything is, tells clients, and works out goals and catches from positions.

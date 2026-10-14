@@ -2,7 +2,7 @@
 title: State bags
 description: Attach your own keys and values to players and other entities, choose which clients receive each key, and react when one changes.
 sidebar:
-  order: 22
+  order: 220
 ---
 
 Every replicated entity carries a state bag, `entity.state`: a small key/value store that the server writes and that travels with the entity to the clients that can see it. Players, NPCs, beasts, world objects, effects and characters all have one, and `World.state` is a bag for state that belongs to no entity.

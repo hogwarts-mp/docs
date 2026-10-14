@@ -2,7 +2,7 @@
 title: Appearance
 description: Save and restore how players look, open the character creator, and change their clothes, house, size, disguise and what they hold.
 sidebar:
-  order: 33
+  order: 330
 ---
 
 A player's look is their body, face, hair, voice and name. Their own game builds it and sends it to the server, which checks it and shows it to everyone else. The server can read a look, keep it and hand it back, and it controls a player's house, size, disguise and the prop in their hand. Clothes are gear in the player's [inventory](/guides/players/inventory/).

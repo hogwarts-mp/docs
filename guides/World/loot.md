@@ -2,7 +2,7 @@
 title: Loot
 description: Place chests, moonstone deposits and foragables the server owns, decide what each player finds in them, refill them, and switch off the game's own loot.
 sidebar:
-  order: 53
+  order: 530
 ---
 
 Players loot the world the game's way: they open chests with F, break moonstone deposits with a spell and pick up foragables with F. The server can own any of these, so that what they hold, who can take it and when it refills are your resource's to decide.

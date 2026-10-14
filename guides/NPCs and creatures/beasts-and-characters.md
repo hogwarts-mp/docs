@@ -2,7 +2,7 @@
 title: Beasts and characters
 description: Spawn tame beasts players can pet and feed, decide who may care for them, and place stationary townspeople and vendors with nameplates.
 sidebar:
-  order: 42
+  order: 420
 ---
 
 Besides enemies, the server can place two kinds of living thing: tame beasts, which wander and can be cared for, and characters, which stand still and never fight.

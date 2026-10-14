@@ -2,7 +2,7 @@
 title: HUD, prompts and nametags
 description: Hide parts of the game's HUD, float an interaction prompt over the world, and set the names, colours and lines over players' heads.
 sidebar:
-  order: 61
+  order: 610
 ---
 
 Some of what players see on screen is the game's own HUD, which client scripts can hide in parts and add a prompt to. The names over players' heads are set from both sides: the server decides what everyone sees, and each client can add lines and hide nametags for its own player.
