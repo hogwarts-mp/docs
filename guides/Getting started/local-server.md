@@ -77,4 +77,5 @@ A server built from source in the Debug configuration also watches its running r
 ## Where to go next
 
 - [Your first resource](/guides/getting-started/first-resource/) for the manifest, load order and sharing code between resources.
+- [Use TypeScript](/guides/getting-started/typescript/) for autocomplete and type checking.
 - [Debugging](/guides/getting-started/debugging/) for where output and errors go, on both sides.
