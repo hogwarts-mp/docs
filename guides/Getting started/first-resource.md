@@ -178,7 +178,7 @@ That includes player inventories: a joining player starts with an empty inventor
 
 ## Editor autocomplete
 
-The same TypeScript declarations that generate this reference are published on npm as `@hogwartsmp/types`, versioned with the release. Install the version your server runs as a dev dependency and name your side in a `jsconfig.json` or `tsconfig.json`, `"types": ["@hogwartsmp/types/server"]` or `"types": ["@hogwartsmp/types/client"]`, and your editor autocompletes and type-checks the whole API.
+The same TypeScript declarations that generate this reference are published on npm as `@hogwartsmp/types`, versioned with the release. Install the version your server runs as a dev dependency and name your side in a `jsconfig.json` or `tsconfig.json`, `"types": ["@hogwartsmp/types/server"]` or `"types": ["@hogwartsmp/types/client"]`, and your editor autocompletes and type-checks the whole API. [Use TypeScript](/guides/getting-started/typescript/) walks through both setups.
 
 > Load the server and client declarations **separately**. A global shown in one environment is not automatically available in the other: `Hud`, `Camera`, and `LocalPlayer` are client-only; `PlayerManager`, `NPCManager`, and `InventoryCatalog` are server-only; `World` and `Pvp` exist on both sides with different members.
 
