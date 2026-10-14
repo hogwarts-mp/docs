@@ -96,4 +96,4 @@ Events.on("resourceStop", (resourceName) => {
 ## Where to go next
 
 - [Brooms and mounts](/guides/mounts-and-races/brooms-and-mounts/) for giving players brooms and controlling how they fly.
-- [Quidditch](/guides/mounts-and-races/quidditch/) for balls, hoops and a snitch.
+- [Quidditch](/guides/quidditch/running-a-match/) for a match with a quaffle, hoops, bludgers and the snitch.
