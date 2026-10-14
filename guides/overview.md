@@ -59,11 +59,12 @@ Use the navigation to browse the globals available to the selected environment. 
 
 **World:**
 
-- [Time and weather](/guides/world/time-and-weather/) — the shared clock, calendar, season and weather, holiday decor and the Headmaster's office.
+- [Time and weather](/guides/world/time-and-weather/) — the shared clock, calendar, season and weather, holiday decor, the Headmaster's office and Great Hall meals.
 - [Objects and effects](/guides/world/objects-and-effects/) — placing and moving props from the game's meshes and Blueprints, and visual effects that can follow an entity.
 - [Physics objects](/guides/world/physics-objects/) — objects that fall, roll and fly, pushing and throwing them, and letting players carry them.
 - [Doors](/guides/world/doors/) — holding the game's doors locked or open for everyone, and deciding who gets in.
 - [Loot](/guides/world/loot/) — server-owned chests, moonstones and foragables, per-player contents, and switching off the game's own loot.
+- [Line traces](/guides/world/line-traces/) — finding what a line through the world hits first, from a client script.
 
 **Room of Requirement:**
 
