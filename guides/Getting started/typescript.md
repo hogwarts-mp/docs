@@ -14,7 +14,7 @@ There are two ways to use them. Keep writing JavaScript and let the editor check
 The package version is the release version. From the resource's directory, install the one your server runs:
 
 ```sh
-npm install --save-dev --save-exact @hogwartsmp/types@1.8.2
+npm install --save-dev --save-exact @hogwartsmp/types@1.9.0
 ```
 
 A resource's `package.json` is also an ordinary npm manifest, so the dependency is recorded beside the `mafiahub` block. As long as the manifest declares `files`, only what it lists [reaches players](/guides/getting-started/first-resource/#what-reaches-the-player); `node_modules/` stays on your machine and the server's disk.
@@ -91,7 +91,7 @@ npm install --save-dev --save-exact typescript@5.9.3
     "build": "tsc -p tsconfig.json && tsc -p src/client/tsconfig.json"
   },
   "devDependencies": {
-    "@hogwartsmp/types": "1.8.2",
+    "@hogwartsmp/types": "1.9.0",
     "typescript": "5.9.3"
   },
   "mafiahub": {

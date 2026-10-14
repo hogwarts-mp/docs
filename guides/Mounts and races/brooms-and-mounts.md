@@ -1,11 +1,11 @@
 ---
 title: Brooms and mounts
-description: Give players brooms and creatures to ride, put them on and take them off from a client script, change how a broom flies, and keep riders out of an area.
+description: Give players brooms and creatures to ride, put them on and take them off from a client script, set how fast brooms fly, change how a broom handles, and keep riders out of an area.
 sidebar:
   order: 800
 ---
 
-Players fly brooms and ride the game's creatures, and everyone else sees them do it without any script. Client scripts control the local player's riding with `Broom`, `FlyingMount` and `GroundMount`. The server decides what each player owns, through their [inventory](/guides/players/inventory/), and has no call of its own for riding.
+Players fly brooms and ride the game's creatures, and everyone else sees them do it without any script. Client scripts control the local player's riding with `Broom`, `FlyingMount` and `GroundMount`. The server decides what each player owns, through their [inventory](/guides/players/inventory/), and how fast their broom flies, but has no call to put a player on a broom or take them off.
 
 ## What players own
 
@@ -56,11 +56,24 @@ Events.on("broom:mount", () => {
 
 `Broom.dismount()` takes the player off at once, wherever they are, so a player in the air falls. `Broom.dismount(true)` asks the game to land them the normal way instead, which does nothing where the game will not let them land. Both return `false` until the player is seated. `equip` and `unequip` refuse while the player is riding.
 
+## Broom upgrades and speed
+
+The server sets how fast each player's broom flies. `player.setBroomUpgradeTier(tier)` gives a player the game's broom upgrades from Albie Weekes' shop, from 0 to 3: each tier flies and boosts faster, and lets the boost meter refill higher above the ground. `player.setBroomSpeedMultiplier(multiplier)` scales cruising, boost and turbo speed on top of that, from 0.25 to 3. Faster than 3 would outrun the world loading around the player.
+
+```js
+// server/main.js
+Events.on("loadingFinished", (player) => {
+  player.setBroomUpgradeTier(3);
+  player.setBroomSpeedMultiplier(1.5); // half again as fast as a fully upgraded broom
+});
+```
+
+Both apply at once, mounted or not, and last through respawns and travel. `null` sets them back to the server's defaults, `mod.broomUpgradeTier` and `mod.broomSpeedMultiplier` in [`server.json`](/guides/hosting-a-server/configuration/#mod-keys), which every joining player starts with. `player.broomUpgradeTier` and `player.broomSpeedMultiplier` read them back. A value outside its range throws. Broom races keep their own speeds.
+
 ## Changing how a broom flies
 
 | Call | Does |
 | --- | --- |
-| `Broom.setMaxSpeed(speed)` | Caps the speed, in centimetres per second |
 | `Broom.setMaxHeight(z)` | Caps how high the broom can climb, as a world height; `clearMaxHeight()` lifts it |
 | `Broom.setInputDisabled(disabled)` | Stops the rider steering |
 | `Broom.setForceLand(forceLand)` | Brings the broom down |
@@ -68,7 +81,7 @@ Events.on("broom:mount", () => {
 | `Broom.setCastingAllowed(allowed)` | Lets the rider cast spells other than heavy ones while flying |
 | `Broom.teleport(x, y, z, yaw)` | Moves a rider and stops them dead; leaving out `yaw` faces them to 0, not their heading |
 
-These belong to the client, not to your resource, and stay until something changes them. `Broom.resetOverrides()` undoes every one of them set through `Broom`, so call it when your game ends and as your resource stops. Set the speed again after the player switches broom.
+These belong to the client, not to your resource, and stay until something changes them. `Broom.resetOverrides()` undoes every one of them set through `Broom`, so call it when your game ends and as your resource stops.
 
 A knock out of the sky, without dismounting:
 

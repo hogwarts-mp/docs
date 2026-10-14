@@ -29,6 +29,7 @@ Each row in `list()` is an item:
 | `variation` | Gear's own variant id; empty for ordinary items |
 | `unique` | Whether the row is a unique item |
 | `identified`, `equipped`, `hoodUp` | Gear only: whether it is identified, whether it is worn, and its hood |
+| `appearanceOverride` | Worn gear only: the gear id whose look it shows, as players choose in the Equipment menu, or `""` for its own |
 
 `InventoryCatalog` describes every item the game knows: `InventoryCatalog.get(itemId)` returns its default holder, stack size and kind, `has(itemId)` tests an id, and `list(filter)` lists definitions, for example every consumable.
 
@@ -55,7 +56,7 @@ player.inventory.give("Edurus", 3, {}, (error, result) => {
 });
 ```
 
-Ids are checked against the catalog: an unknown one fails with `INVALID_ITEM`, and taking more than a player has fails with `INSUFFICIENT_COUNT`. Gear gets a variation of its own when given, and `options` can hand it over identified or already worn:
+Ids are checked against the catalog: an unknown one fails with `INVALID_ITEM`, and taking more than a player has fails with `INSUFFICIENT_COUNT`. Gear gets a variation of its own when given, and `options` can hand it over identified, already worn, with its hood up, or showing another piece's look with `appearanceOverride`, a bare gear id. A malformed override fails the whole change:
 
 ```js
 // server/main.js
@@ -102,7 +103,7 @@ Events.on("loadingFinished", async (player) => {
 });
 ```
 
-Keep the rows as `list()` returns them: `replace` needs a gear row's `variation` to restore that exact piece. `saveInventory` and `loadInventory` stand for your own store, such as the database behind [Persisting state](/guides/getting-started/first-resource/#persisting-state).
+Keep the rows as `list()` returns them: `replace` needs a gear row's `variation` to restore that exact piece, and its `appearanceOverride` to restore the look it shows. `saveInventory` and `loadInventory` stand for your own store, such as the database behind [Persisting state](/guides/getting-started/first-resource/#persisting-state).
 
 ## Waiting for the player's game
 

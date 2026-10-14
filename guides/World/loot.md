@@ -66,17 +66,17 @@ function showDailyReward(player, alreadyClaimed) {
 
 ## Switching off the game's own loot
 
-The game places its own chests, moonstone deposits and foragables everywhere, and each player's game spawns and empties them separately. To make your lootables the only loot, switch the game's families off with `World.suppressLoot`:
+The game places its own chests, coin pouches, moonstone deposits and foragables everywhere, and each player's game spawns and empties them separately. To make your lootables the only loot, switch the game's families off with `World.suppressLoot`:
 
 ```js
 // server/main.js
 Events.on("resourceStart", (resourceName) => {
   if (resourceName !== "my-gamemode") return;
-  World.suppressLoot({ chests: true, moonstones: true, foragables: true });
+  World.suppressLoot({ chests: true, pouches: true, moonstones: true, foragables: true });
 });
 ```
 
-Suppressed chests are hidden, and Overland's moonstone and foragable spawns are removed along with placed deposits and foragables. Room of Requirement storage and quest containers are never touched. Spawns are removed only from areas that load after the change, so call it when your resource starts. `false` switches a family back on, a family you leave out keeps its setting, and `World.lootSuppressed` reads the current settings.
+Suppressed chests and coin pouches are hidden, prompt and all, and Overland's moonstone and foragable spawns are removed along with placed deposits and foragables. Room of Requirement storage and quest containers are never touched. Spawns are removed only from areas that load after the change, so call it when your resource starts. `false` switches a family back on, a family you leave out keeps its setting, and `World.lootSuppressed` reads the current settings.
 
 ## Where to go next
 
