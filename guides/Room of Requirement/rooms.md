@@ -35,11 +35,11 @@ Players see each other's rooms only through your script, so choose ids that say 
 
 ## Decorating
 
-`Sanctuary.setEditor(id, player, true)` lets a player change a room with the game's own spells: conjuring, moving, resizing, recolouring and vanishing pieces, unlocking parts of the room and choosing its lighting. They need the spells and the moonstones to cast them, as in the game. `Sanctuary.editors(id)` lists who may edit a room.
+`Sanctuary.setEditor(id, player, true)` lets a player change a room with the game's own spells: conjuring, moving, resizing, recolouring and vanishing pieces, and choosing its lighting. They need the spells, the recipes and the moonstones, as in the game. Which parts of the room are open is yours to decide, not theirs: see [Wings, vivariums and recipes](/guides/room-of-requirement/unlocks/). `Sanctuary.editors(id)` lists who may edit a room.
 
 Edit rights belong to the player's connection: they last until the player disconnects, whether or not the room is loaded, so grant them again when the player comes back.
 
-Moving, conjuring, recolouring and vanishing reach everyone in the room within a second or so. Unlocked parts and lighting appear for everyone else the next time they enter. Players without edit rights can still cast in a room, but nothing they change is kept, and it is gone the next time they enter.
+Moving, conjuring, recolouring and vanishing reach everyone in the room within a second or so. A new lighting style takes everyone else in the room back into it behind the game's loading screen, so they see it at once. Players without edit rights can still cast in a room, but nothing they change is kept, and it is gone the next time they enter.
 
 The server checks that an edit is well formed, not that it makes sense, so a player you let edit can put anything anywhere in their room.
 
@@ -71,7 +71,7 @@ Events.on("sanctuaryChanged", (id) => {
 | --- | --- |
 | `version` | 1 |
 | `objects` | Every conjured or changed piece: its type, position, rotation, scale and colour. A piece of the room's own that was vanished has the type `"None"`. |
-| `locks` | Which parts of the room are unlocked: the expansions, the biomes, the initial dressing and lighting |
+| `locks` | Which parts of the room are open: the expansions, the vivarium biomes, the initial dressing and the lighting choice ([the lock ids](/guides/room-of-requirement/unlocks/#the-rooms-locks)) |
 | `lighting` | The lighting style: `"Default"`, `"Potnr"`, `"Hbgst"`, `"Mzoo"` or `"Dwiz"` (the potioneer's, herbologist's, magizoologist's and dark wizard's) |
 
 A room holds at most 8192 objects. A layout does not hold what goes on at the room's stations, its beasts, who may edit it or where anyone's door leads.
@@ -81,4 +81,5 @@ Give every layout its `locks` and `lighting`. A layout that leaves them empty ke
 ## Where to go next
 
 - [Doors and visits](/guides/room-of-requirement/doors-and-visits/) for getting players in and out of rooms.
+- [Wings, vivariums and recipes](/guides/room-of-requirement/unlocks/) for opening parts of a room and giving players the conjuration recipes.
 - [Virtual worlds](/guides/core-concepts/virtual-worlds/) for who sees whom inside a room.
