@@ -1,6 +1,6 @@
 ---
 title: Hits and defeat
-description: How a spell hit between players lands, what the server checks, how much it costs, how to change hits with a policy, and what losing a fight does.
+description: How a spell hit between players lands, what the server checks, how much it costs, how to change hits with a policy, what losing a fight does, and how spell cooldowns work in a fight.
 sidebar:
   order: 475
 ---
@@ -76,6 +76,35 @@ On the client, `localDowned` fires as the local player kneels and `localDownedEn
 ## Health recovery
 
 Players get their health back by themselves, and every PvP hit pauses that for 10 seconds. `player.setHealthRecovery(false)` stops it until you set it back to `true`. A respawn or any trip to another map turns recovery back on, so set it again afterwards.
+
+## Spell cooldowns
+
+Out of combat, the game recharges most spells in about a third of a second. Fighting enemies, it waits each spell's full cooldown. To the game, a fight between players is never combat, so HogwartsMP decides when a player is in a PvP fight:
+
+- a player hostile to them is within 50 m, or
+- they hit, or were hit by, a hostile player in the last `flagCombatLockSeconds`.
+
+While a player is in a PvP fight, every spell they cast waits its full cooldown, as it would against enemies. A cooldown that started in a fight keeps its full length after the fight ends.
+
+| Spell | In a PvP fight | Outside a fight |
+| --- | --- | --- |
+| Flipendo | 5 s | 0.33 s |
+| Accio, Incendio, Levioso | 8 s | 0.33 s |
+| Confringo, Depulso, Descendo, Expelliarmus, Glacius | 10 s | 0.33 s |
+| Arresto Momentum, Diffindo, Expulso | 15 s | 0.33 s |
+| Crucio | 20 s | 0.33 s |
+| Avada Kedavra | 90 s | 90 s |
+
+These are the game's base times, before any talent that shortens them. Stupefy, the basic cast, and Protego have no cooldown in the game at all, so nothing here limits them.
+
+The `cooldowns` rule turns this off. `"full"`, the default, works as above; `"fast"` keeps the out-of-combat recharge in fights too, for quick, spell-heavy PvP:
+
+```js
+// server/main.js
+Pvp.configure({ cooldowns: "fast" });
+```
+
+Each player's own game runs their cooldowns, so a changed game can ignore them. What the server limits is hits: 12 a second from any one attacker.
 
 ## Where to go next
 
