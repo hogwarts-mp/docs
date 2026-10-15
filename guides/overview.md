@@ -71,6 +71,7 @@ Use the navigation to browse the globals available to the selected environment. 
 
 - [Rooms](/guides/room-of-requirement/rooms/) — loading rooms under ids of your own, letting players decorate them, and saving what they build.
 - [Doors and visits](/guides/room-of-requirement/doors-and-visits/) — where each player's door leads, taking players in, visitors, and who is where.
+- [Wings, vivariums and recipes](/guides/room-of-requirement/unlocks/) — opening a room's expansions, vivarium biomes and lighting, and giving players the conjuration recipes.
 
 **User interface:**
 
