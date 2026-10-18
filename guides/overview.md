@@ -33,6 +33,7 @@ Use the navigation to browse the globals available to the selected environment. 
 - [Chat and commands](/guides/players/chat-and-commands/) — sending chat, taking over the chat relay, and slash commands.
 - [Inventory](/guides/players/inventory/) — the server-owned inventory, atomic changes, saving inventories, and items the game hands out.
 - [Appearance](/guides/players/appearance/) — saving and restoring looks, the character creator, clothes, house, size, disguises and props.
+- [Progression](/guides/players/progression/) — levels and experience, which spells players can cast, talents, and every talent in the game.
 
 **NPCs and creatures:**
 
