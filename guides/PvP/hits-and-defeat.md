@@ -67,15 +67,48 @@ A policy that throws drops the hit. There is one policy for the whole server and
 A hit that would take a player's health to 0 defeats them, the way the relation's `defeat` says:
 
 - `"death"`: the game's own death. `playerDied` fires, and the player respawns as after any [death](/guides/players/join-and-spawn/#deaths-and-respawns). Once they are back up, they have spawn protection for `spawnProtectionSeconds`.
-- `"kneel"`: the player drops to their knees for about four seconds, held at `kneelHp`, ignoring hits, and then gets up by themselves. `playerDowned` fires as they kneel and `playerDownedEnd` as they stand. Under a kneel relation, even the Killing Curse kneels.
+- `"kneel"`: the player drops to their knees for `kneelSeconds`, held at `kneelHp`, ignoring hits, and then gets up by themselves. `playerDowned` fires as they kneel and `playerDownedEnd` as they stand. Under a kneel relation, even the Killing Curse kneels.
 
 `pvpDefeat` fires with the victim, the player who defeated them and `"death"` or `"kneel"`. It credits a player whose hit the server accepted in the last few seconds, so a defeat nobody caused raises nothing. A policy's `minHp` under a death relation keeps the victim alive without a defeat.
 
 On the client, `localDowned` fires as the local player kneels and `localDownedEnd` as they get up.
 
+### How long a kneel lasts
+
+The `kneelSeconds` rule sets how long a kneel lasts, 4 seconds by default. `0` keeps the loser kneeling until a script calls `player.endKneel()`, which stands a kneeling player up at once, for example when a medic reaches them. `endKneel` returns `false` for a player who is not kneeling.
+
+Either way, the player stands up at full health. To give them less, set it in `playerDownedEnd`:
+
+```js
+// server/main.js
+Pvp.configure({ defeat: "kneel", kneelSeconds: 0 });
+
+// A medic's /revive <name> stands a kneeling player up.
+Events.on("chatCommand", (player, message, command, args) => {
+  if (command !== "revive") return;
+  const patient = PlayerManager.getAll().find((p) => p.nickname === args[0]);
+  if (!patient?.endKneel()) player.sendChat(`${args[0] ?? "Nobody"} is not kneeling.`);
+});
+
+// Back up from a kneel or a respawn with a quarter of their health, not all of it.
+Events.on("playerDownedEnd", (player) => player.setHealth(Math.round(player.maxHealth / 4)));
+```
+
+For about 0.6 seconds after a player stands up, the game refuses a new kneel, so a hit in that time that should kneel them is lost.
+
 ## Health recovery
 
-Players get their health back by themselves, and every PvP hit pauses that for 10 seconds. `player.setHealthRecovery(false)` stops it until you set it back to `true`. A respawn or any trip to another map turns recovery back on, so set it again afterwards.
+Players get their health back by themselves, and every PvP hit pauses that for 10 seconds. `player.setHealthRecovery(false)` stops it until you set it back to `true`. Their game keeps it off through respawns and trips to other maps.
+
+A trip to another map, such as through a dungeon door, gives the player a fresh body at full health. `player.setKeepHealthOnTravel(true)` carries their health over instead, and `player.getKeepHealthOnTravel()` reads it back. A respawn after a death still starts at full health, so set it in `playerDownedEnd` as above. Together they keep a player's health in your hands, as a roleplay server may want:
+
+```js
+// server/main.js
+Events.on("playerConnect", (player) => {
+  player.setHealthRecovery(false);
+  player.setKeepHealthOnTravel(true);
+});
+```
 
 ## Spell cooldowns
 

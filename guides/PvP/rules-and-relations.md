@@ -22,6 +22,7 @@ Out of the box nobody can hurt anybody. PvP starts when a script sets rules or p
 | `defeat` | `"death"` | What losing does: the game's own `"death"`, or a `"kneel"` that the player gets up from |
 | `curses` | `"on"` | `"off"` stops the Killing, Cruciatus and Imperius curses doing anything to players |
 | `kneelHp` | 1 | The health at which a kneel defeat starts, and the health a kneeling player is held at |
+| `kneelSeconds` | 4 | How long a [kneel](/guides/pvp/hits-and-defeat/#how-long-a-kneel-lasts) lasts; `0` keeps the player kneeling until `player.endKneel()` |
 | `flagCombatLockSeconds` | 15 | How long after a hit, given or taken, a player who drops their flag stays flagged, and stays in a fight for [spell cooldowns](/guides/pvp/hits-and-defeat/#spell-cooldowns) |
 | `spawnProtectionSeconds` | 5 | How long a player killed in PvP cannot be hurt once they are back up; their own hit ends it |
 | `damageScale` | 1 | Multiplies every spell's [damage](/guides/pvp/hits-and-defeat/#damage) |
