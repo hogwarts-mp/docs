@@ -1,11 +1,13 @@
 ---
 title: Doors
-description: Hold the game's doors locked, unlocked, open or closed for every player, find a door's name, and decide when a locked door opens for someone.
+description: Hold the game's doors locked, unlocked, open or closed for every player, share the locks players open, find a door's name, and decide when a locked door opens for someone.
 sidebar:
   order: 520
 ---
 
 Hogwarts and Overland are full of the game's own doors and locks, and each player's game normally keeps their state in that player's save. The server can take over any of them, so that a door is locked or open for everyone.
+
+Portcullises, the Astronomy rune gate, goblin camp gates and crawl grates are not doors, and no `Doors` call reaches them. See [Gates](/guides/world/gates/).
 
 ## Holding a door's state
 
@@ -29,6 +31,7 @@ Each player's game re-applies what the server holds as the door streams in, so p
 - `Doors.get(selector)` returns the state held under a selector, and `Doors.list()` every held state.
 - `Doors.clear(selector)` releases a selector, and `Doors.clearAll()` releases them all. A released door keeps its current state until it streams in again, when each player's save takes over.
 - A selector left holding nothing, with both fields `null`, is released.
+- Each leaf of a double door is its own door and swings on its own, so hold both leaves to keep a double door shut.
 
 ## Finding a door
 
@@ -54,9 +57,25 @@ Events.on("resourceStart", (resourceName) => {
 
 `Doors.list(radius)` returns each loaded door within `radius` centimetres, 3000 by default, with its name, persistent id, full path, distance and lock state. The output goes to the [client log](/guides/getting-started/debugging/#where-output-goes).
 
+## When a player unlocks a door
+
+When a player opens a lock with a key or Alohomora, the server holds that door unlocked for everyone, under its persistent id or, without one, its path. `Doors.setShareUnlocks(false)` keeps each unlock in the player's own game instead, and `Doors.getShareUnlocks()` reads the setting.
+
+Either way the server raises `doorUnlocked` with the player and the door: its `name`, persistent `id`, `path` and whether the unlock was `shared`. `id` is empty for a lock that is not on a door.
+
+```js
+// server/main.js
+Events.on("doorUnlocked", (player, door) => {
+  if (!door.shared) return;
+  Chat.sendToAll(`${player.nickname} unlocked ${door.name} for everyone.`);
+});
+```
+
+`Doors.set` or `Doors.clear` on that selector takes a shared unlock back. An unlock is not shared while the server holds the door locked.
+
 ## When a player tries a locked door
 
-When a player tries to open a lock the server holds shut, with a key or Alohomora, their game refuses at once and the server raises `doorUnlockRequest` with the player and the door: its `selector`, `name` and `id`. Release the lock there if the player should get in:
+When a player tries to open a lock the server holds shut, with a key or Alohomora, their game refuses at once and the server raises `doorUnlockRequest` with the player and the door: its `selector`, `name` and `id`. It fires at most once a second for each door. Release the lock there if the player should get in:
 
 ```js
 // server/main.js
@@ -72,7 +91,10 @@ Events.on("doorUnlockRequest", (player, door) => {
 });
 ```
 
-Unlocking with `Doors.set` opens the door for everyone, not only the player who asked.
+Unlocking with `Doors.set` unlocks the door for everyone, not only the player who asked.
+
+- On a double door, `selector` may name the other leaf, when that leaf's held lock is what refused the player.
+- A lock the player's own client policy keeps shut raises it too, with an empty `selector`.
 
 ## On the client
 
@@ -80,10 +102,34 @@ Client scripts can change doors too, but only for their own player, and the serv
 
 - `Doors.setLocked(selector, locked)` locks or unlocks matching doors on this client only, until they stream in again.
 - `Doors.setPolicy(policy)` keeps streamed doors unlocked or locked on this client: unlock all of them, a list, or all except a list, and lock a list, which beats any unlock.
-- `Doors.superAlohomora(true)` lets every lock open to a key or Alohomora, whatever the player's Alohomora level. Locks the server holds still refuse, and it is cleared on disconnect.
+- `Doors.superAlohomora(true)` lets every lock open to a key or Alohomora, whatever the player's Alohomora level, key-only locks included. Locks the server holds still refuse, and it is cleared on disconnect.
 - `Doors.held()` lists the door states the server holds, as this client received them.
+
+## With the doors resource
+
+The `doors` resource holds the doors listed under `held` in its `doors.config.js` for everyone while it runs, and releases them when it stops. The file exports one object, `module.exports = { … }`:
+
+```json5
+{
+  version: 1,
+  held: {
+    "BP_Door_BellTowers_EXT": { locked: false },
+    "BP_Door_Template4:AQsMCQ0PAAUKCgQEBAgADQ": { open: true },
+  },
+  rules: [{ priority: 1000, action: "allow", doors: "*" }],
+}
+```
+
+| Command | Does |
+| --- | --- |
+| `/listdoors [radius]` | Lists the doors near you, with their names and ids, in the F8 console |
+| `/doorset <name\|id\|path> <locked\|unlocked\|open\|closed\|release>` | Holds a door's state for everyone. Needs the staff or admin role. |
+| `/doorsheld` | Lists every door state the server holds |
+
+The same resource handles gates with `heldGates`, `gates:` rules and its gate commands. See [Gates](/guides/world/gates/#with-the-doors-resource).
 
 ## Where to go next
 
+- [Gates](/guides/world/gates/) for portcullises, the rune gate, camp gates and crawl grates.
 - [Loot](/guides/world/loot/) for chests behind your doors.
 - [Authority](/guides/core-concepts/authority/) for why a request like `doorUnlockRequest` is the server's to decide.
