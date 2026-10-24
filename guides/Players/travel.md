@@ -26,7 +26,7 @@ When something has to happen after the player arrives, such as starting an encou
 
 ## Teleporting within a map
 
-`player.teleport` moves a player to world coordinates in the map they are in, and never across maps. Its options and statuses are in [Join and spawn](/guides/players/join-and-spawn/#putting-players-in-place).
+`player.teleport` moves a player to world coordinates in the map they are in, and never across maps. Its options and statuses are in [Join and spawn](/guides/players/join-and-spawn/#teleporting).
 
 ## Fast travel
 
