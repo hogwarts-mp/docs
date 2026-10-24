@@ -7,7 +7,7 @@ sidebar:
 
 The Room of Requirement holds as many rooms as the server loads. A room is a layout, the objects players have conjured and changed there, stored under an id your script chooses. The `Sanctuary` global on the server loads rooms, decides who may decorate them and who goes into which.
 
-Nobody owns a room unless your script says so. "Every player has a room of their own" is a few lines of script: load a room for each player as they join, make it where their door leads, and let them edit it.
+Nobody owns a room unless your script says so. "Every player has a room of their own" is a few lines of script: load a room for each player as they join, make it where their door leads, and let them edit it. The castle door itself takes nobody in until a script [lets players in](/guides/room-of-requirement/doors-and-visits/#letting-players-in).
 
 ## Loading a room
 
