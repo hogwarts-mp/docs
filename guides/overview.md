@@ -72,6 +72,7 @@ Use the navigation to browse the globals available to the selected environment. 
 - [Loot](/guides/world/loot/) — server-owned chests, moonstones and foragables, per-player contents, and switching off the game's own loot.
 - [Hogwarts Express](/guides/world/hogwarts-express/) — running the train from the server, stopping it at Hogsmeade, its events, and the Foundations timetable.
 - [Line traces](/guides/world/line-traces/) — finding what a line through the world hits first, from a client script.
+- [Shapes](/guides/world/shapes/) — drawing rings, spheres, boxes, cylinders, polygons and lines in the world from a client script, to show zones or debug traces.
 
 **Room of Requirement:**
 

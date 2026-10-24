@@ -39,6 +39,8 @@ A malformed shape or option throws. The server holds at most 4096 zones.
 
 Keys are shared by every resource, and creating a zone under a key in use replaces that zone, so start yours with your resource's name. `Zone.get(key)` returns a zone or `undefined`, `Zone.getAll()` lists them, and `Zone.destroy(key)` or `zone.destroy()` removes one.
 
+Players cannot see a zone. To show them where one lies, send `zone.getShape()` to their clients and draw it with [Shapes](/guides/world/shapes/#showing-a-zone).
+
 ## Coming and going
 
 `zoneEnter` fires with the zone and the entity that came in. `zoneExit` fires with the zone, the entity, a reason and the entity's id: the reason is `"left"` when it moved out, or out of the zone's world, and `"gone"` when it no longer exists, such as a player who disconnected, and then the entity is `null`. Every resource receives every zone's events, so check the key:
