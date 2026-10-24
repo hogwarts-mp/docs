@@ -121,6 +121,27 @@ The list starts empty, and it should stay empty until you have chosen and tested
 
 That is a fragment of `server.json`, not a complete file, and the placeholder has to be replaced. Several projects are separate strings in the same array. Do not use a URL, project name, slug or file ID, or an ID copied from another server without knowing what it installs. Set the array back to `[]` to require nothing.
 
+### What a join does
+
+Every join checks the required mods with CurseForge. The player's game installs the ones it is missing and updates the rest to each project's latest file. You cannot pin a version: a file an author publishes reaches your players at their next join. The join screen shows how much has downloaded and how fast, both for your resources' files and for the mods.
+
+The game only changes its mods when it starts. When a join installs a mod, replaces an outdated copy or turns off a mod your server does not require, the game restarts and joins your server again by itself. Turned-off mods stay installed. While your server requires mods, any mod a player copied into the game's `Phoenix/Mods` folder by hand is moved to `Phoenix/HogwartsMP-ParkedMods` beside it. A server that requires none leaves those mods in place.
+
+### Rejected joins
+
+A required mod that cannot be checked, installed or updated turns the player away before the world loads. The message lists the failed mods first, each with its cause, and shows only its first few lines. The player's [client log](/guides/getting-started/debugging/#where-output-goes) holds every line.
+
+| Cause | What helps |
+| --- | --- |
+| CurseForge did not answer within a minute | Try again later. |
+| No download progress for a minute | Check the player's connection, and try again. |
+| Not enough disk space | Free space on the drive that holds the folder the message names. |
+| The game cannot use its mods folder | Windows Controlled Folder Access or antivirus folder protection may be blocking `HogwartsMPLauncher.exe`, so allow it there. If Documents is on OneDrive, OneDrive must be running. |
+| CurseForge lists the project as deleted, rejected, under review or needing changes | The game does not install such a project, so a player who does not have it yet cannot join. Remove it from the list. Inactive and abandoned projects still install. |
+| The game could not remove or move a mod folder when it started | Quit the game, close whatever holds the folder or move it out of `Phoenix/Mods` by hand, and start again. |
+
+An install that is broken, or whose last attempt failed, is installed again at the next join, so players do not need to reinstall a mod by hand.
+
 ## Respawning
 
 With `mod.autoRespawn` at its default of `true`, a dead player stands back up on their own a few seconds after dying. Set it to `false` and a dead player stays where they fell, still watching the world, until a script respawns them with `player.respawn()`. Game modes with revives, spectating or round-based play use this.
