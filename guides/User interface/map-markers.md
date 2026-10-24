@@ -1,6 +1,6 @@
 ---
 title: Map markers
-description: Put markers, search circles and gold routes on the map and minimap, choose which players get a blip and in what colour, and read what the minimap shows.
+description: Put markers, search circles and gold routes on the map and minimap, read the player's own waypoint, choose which players get a blip and in what colour, and read what the minimap shows.
 sidebar:
   order: 620
 ---
@@ -75,6 +75,43 @@ Blips.setRoute("hunt:area", "Search for the clue");
 - While the player has placed a waypoint of their own, their purple line takes over the minimap. The big map keeps drawing your route beside it.
 
 `Blips.clearRoute()` ends the route, and removing its blip ends it too. `Blips.route()` returns the key or network id the route leads to, or `null`.
+
+## The player's waypoint
+
+Players drop a waypoint of their own on the game's map. It is theirs, not a blip, so the calls above never change it, but `Blips.waypoint()` reads it, or returns `null` when they have none:
+
+| Field | Meaning |
+| --- | --- |
+| `x`, `y`, `z` | Where it is, in world centimetres |
+| `target` | The beacon name of the map icon it was dropped on, such as `"FT_HW_GreatHall"`; `null` on open ground |
+
+Dropped on an icon, the waypoint sits exactly on it. On open ground, `z` is the height of the map's model under the cursor: close to the terrain, but not on it. Find [the ground under it](/guides/world/line-traces/#the-ground-under-a-point) before you stand someone there.
+
+The `waypointChanged` event fires with the new waypoint and the previous one each time the player places, moves or removes theirs, and a removal reports `null`. It only reports changes, so read `Blips.waypoint()` as your script starts for one placed before. This party shares each member's waypoint with the others:
+
+```js
+// client/main.js
+Events.on("waypointChanged", (waypoint) => Events.emitServer("party:waypoint", waypoint));
+
+Events.on("party:waypoint", (payload) => {
+  const key = `party:waypoint:${payload.playerId}`;
+  const at = payload.waypoint;
+  if (at) Blips.setMarker(key, at.x, at.y, at.z, undefined, payload.name);
+  else Blips.remove(key);
+});
+```
+
+```js
+// server/main.js
+Events.onClient("party:waypoint", (player, waypoint) => {
+  const valid = waypoint && [waypoint.x, waypoint.y, waypoint.z].every(Number.isFinite);
+  const at = valid ? { x: waypoint.x, y: waypoint.y, z: waypoint.z } : null;
+  const payload = JSON.stringify({ playerId: player.id, name: player.nickname, waypoint: at });
+  for (const member of partyMembers(player)) {
+    if (member !== player) member.emit("party:waypoint", payload);
+  }
+});
+```
 
 ## Player blips
 

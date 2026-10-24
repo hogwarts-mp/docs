@@ -247,6 +247,8 @@ These events are delivered only inside the client runtime. Receiving a native cl
 | `spellAssignment` | `({ source, loadout, slot })` | A spell is assigned to a slot, from the game's menu or a script |
 | `spellLearningFinished` | `(result)` | A spell lesson the resource started finishes; it grants no spell |
 | `minimapChanged` | `(state, previous)` | The [minimap](/guides/user-interface/map-markers/#the-minimap) switches map, floor or tile |
+| `waypointChanged` | `(waypoint, previous)` | The local player places, moves or removes their [map waypoint](/guides/user-interface/map-markers/#the-players-waypoint); a removal reports `null` |
+| `mailRead` | `(key, sender)` | The local player reads an owl post letter, theirs or the game's; `sender` is the sender's id, not their display name. A letter that loads or arrives already read raises nothing |
 | `pvpRelationChanged` | `(relation)` | The local player's [PvP relation](/guides/pvp/rules-and-relations/) to another player is resolved or changes |
 | `localDowned` | `()` | The local player kneels after a PvP defeat |
 | `localDownedEnd` | `({ wasDead })` | The local player gets up, from a kneel or a respawn |
