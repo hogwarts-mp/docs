@@ -1,6 +1,6 @@
 ---
 title: Inventory
-description: Give, take and move items in a server-owned inventory, change several things at once safely, save inventories between visits, and adopt items the game hands out.
+description: Give, take and move items in a server-owned inventory, change several things at once safely, save inventories between visits, adopt items the game hands out, and decide what gear's stats are worth.
 sidebar:
   order: 320
 ---
@@ -30,6 +30,7 @@ Each row in `list()` is an item:
 | `unique` | Whether the row is a unique item |
 | `identified`, `equipped`, `hoodUp` | Gear only: whether it is identified, whether it is worn, and its hood |
 | `appearanceOverride` | Worn gear only: the gear id whose look it shows, as players choose in the Equipment menu, or `""` for its own |
+| `stats` | Gear only: the item's [roll](#gear-stats), or `null` until the player's game has reported it |
 
 `InventoryCatalog` describes every item the game knows: `InventoryCatalog.get(itemId)` returns its default holder, stack size and kind, `has(itemId)` tests an id, and `list(filter)` lists definitions, for example every consumable.
 
@@ -56,7 +57,7 @@ player.inventory.give("Edurus", 3, {}, (error, result) => {
 });
 ```
 
-Ids are checked against the catalog: an unknown one fails with `INVALID_ITEM`, and taking more than a player has fails with `INSUFFICIENT_COUNT`. Gear gets a variation of its own when given, and `options` can hand it over identified, already worn, with its hood up, or showing another piece's look with `appearanceOverride`, a bare gear id. A malformed override fails the whole change:
+Ids are checked against the catalog: an unknown one fails with `INVALID_ITEM`, and taking more than a player has fails with `INSUFFICIENT_COUNT`. Gear gets a variation of its own when given, and `options` can hand it over identified, already worn, with its hood up, showing another piece's look with `appearanceOverride`, a bare gear id, or with a roll of [`stats`](#gear-stats). A malformed override or roll fails the whole change:
 
 ```js
 // server/main.js
@@ -89,7 +90,7 @@ function buyEdurus(player) {
 
 ## Saving inventories
 
-The server writes nothing to disk, so save the inventory whenever it changes and give it back when the player returns. `playerInventoryUpdated` fires with every row and the new revision after each change, and `replace` restores a saved list in one step, gear variations included. Restore it once the player's load screen is gone, as you would [move them to a spawn point](/guides/players/join-and-spawn/#putting-players-in-place):
+The server writes nothing to disk, so save the inventory whenever it changes and give it back when the player returns. `playerInventoryUpdated` fires with every row and the new revision after each change, and `replace` restores a saved list in one step, gear variations included. The changes include gear and mounts the player changes in game: identifying a piece, what they wear, their hood, the look a worn piece shows and the mount they have slotted. `player.inventory` still reads inside `playerDisconnect`, so a last save can run there. Restore it once the player's load screen is gone:
 
 ```js
 // server/main.js
@@ -103,7 +104,7 @@ Events.on("loadingFinished", async (player) => {
 });
 ```
 
-Keep the rows as `list()` returns them: `replace` needs a gear row's `variation` to restore that exact piece, and its `appearanceOverride` to restore the look it shows. `saveInventory` and `loadInventory` stand for your own store, such as the database behind [Persisting state](/guides/getting-started/first-resource/#persisting-state).
+Keep the rows as `list()` returns them: `replace` needs a gear row's `variation` to restore that exact piece, its `appearanceOverride` to restore the look it shows, and its `stats` to give it back its roll, since a restarted game re-creates gear without one. `saveInventory` and `loadInventory` stand for your own store, such as the database behind [Persisting state](/guides/getting-started/first-resource/#persisting-state).
 
 ## Waiting for the player's game
 
@@ -139,7 +140,65 @@ An addition outside the allowlists fails with `NATIVE_DELTA_NOT_ALLOWED`, and a 
 
 `player.inventory.use(itemId, options, callback)` uses one potion or plant on the player's game, and completes only once the game shows that exact item was used up. The authoritative inventory changes with it and `playerInventoryConsumed` fires. It fails with `ITEM_NOT_USABLE` for an item the game cannot use from the inventory, and `USE_IN_PROGRESS` while another use is still running.
 
+## Gear stats
+
+Every piece of gear has its own roll: a level, the Offense, Defense and Cooldown it adds to the wearer's, and up to three traits, such as more Confringo damage or less damage taken from trolls. The game rolls it once, when the gear drops as loot, and only the Loom changes it afterwards. A gear row's `stats` holds it:
+
+| Field | Meaning |
+| --- | --- |
+| `level` | The item's level, 0 for Basic gear |
+| `offense`, `defense`, `cooldown` | What it adds to the wearer's Offense, Defense and Cooldown |
+| `upgrades` | How many Loom upgrades it has had |
+| `traits` | Its trait ids in slot order, at most 3 |
+
+`stats` is `null` on every other kind of item. The player's game reports each roll and the server keeps it, so a Loom upgrade is a change like any other and raises `playerInventoryUpdated`.
+
+Gear from `give` has no roll: the player's game adds it at level 1 with no stats and no traits. Pass `stats` to give it one. Fields you leave out are 0, and the numbers are whole, from 0 to 1000000:
+
+```js
+// server/main.js
+player.inventory.give("Back_002_Rare", 1, {
+  identified: true,
+  stats: { level: 23, offense: 187, cooldown: 3, traits: ["Gear_Armor_DarkWizard_1"] },
+});
+```
+
+`replace` writes a saved roll back the same way, onto each piece the player's game has to re-create. A piece the player still holds keeps the roll it has. If a roll does not take, `waitForRevision` rejects with `NATIVE_APPLY_FAILED`.
+
+### What worn gear is worth
+
+What worn gear adds is a server rule, apart from its roll. `player.setGearStatMultiplier(multiplier)` scales the Offense, Defense and Cooldown every worn piece adds, which the game turns into its gear damage bonus and damage reduction: 1 is the full roll, and 0 is as if the player wore no gear. `player.setGearTraits(false)` stops worn gear's traits from applying. Together they make gear cosmetic, for example in an arena:
+
+```js
+// server/main.js
+function enterArena(player) {
+  player.setGearStatMultiplier(0);
+  player.setGearTraits(false);
+}
+
+function leaveArena(player) {
+  player.setGearStatMultiplier(null);
+  player.setGearTraits(null);
+}
+```
+
+`null` goes back to `mod.gearStatMultiplier` and `mod.gearTraits` in [`server.json`](/guides/hosting-a-server/configuration/#mod-keys), which set the rules for every joining player. `player.gearStatMultiplier` and `player.gearTraits` read them back. The player's game re-applies their gear at once and keeps the rules over respawns and travel. A multiplier outside 0 to 1 throws.
+
+The rules change only what the gear adds. Each row's `stats` and the item tooltips keep the real roll, so a piece is worth all of it again once the rule is lifted.
+
+### Reading a roll on the client
+
+`LocalPlayer.gearStats(itemId, variation)` reads the roll of one piece the local player owns, worn or not, with whether it is `identified`. It is the item's own roll, whatever the server's rules, or `null` when the player owns no such piece:
+
+```js
+// client/main.js
+const robe = LocalPlayer.equippedGear()?.Back;
+const roll = robe ? LocalPlayer.gearStats(robe.itemId, robe.variation) : null;
+if (roll) console.log(`Robe level ${roll.level}: offense ${roll.offense}, defense ${roll.defense}`);
+```
+
 ## Where to go next
 
 - [Join and spawn](/guides/players/join-and-spawn/) for restoring saved data when a player connects.
 - [Authority](/guides/core-concepts/authority/) for why client reports never grant items.
+- [Appearance](/guides/players/appearance/#clothes) for dressing players in the gear they own.

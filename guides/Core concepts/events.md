@@ -165,7 +165,7 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `loadingFinished` | `(player)` | The player's load screen is dismissed after `worldReady` |
 | `playerInventoryChanged` | `(player, items)` | The player's reported native inventory changes; `items` is the full native inventory |
 | `playerInventoryNativeDelta` | `(player, delta)` | A positive native acquisition not yet represented by the authoritative inventory is reported; the first report after connecting establishes a baseline and does not fire this event |
-| `playerInventoryUpdated` | `(player, items, revision)` | The authoritative inventory model changes |
+| `playerInventoryUpdated` | `(player, items, revision)` | The authoritative inventory model changes, by a script or by gear and mounts the player changes in game |
 | `playerInventoryConsumed` | `(player, item, remaining)` | An accepted native consumable use updates authoritative inventory |
 | `playerAppearanceChanged` | `(player, look, revision)` | The server accepts a new look from the player's game or `player.setLook`; `look` is the checked [look](/guides/players/appearance/#the-look) and `revision` increases for the connection |
 | `playerTeleportComplete` | `(player, requestId, status, completion)` | A `player.teleport` request finishes; `completion` includes the normalized request, client-observed final transform, and ground-snap result |
