@@ -24,6 +24,7 @@ const chestId = Lootables.place("chest", x, y, z, 90, {
 | `locked` | A locked lootable offers nothing to take |
 | `mode` | `"shared"` (the default): a take empties it for everyone. `"perPlayer"`: a take empties it only for the player who took it. |
 | `model` | The Blueprint to show. It defaults to a Hogwarts chest, a small moonstone deposit, or the foragable plant that gives the item. |
+| `virtualWorld`, `map` | The [virtual world](/guides/core-concepts/virtual-worlds/#loot-zones-and-sounds) to place it in, and the map that world is in, by its `areaId`. World 0 of Overland by default. |
 
 Moonstone deposits and foragables hold plain items only, and a foragable holds a single stack. A moonstone takes one of the `BP_Moonstone_S`, `_M` or `_L` Blueprints, and a foragable one of the game's five foragable Blueprints. An empty or locked moonstone shows as mined out, and an empty or locked foragable as picked.
 

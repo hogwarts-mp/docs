@@ -127,13 +127,13 @@ Fx.create("spawn-flash", flashPath, { x, y, z, scale: 2, ttl: 5 });
 function lightTorch(player) {
   const torch = Fx.create(`torch:${player.id}`, campfire, { scale: 0.3 });
   if (!torch) return undefined;
-  torch.setVirtualWorld(player.virtualWorld);
+  torch.setVirtualWorld(player.virtualWorld, player.location()?.areaId);
   torch.attachTo(player, { x: 30, y: 25, z: 70 });
   return torch;
 }
 ```
 
-An attached effect does not take its entity's virtual world, so set it to match.
+An attached effect does not take its entity's virtual world or map, so set them to match.
 
 `effect.setColor(name, color)` sets one of a Niagara effect's colour parameters, by the parameter's name, for everyone. Components run from 0 to 1, and values above 1 glow. An effect can carry up to four colours, and Cascade effects ignore them.
 
@@ -141,7 +141,7 @@ An attached effect does not take its entity's virtual world, so set it to match.
 
 Objects and effects your resource creates are destroyed when it stops, along with its other entities. They are not saved: a resource that keeps placed props across restarts stores their keys, models and positions itself and creates them again when it starts.
 
-Like other entities they start in [virtual world](/guides/core-concepts/virtual-worlds/#placing-entities) 0; call `setVirtualWorld` on one to show it to players in another world.
+Like other entities they start in [virtual world](/guides/core-concepts/virtual-worlds/#placing-entities) 0 of Overland; call `setVirtualWorld(world, map)` on one to show it to players in another world or map.
 
 ## Where to go next
 

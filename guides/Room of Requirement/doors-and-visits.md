@@ -81,7 +81,7 @@ The server only knows a player is inside once their game has finished loading th
 
 Each room is its own [virtual world](/guides/core-concepts/virtual-worlds/), combined with the player's world number. Players in the same room with the same world number see and hear each other, and nobody in another room. The global world `4294967295` still sees into every room.
 
-Entities the server creates are not tied to a map, so you cannot place an NPC or an object in one particular room.
+`setVirtualWorld` places an entity in a map's world, never in one particular room. An NPC or beast created with a `preferredOwnerId` starts in that player's world and map, and so in their room.
 
 ## Where to go next
 
