@@ -56,6 +56,8 @@ An NPC never gets its health back by itself, and its owner finishes off any NPC 
 
 `launch` returns `false` for a dormant NPC; `true` means it was sent. Pass `{ overrideXY: true }` or `{ overrideZ: true }` to replace the NPC's own speed instead of adding to it, and `{ space: "local" }` to launch along its own facing.
 
+To walk an NPC to a spot, send it on a patrol or choose what it does when idle, see [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/#npcs).
+
 ## Switching behaviour off
 
 Five properties switch parts of an NPC's behaviour off. They are held on the server, can be set before the NPC has an owner, and carry over hand-offs:

@@ -174,11 +174,17 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `playerMapTravelComplete` | `(player, requestId, status, completion)` | A `player.travelToMap` or `player.travelToPlace` request finishes, once the player can play in the new map, or times out. See [Travel between places](/guides/players/travel/#loading-another-map) |
 | `npcDied` | `(npcId, enemyId, killerId, damagerIds)` | A server-spawned NPC dies; `killerId` is the last player to damage it, or `null`, and `damagerIds` every player who did. See [Fighting NPCs](/guides/pve/fighting-npcs/#damage-and-death) |
 | `npcDamaged` | `(npcId, attackerId, amount)` | A player reports damage to a server-spawned NPC |
+| `npcWaypoint` | `(npc, index, lap)` | An NPC on a path reaches `waypoints[index]`, before its wait; `lap` counts completed laps. See [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/#path-events) |
+| `npcMoveEnded` | `(npc, reason)` | An NPC's path ends: `"arrived"`, `"stopped"`, `"replaced"` or `"unreachable"` |
 | `beastCared` | `(beast, player, kind)` | A player pets or feeds a beast; return `false` synchronously to refuse it |
 | `beastCaptureStart` | `(beast, player)` | A player's Nab-Sack starts drawing in a beast they may catch; return `false` synchronously to make it let go. See [Catching beasts](/guides/npcs-and-creatures/catching-beasts/#refereeing-a-catch) |
 | `beastCaptureRequest` | `(beast, player)` | A player's Nab-Sack finished on a beast and the catch waits for the server; return `false` synchronously to refuse it |
 | `beastCaptured` | `(player, captured)` | A catch landed: the beast is in the player's bag and has left the world |
 | `beastReleased` | `(player, released, at)` | A player released a beast from their Field Guide; `at` is where they stood |
+| `beastWaypoint` | `(beast, index, lap)` | A beast on a path reaches `waypoints[index]`, before its wait |
+| `beastMoveEnded` | `(beast, reason)` | A beast's path or follow ends: `"arrived"`, `"stopped"`, `"replaced"`, `"unreachable"` or `"targetGone"` |
+| `characterWaypoint` | `(character, index, lap)` | A character on a path reaches `waypoints[index]`, before its wait |
+| `characterMoveEnded` | `(character, reason)` | A character's path ends: `"arrived"`, `"stopped"` or `"replaced"` |
 | `campActivated` | `(campId)` | A [camp](/guides/encounters/camps/)'s enemies spawn |
 | `campCleared` | `(campId)` | Every enemy of an active camp is dead |
 | `worldEventStarted` | `(spotId, kind)` | A [world event](/guides/encounters/world-events/) starts |
