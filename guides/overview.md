@@ -70,6 +70,7 @@ Use the navigation to browse the globals available to the selected environment. 
 - [Physics objects](/guides/world/physics-objects/) — objects that fall, roll and fly, pushing and throwing them, and letting players carry them.
 - [Doors](/guides/world/doors/) — holding the game's doors locked or open for everyone, and deciding who gets in.
 - [Loot](/guides/world/loot/) — server-owned chests, moonstones and foragables, per-player contents, and switching off the game's own loot.
+- [Hogwarts Express](/guides/world/hogwarts-express/) — running the train from the server, stopping it at Hogsmeade, its events, and the Foundations timetable.
 - [Line traces](/guides/world/line-traces/) — finding what a line through the world hits first, from a client script.
 
 **Room of Requirement:**

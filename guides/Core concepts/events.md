@@ -194,6 +194,9 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `zoneExit` | `(zone, entity, reason, entityId)` | An entity leaves a zone; `reason` is `"left"` or `"gone"` |
 | `doorUnlockRequest` | `(player, door)` | A player tries to open a lock the server holds shut, by key or Alohomora |
 | `lootableTaken` | `(player, lootableId, items)` | A player takes a server lootable; `items` is what it gave them |
+| `trainSpawned` | `(t)` | `World.hogwartsExpress.spawn` stands the [Hogwarts Express](/guides/world/hogwarts-express/) at `t` |
+| `trainStopped` | `(t)` | The train brakes to a stop at `t`, at the end of a `moveTo` or a `halt` |
+| `trainEnded` | `(reason)` | The train is gone; `reason` is `"end"` when a departure left the track, `"despawned"` after `despawn()` or a replacing `spawn()` |
 | `housePointsChange` | `(house, points, previous)` | A house's points change |
 | `housePointsRequest` | `(player, request)` | A player's game asks to change house points; return `false` synchronously to refuse it |
 | `sanctuaryChanged` | `(id, revision, editor)` | An editor changes a [Room of Requirement](/guides/room-of-requirement/rooms/) room |
