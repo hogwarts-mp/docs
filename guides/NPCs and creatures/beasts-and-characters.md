@@ -1,11 +1,11 @@
 ---
 title: Beasts and characters
-description: Spawn tame beasts players can pet, feed and catch, decide who may care for them, and place stationary townspeople and vendors with nameplates.
+description: Spawn tame beasts players can pet, feed and catch, decide who may care for them, and place townspeople, ghosts, house-elves and other characters with nameplates.
 sidebar:
   order: 420
 ---
 
-Besides enemies, the server can place two kinds of living thing: tame beasts, which wander and can be cared for, and characters, which stand still and never fight.
+Besides enemies, the server can place tame beasts, which wander and can be cared for, and characters, which never fight. A character stands where you put it, or walks a path you give it.
 
 ## Beasts
 
@@ -28,7 +28,7 @@ The species are the game's 13 creatures you can nurture and their young, such as
 | `color` | One of the species' colours |
 | `preferredOwnerId` | The player whose client should run its AI |
 
-Like an NPC, a beast's AI runs on one nearby player's client, named by `beast.ownerId`, and a beast starts in [virtual world](/guides/core-concepts/virtual-worlds/#placing-entities) 0.
+Like an NPC, a beast's AI runs on one nearby player's client, named by `beast.ownerId`. A beast starts in [virtual world](/guides/core-concepts/virtual-worlds/#placing-entities) 0, or, with `preferredOwnerId`, in that player's world and map. [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/#beasts) covers walking a beast, having it follow someone and what it does when idle.
 
 ### Care and happiness
 
@@ -57,7 +57,7 @@ Players can catch a beast with the game's Nab-Sack once a script makes it catcha
 
 ## Characters
 
-A character is a dressed, stationary human placed by the server: a vendor, a townsperson or a quest giver. It has no AI, no owner and no health. `Character.create(key, characterId, options)` creates one under a key of your choosing, and creating again with the same key replaces it:
+A character is a figure placed by the server: a vendor, a townsperson, a ghost or a quest giver. It has no AI, no owner and no health. It stands where you put it until you give it a path, which [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/#characters) covers. `Character.create(key, characterId, options)` creates one under a key of your choosing, and creating again with the same key replaces it:
 
 ```js
 // server/main.js
@@ -69,11 +69,16 @@ Character.create("wand-shop", "GerboldOllivander", {
 });
 ```
 
-`characterId` must be one of the game's human characters that the Mod allows, such as `GerboldOllivander`; `Character.isAllowed(characterId)` tests one, and `Character.create` throws for any other. `Character.destroy(key)` removes a character by its key.
+`characterId` must be one of the game's characters that the Mod allows; `Character.isAllowed(characterId)` tests one, and `Character.create` throws for any other. Characters come in two kinds of body:
+
+- A human id, such as `GerboldOllivander`, is built on the same body as a player's and dressed as that character.
+- Other ids spawn the game's own body for that character: ghosts such as `NearlyHeadlessNick`, house-elves, goblins, centaurs, the game's crowd looks such as `T3TownspersonFemale1`, the statue busts, the Sorting Hat (`SortingHat`) and the Howler (`Howler`). The Mod switches off the AI, lock-on, interaction prompt and damage the game gives that body.
+
+Ids with no look of their own, such as portraits and talking objects, are refused. `Character.destroy(key)` removes a character by its key.
 
 | Option | Meaning |
 | --- | --- |
-| `x`, `y`, `z`, `yaw` | Where it stands and which way it faces |
+| `x`, `y`, `z`, `yaw` | Where it stands, as a player's position, and which way it faces |
 | `scale` | Its size; 1 is native |
 | `label` | A nameplate over its head, seen from up to 25 m |
 | `promptText` | A second line, seen only within `promptRange`, usually inviting players to interact |
@@ -85,5 +90,6 @@ The prompt is only text. Handling the interaction it invites, such as opening a 
 ## Where to go next
 
 - [Catching beasts](/guides/npcs-and-creatures/catching-beasts/) for the Nab-Sack, the player's bag and releasing beasts.
+- [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/) for walking beasts and characters, and beasts that follow players.
 - [NPCs](/guides/npcs-and-creatures/npcs/) for enemies and their AI, and [Rewards and loot](/guides/pve/rewards-and-loot/) for what their deaths pay.
 - [Authority](/guides/core-concepts/authority/) for which client runs a creature's AI and what that means.

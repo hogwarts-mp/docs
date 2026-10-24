@@ -42,7 +42,7 @@ Use the navigation to browse the globals available to the selected environment. 
 
 - [NPCs](/guides/npcs-and-creatures/npcs/) — spawning enemies, who runs their AI, controlling their health, targets and size, and switching their behaviour off.
 - [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/) — paths of waypoints for NPCs, beasts and characters, beasts that follow players, idles, and arrival events.
-- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) — tame creatures players care for, and stationary townspeople.
+- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) — tame creatures players care for, and townspeople, ghosts and other characters.
 - [Catching beasts](/guides/npcs-and-creatures/catching-beasts/) — the Nab-Sack, refereeing catches, keeping a player's bag across reconnects, and releasing beasts.
 
 **PvE:**
