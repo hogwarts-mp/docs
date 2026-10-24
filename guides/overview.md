@@ -83,6 +83,7 @@ Use the navigation to browse the globals available to the selected environment. 
 **User interface:**
 
 - [Web views](/guides/user-interface/web-views/) — HTML interfaces in the game, and messages between the page and your scripts.
+- [Avatar preview](/guides/user-interface/avatar-preview/) — the player's own live figure framed in a web page, for gear panes and wardrobes.
 - [HUD, prompts and nametags](/guides/user-interface/hud-and-nametags/) — hiding the game's HUD, interaction prompts, and what players' nametags show.
 - [Map markers](/guides/user-interface/map-markers/) — markers, search circles and routes on the map, player blips, and the minimap.
 - [Keys and menus](/guides/user-interface/keys-and-menus/) — key bindings, locking the controls, and keeping the game's own menus shut.
