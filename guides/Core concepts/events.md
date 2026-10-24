@@ -158,6 +158,7 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `playerDownedEnd` | `(player)` | A player recovers from the downed state or respawns |
 | `playerHoldEnded` | `(player, owner, reason)` | A server-owned hold ends; `reason` identifies why |
 | `playerHoldStrained` | `(player, owner, distanceCm)` | A held player continues reporting positions beyond the hold boundary |
+| `playerMoveEnded` | `(player, owner, reason)` | A `player.moveTo` or `player.follow` walk ends. See [Walking and seating players](/guides/players/walking-players/#when-a-walk-ends) |
 | `playerWandChanged` | `(player)` | The player's wand changes |
 | `playerGearChanged` | `(player)` | What the player wears changes |
 | `worldReady` | `(player)` | The player's world, pawn, and replication are ready |
@@ -239,6 +240,7 @@ These events are delivered only inside the client runtime. Receiving a native cl
 | `pvpRelationChanged` | `(relation)` | The local player's [PvP relation](/guides/pvp/rules-and-relations/) to another player is resolved or changes |
 | `localDowned` | `()` | The local player kneels after a PvP defeat |
 | `localDownedEnd` | `({ wasDead })` | The local player gets up, from a kneel or a respawn |
+| `anchorReleased` | `(reason, at)` | The local player's [seat anchor](/guides/players/walking-players/#seating-the-player) ends; `at` is the floor-level point they sat at |
 | `entityStateChange` | `(entity, key, value, previous)` | A replicated state write or removal arrives on the client; `value` is `undefined` for a removal |
 
 A `chatSend` handler may synchronously return `false` to prevent that line from being sent. An asynchronous return value cannot veto it.
