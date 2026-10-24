@@ -1,6 +1,6 @@
 ---
 title: Doors
-description: Hold the game's doors locked, unlocked, open or closed for every player, share the locks players open, find a door's name, and decide when a locked door opens for someone.
+description: Hold the game's doors locked, unlocked, open or closed for every player, set the Alohomora level a padlock asks for, share the locks players open, find a door's name, and decide when a locked door opens for someone.
 sidebar:
   order: 520
 ---
@@ -24,14 +24,25 @@ Doors.set(hallDoor, { locked: null, open: true });
 | `locked` | Held locked. Only a door that has a lock can be locked. | Held unlocked | Left to each player's save |
 | `open` | Held open | Held closed; it still swings for anyone who walks into it unless it is locked | Left to swing on its own |
 
-At runtime a field you leave out keeps whatever the server already holds for it, but the current type declarations ask for both fields, so pass `null` for the one you mean to leave to the game.
+At runtime a field you leave out keeps whatever the server already holds for it, but the current type declarations ask for every field, `lockLevel` included, so pass `null` for the ones you mean to leave to the game.
 
 Each player's game re-applies what the server holds as the door streams in, so players who arrive later see it too.
 
 - `Doors.get(selector)` returns the state held under a selector, and `Doors.list()` every held state.
 - `Doors.clear(selector)` releases a selector, and `Doors.clearAll()` releases them all. A released door keeps its current state until it streams in again, when each player's save takes over.
-- A selector left holding nothing, with both fields `null`, is released.
+- A selector left holding nothing, with every field `null`, is released.
 - Each leaf of a double door is its own door and swings on its own, so hold both leaves to keep a double door shut.
+
+### Lock levels
+
+A padlocked door asks for a level of Alohomora, from 1 to 3, and its callout shows that level. `lockLevel` holds the level for every player, so a player needs that level of Alohomora to cast it on the door. `null` leaves the door at the level it shipped with. Only padlocked doors carry a level.
+
+```js
+// server/main.js
+Doors.set(towerDoor, { locked: null, open: null, lockLevel: 3 });
+```
+
+Players gain the levels through the Alohomora locks in [Progression](/guides/players/progression/#spells). Held together with `locked: true`, the lock refuses even a player whose Alohomora is high enough, and the server raises [`doorUnlockRequest`](#when-a-player-tries-a-locked-door) so your script can decide.
 
 ## Finding a door
 
@@ -55,7 +66,7 @@ Events.on("resourceStart", (resourceName) => {
 });
 ```
 
-`Doors.list(radius)` returns each loaded door within `radius` centimetres, 3000 by default, with its name, persistent id, full path, distance and lock state. The output goes to the [client log](/guides/getting-started/debugging/#where-output-goes).
+`Doors.list(radius)` returns each loaded door within `radius` centimetres, 3000 by default, with its name, persistent id, full path, distance and lock state. A padlocked door also has its `lockLevel`, or `"key"` when only a key opens it. The output goes to the [client log](/guides/getting-started/debugging/#where-output-goes).
 
 ## When a player unlocks a door
 
