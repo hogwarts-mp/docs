@@ -13,7 +13,7 @@ Portcullises, the Astronomy rune gate, goblin camp gates and crawl grates are no
 
 `Doors.set(selector, state)` holds a door's lock, its open state or both, for every player:
 
-```js
+```jsx
 // server/main.js
 Doors.set(vaultDoor, { locked: true, open: null });
 Doors.set(hallDoor, { locked: null, open: true });
@@ -77,7 +77,7 @@ Events.on("doorUnlocked", (player, door) => {
 
 When a player tries to open a lock the server holds shut, with a key or Alohomora, their game refuses at once and the server raises `doorUnlockRequest` with the player and the door: its `selector`, `name` and `id`. It fires at most once a second for each door. Release the lock there if the player should get in:
 
-```js
+```jsx
 // server/main.js
 const vaultKeyHolders = new Set();
 
