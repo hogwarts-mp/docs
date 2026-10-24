@@ -118,6 +118,12 @@ Events.on("hippogriff:fly", () => {
 
 `state()` on either reports the creature's `species`, whether the player is `mounted`, and for flying creatures whether they are `flying`.
 
+## A rider's size and visibility
+
+A broom is drawn at its rider's size: [`player.setScale`](/guides/players/appearance/#size) resizes the broom a player rides along with them, in either mode and on every client. In flight it keeps a native broom's collision. A creature keeps its own size.
+
+`player.setVisible(false)` hides the broom or creature a player rides along with the player, the broom's flight trails included. A broom or creature they summon while hidden stays hidden too.
+
 ## Keeping riders out
 
 To keep players off brooms and creatures in an arena, take the items away on the server while they are inside, and have their client dismount them and keep the game's tool wheel, where players summon them, shut:
