@@ -32,12 +32,14 @@ Shapes are in world centimetres:
 
 The options are:
 
-- `virtualWorld`: the [world](/guides/core-concepts/virtual-worlds/) it watches, 0 by default. A zone matches entities in exactly that world. Players match only in Overland, since anywhere else their world is combined with their map.
+- `virtualWorld` and `map`: the [world](/guides/core-concepts/virtual-worlds/#worlds-and-maps) it watches, and the map that world is in by its `areaId`. By default, world 0 of Overland. A zone matches entities in exactly that world of that map. `zone.virtualWorld` and `zone.map` read them back, with `""` for Overland.
 - `track`: which entities it notices, from `"player"`, `"npc"`, `"beast"`, `"worldObject"` and `"character"`, by default only players.
 
 A malformed shape or option throws. The server holds at most 4096 zones.
 
 Keys are shared by every resource, and creating a zone under a key in use replaces that zone, so start yours with your resource's name. `Zone.get(key)` returns a zone or `undefined`, `Zone.getAll()` lists them, and `Zone.destroy(key)` or `zone.destroy()` removes one.
+
+Players cannot see a zone. To show them where one lies, send `zone.getShape()` to their clients and draw it with [Shapes](/guides/world/shapes/#showing-a-zone).
 
 ## Coming and going
 

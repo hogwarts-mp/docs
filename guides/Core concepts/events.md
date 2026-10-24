@@ -158,24 +158,33 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `playerDownedEnd` | `(player)` | A player recovers from the downed state or respawns |
 | `playerHoldEnded` | `(player, owner, reason)` | A server-owned hold ends; `reason` identifies why |
 | `playerHoldStrained` | `(player, owner, distanceCm)` | A held player continues reporting positions beyond the hold boundary |
+| `playerMoveEnded` | `(player, owner, reason)` | A `player.moveTo` or `player.follow` walk ends. See [Walking and seating players](/guides/players/walking-players/#when-a-walk-ends) |
 | `playerWandChanged` | `(player)` | The player's wand changes |
+| `playerSpellCast` | `(player, spell, cast)` | A player casts a [server-defined spell](/guides/players/custom-spells/#casting); `spell` is its id and `cast` its `aimYaw` and `wand` tip, as the caster's game reports them |
 | `playerGearChanged` | `(player)` | What the player wears changes |
 | `worldReady` | `(player)` | The player's world, pawn, and replication are ready |
 | `loadingFinished` | `(player)` | The player's load screen is dismissed after `worldReady` |
 | `playerInventoryChanged` | `(player, items)` | The player's reported native inventory changes; `items` is the full native inventory |
 | `playerInventoryNativeDelta` | `(player, delta)` | A positive native acquisition not yet represented by the authoritative inventory is reported; the first report after connecting establishes a baseline and does not fire this event |
-| `playerInventoryUpdated` | `(player, items, revision)` | The authoritative inventory model changes |
+| `playerInventoryUpdated` | `(player, items, revision)` | The authoritative inventory model changes, by a script or by gear and mounts the player changes in game |
 | `playerInventoryConsumed` | `(player, item, remaining)` | An accepted native consumable use updates authoritative inventory |
 | `playerAppearanceChanged` | `(player, look, revision)` | The server accepts a new look from the player's game or `player.setLook`; `look` is the checked [look](/guides/players/appearance/#the-look) and `revision` increases for the connection |
 | `playerTeleportComplete` | `(player, requestId, status, completion)` | A `player.teleport` request finishes; `completion` includes the normalized request, client-observed final transform, and ground-snap result |
 | `playerFastTravelComplete` | `(player, requestId, status)` | A `player.fastTravel` request finishes or times out |
+| `playerMapTravelComplete` | `(player, requestId, status, completion)` | A `player.travelToMap` or `player.travelToPlace` request finishes, once the player can play in the new map, or times out. See [Travel between places](/guides/players/travel/#loading-another-map) |
 | `npcDied` | `(npcId, enemyId, killerId, damagerIds)` | A server-spawned NPC dies; `killerId` is the last player to damage it, or `null`, and `damagerIds` every player who did. See [Fighting NPCs](/guides/pve/fighting-npcs/#damage-and-death) |
 | `npcDamaged` | `(npcId, attackerId, amount)` | A player reports damage to a server-spawned NPC |
+| `npcWaypoint` | `(npc, index, lap)` | An NPC on a path reaches `waypoints[index]`, before its wait; `lap` counts completed laps. See [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/#path-events) |
+| `npcMoveEnded` | `(npc, reason)` | An NPC's path ends: `"arrived"`, `"stopped"`, `"replaced"` or `"unreachable"` |
 | `beastCared` | `(beast, player, kind)` | A player pets or feeds a beast; return `false` synchronously to refuse it |
 | `beastCaptureStart` | `(beast, player)` | A player's Nab-Sack starts drawing in a beast they may catch; return `false` synchronously to make it let go. See [Catching beasts](/guides/npcs-and-creatures/catching-beasts/#refereeing-a-catch) |
 | `beastCaptureRequest` | `(beast, player)` | A player's Nab-Sack finished on a beast and the catch waits for the server; return `false` synchronously to refuse it |
 | `beastCaptured` | `(player, captured)` | A catch landed: the beast is in the player's bag and has left the world |
 | `beastReleased` | `(player, released, at)` | A player released a beast from their Field Guide; `at` is where they stood |
+| `beastWaypoint` | `(beast, index, lap)` | A beast on a path reaches `waypoints[index]`, before its wait |
+| `beastMoveEnded` | `(beast, reason)` | A beast's path or follow ends: `"arrived"`, `"stopped"`, `"replaced"`, `"unreachable"` or `"targetGone"` |
+| `characterWaypoint` | `(character, index, lap)` | A character on a path reaches `waypoints[index]`, before its wait |
+| `characterMoveEnded` | `(character, reason)` | A character's path ends: `"arrived"`, `"stopped"` or `"replaced"` |
 | `campActivated` | `(campId)` | A [camp](/guides/encounters/camps/)'s enemies spawn |
 | `campCleared` | `(campId)` | Every enemy of an active camp is dead |
 | `worldEventStarted` | `(spotId, kind)` | A [world event](/guides/encounters/world-events/) starts |
@@ -185,6 +194,9 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `zoneExit` | `(zone, entity, reason, entityId)` | An entity leaves a zone; `reason` is `"left"` or `"gone"` |
 | `doorUnlockRequest` | `(player, door)` | A player tries to open a lock the server holds shut, by key or Alohomora |
 | `lootableTaken` | `(player, lootableId, items)` | A player takes a server lootable; `items` is what it gave them |
+| `trainSpawned` | `(t)` | `World.hogwartsExpress.spawn` stands the [Hogwarts Express](/guides/world/hogwarts-express/) at `t` |
+| `trainStopped` | `(t)` | The train brakes to a stop at `t`, at the end of a `moveTo` or a `halt` |
+| `trainEnded` | `(reason)` | The train is gone; `reason` is `"end"` when a departure left the track, `"despawned"` after `despawn()` or a replacing `spawn()` |
 | `housePointsChange` | `(house, points, previous)` | A house's points change |
 | `housePointsRequest` | `(player, request)` | A player's game asks to change house points; return `false` synchronously to refuse it |
 | `sanctuaryChanged` | `(id, revision, editor)` | An editor changes a [Room of Requirement](/guides/room-of-requirement/rooms/) room |
@@ -225,7 +237,7 @@ These events are delivered only inside the client runtime. Receiving a native cl
 | `resourceStop` | `(resourceName)` | A client JavaScript resource is about to stop |
 | `chatMessage` | `({ author, text, color })` | A chat message arrives from the server |
 | `chatSend` | `(text)` | The local player submits text through the chat overlay |
-| `spellCast` | `(spellPath)` | The local player casts a spell; the path identifies its spell record |
+| `spellCast` | `(spellPath)` | The local player casts a spell; the path identifies its spell record, or is the id of a [server-defined spell](/guides/players/custom-spells/#casting) |
 | `playerRegionChanged` | `(region)` | The local player enters a named region |
 | `creatorOpened` | `({})` | The character creator opens |
 | `creatorConfirmed` | `({ first, last })` | The character creator closes after confirmation |
@@ -235,9 +247,12 @@ These events are delivered only inside the client runtime. Receiving a native cl
 | `spellAssignment` | `({ source, loadout, slot })` | A spell is assigned to a slot, from the game's menu or a script |
 | `spellLearningFinished` | `(result)` | A spell lesson the resource started finishes; it grants no spell |
 | `minimapChanged` | `(state, previous)` | The [minimap](/guides/user-interface/map-markers/#the-minimap) switches map, floor or tile |
+| `waypointChanged` | `(waypoint, previous)` | The local player places, moves or removes their [map waypoint](/guides/user-interface/map-markers/#the-players-waypoint); a removal reports `null` |
+| `mailRead` | `(key, sender)` | The local player reads an owl post letter, theirs or the game's; `sender` is the sender's id, not their display name. A letter that loads or arrives already read raises nothing |
 | `pvpRelationChanged` | `(relation)` | The local player's [PvP relation](/guides/pvp/rules-and-relations/) to another player is resolved or changes |
 | `localDowned` | `()` | The local player kneels after a PvP defeat |
 | `localDownedEnd` | `({ wasDead })` | The local player gets up, from a kneel or a respawn |
+| `anchorReleased` | `(reason, at)` | The local player's [seat anchor](/guides/players/walking-players/#seating-the-player) ends; `at` is the floor-level point they sat at |
 | `entityStateChange` | `(entity, key, value, previous)` | A replicated state write or removal arrives on the client; `value` is `undefined` for a removal |
 
 A `chatSend` handler may synchronously return `false` to prevent that line from being sent. An asynchronous return value cannot veto it.

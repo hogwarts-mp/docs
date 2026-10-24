@@ -1,6 +1,6 @@
 ---
 title: Camera
-description: Take over the player's view with a camera of your own, move it in shots, paths and orbits, fade the screen, and hand the view back.
+description: Take over the player's view with a camera of your own, move it in shots, paths and orbits, steer it with the mouse, fade the screen, and hand the view back.
 sidebar:
   order: 700
 ---
@@ -112,6 +112,34 @@ function circlePlayer() {
 ### Clearing the aim
 
 An orbit, or `lookAt`, leaves the camera aimed at its point after the orbit stops, after `stop` and even after `restore`. The aim then overrides the rotation of every later shot until `Camera.clearLookAt()` lifts it, so clear it before you set up a new shot, as the samples above do.
+
+## Looking around with the mouse
+
+While your camera is active, the game's own camera stops reading the mouse, so the player cannot look around. `Camera.getLookInput()` returns how far the mouse has looked since the last call, as `pitch` and `yaw` in degrees, and starts counting again from zero. Positive `pitch` looks up and positive `yaw` turns right. Read it on a timer and turn your camera by it, for a free camera:
+
+```js
+// client/main.js
+function startFreeCamera() {
+  const view = Camera.capture();
+  if (!view) return;
+  Camera.clearLookAt();
+  Camera.activate(view, { duration: 0 });
+
+  const rotation = { ...view.rotation };
+  const timer = setInterval(() => {
+    if (!Camera.active) {
+      clearInterval(timer);
+      return;
+    }
+    const look = Camera.getLookInput();
+    rotation.yaw += look.yaw;
+    rotation.pitch = Math.max(-89, Math.min(89, rotation.pitch + look.pitch));
+    Camera.setPose({ position: Camera.pose.position, rotation });
+  }, 16);
+}
+```
+
+It reads zero while your camera is not active, while the cursor shows, as it does in chat, with a web view focused or with the [controls locked](/guides/user-interface/keys-and-menus/#locking-the-controls), and while a game menu is open. Movement in those moments is dropped, not saved for later, so the view does not jump when they end. Each read clears what it returns, so read it from one place.
 
 ## Lens
 

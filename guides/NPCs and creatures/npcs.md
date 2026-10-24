@@ -23,11 +23,11 @@ if (grunt) {
 - `enemyId`: one of the game's enemy ids, one of the Mod's short names such as `Goblin_Grunt`, or an enemy's class path. The server does not check it for you: a misspelled id returns an NPC that never appears.
 - A position in world centimetres.
 - `disposition`: `"hostile"` (the default) or `"friendly"`.
-- `preferredOwnerId`: the player whose client should run its AI. It is used only if that player can see world 0 when the NPC spawns; otherwise the server picks.
+- `preferredOwnerId`: the player whose client should run its AI. The NPC starts in that player's virtual world and map.
 
 It returns the NPC, or `undefined` if it could not be created. `setScale` takes effect best right after `create`, before the NPC first reaches anyone. Pass `"visual"` as its second argument to resize only the body and keep native collision.
 
-NPCs start in [virtual world](/guides/core-concepts/virtual-worlds/#placing-entities) 0. The NPCs a resource creates are destroyed when that resource stops; [camp](/guides/encounters/camps/) and [world event](/guides/encounters/world-events/) enemies, and enemies an NPC summons, belong to no resource.
+Without a `preferredOwnerId`, NPCs start in [virtual world](/guides/core-concepts/virtual-worlds/#placing-entities) 0. The NPCs a resource creates are destroyed when that resource stops; [camp](/guides/encounters/camps/) and [world event](/guides/encounters/world-events/) enemies, and enemies an NPC summons, belong to no resource.
 
 ## Who runs the AI
 
@@ -55,6 +55,8 @@ An NPC never gets its health back by itself, and its owner finishes off any NPC 
 `forceTarget` does nothing on a dormant or dead NPC, and waits while the NPC's AI is paused. When the forced player is more than 55 m from the owner's player, the NPC moves to the forced player's client until the force ends. A force is not cleared when its player disconnects, so release it yourself in `playerDisconnect`. Read `targetPlayerId` to see whether it held.
 
 `launch` returns `false` for a dormant NPC; `true` means it was sent. Pass `{ overrideXY: true }` or `{ overrideZ: true }` to replace the NPC's own speed instead of adding to it, and `{ space: "local" }` to launch along its own facing.
+
+To walk an NPC to a spot, send it on a patrol or choose what it does when idle, see [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/#npcs).
 
 ## Switching behaviour off
 
@@ -88,4 +90,4 @@ function trainingDummy(x, y, z) {
 ## Where to go next
 
 - [Fighting NPCs](/guides/pve/fighting-npcs/) for what happens when several players fight one.
-- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) for tame creatures and stationary townspeople.
+- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) for tame creatures, townspeople and ghosts.

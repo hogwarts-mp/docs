@@ -24,7 +24,7 @@ Players walk through physics objects and never push them, so anything that moves
 
 ## Who simulates it
 
-The nearest player within 150 m, measured along the ground, in the object's virtual world, simulates it. They keep it until they are more than 250 m away or someone else is clearly nearer. `object.simulatorId` is that player's id. With nobody near, the object rests where it was last reported until someone comes.
+The nearest player within 150 m, measured along the ground, in the object's virtual world, simulates it. They keep it until they have been more than 250 m away, or someone else clearly nearer, for 3 seconds, so a ball flying past another player stays with whoever threw it. `object.simulatorId` is that player's id. With nobody near, the object rests where it was last reported until someone comes.
 
 The simulating player's game reports where the object is, and the server takes its word. Anything you decide from a physics object's position, such as a goal, trusts that player.
 

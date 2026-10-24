@@ -1,11 +1,11 @@
 ---
 title: Doors and visits
-description: Decide where each player's door to the Room of Requirement leads, take players into rooms, invite visitors, and know who is in which room.
+description: Decide where each player's door to the Room of Requirement leads, let players in through it or take them into rooms directly, invite visitors, and know who is in which room.
 sidebar:
   order: 560
 ---
 
-Players reach the Room of Requirement through its door in the castle, or by fast travel. Where they arrive is up to the server: each player has a destination, the room their door leads to, and the server can also take a player into any room at once.
+Players reach the Room of Requirement by fast travel, or through its door in the castle when a script lets them in. Where they arrive is up to the server: each player has a destination, the room their door leads to, and the server can also take a player into any room at once.
 
 ## Destinations
 
@@ -59,17 +59,72 @@ Events.on("chatCommand", (player, message, command, args) => {
 
 ## The door
 
-The door in the castle is one door that everyone sees. `Sanctuary.setDoor(mode)` sets how it behaves for everyone:
+The door in the castle is one door that everyone sees. `Sanctuary.setDoor(mode)` sets when it shows, for everyone:
 
 | Mode | The door |
 | --- | --- |
-| `"proximity"` | Appears while a player who may enter stands at it, and everyone watching sees it appear. The default. |
+| `"proximity"` | Appears while any player stands at it, and everyone watching sees it appear. The default. |
 | `"open"` | Always shows |
 | `"closed"` | Never shows, so nobody walks in |
 
-`Sanctuary.setDoorAccess(player, false)` keeps the door shut for one player. They still see it appear for others, but cannot go through, and it never appears for them. `Sanctuary.doorAccess(player)` is true when a player may go through: they have access, and their destination is loaded.
+Going through is decided per player. `Sanctuary.doorAccess(player)` is true when a player may: they have access, and their destination is loaded. `Sanctuary.setDoorAccess(player, false)` takes a player's access away, and `true` gives it back. A player without access still makes the door appear and sees it, but cannot go through.
 
-The door is not a lock. Fast travel to the Room of Requirement ignores door access, and the door itself is drawn by each player's game. What keeps a player out of a room is that the server only sends a room to players whose destination it is, who are entering it or who are in it. To bar a player, clear their destination as well.
+### Letting players in
+
+The game's own walk-in through the door, with its F prompt, is off by default. The door still appears, but nobody goes through it until a script takes them in: the client shows its own prompt at the door, and the server calls `Sanctuary.enter`. `Sanctuary.setNativeEntry(true)` turns the game's walk-in back on for players with access, and `Sanctuary.nativeEntry()` reads the setting.
+
+On the client, `Sanctuary.door()` reports the door as this player sees it:
+
+| Field | Meaning |
+| --- | --- |
+| `found` | The door is loaded |
+| `shown` | It is showing |
+| `localNear` | This player stands at it |
+| `access` | This player's door access |
+| `nativeEntry` | The game's own walk-in is on |
+| `x`, `y`, `z` | Where to anchor a prompt, in world centimetres. 0 until the door is found. |
+
+This client script shows a prompt at the door, and asks the server to take the player in when they press F:
+
+```js
+// client/main.js
+let atDoor = false;
+
+setInterval(() => {
+  const door = Sanctuary.door();
+  const want = door.found && door.shown && door.localNear && door.access && !door.nativeEntry;
+  if (want === atDoor) return;
+  atDoor = want;
+  if (want) Hud.showPrompt(Key.getLabel("f"), "Enter", door.x, door.y, door.z);
+  else Hud.hidePrompt();
+}, 250);
+
+Key.bind("f", () => {
+  if (atDoor) Events.emitServer("room:door");
+});
+```
+
+The server checks again that the player stands at the door and has access, since any client can send the request. Which room they enter is yours to choose. This takes them to their destination:
+
+```js
+// server/main.js
+const DOOR = { x: 348658, y: -458032, z: -79920 }; // the door, in Overland
+const lastTrip = new Map(); // player id -> when their last trip began
+
+Events.onClient("room:door", (player) => {
+  const at = player.location();
+  if (at?.areaId !== "Overland" || Math.hypot(at.x - DOOR.x, at.y - DOOR.y, at.z - DOOR.z) > 600) return;
+  if (Date.now() - (lastTrip.get(player.id) ?? 0) < 5000) return; // one trip, however often they press F
+  const id = Sanctuary.destination(player);
+  if (id && Sanctuary.doorAccess(player) && Sanctuary.enter(player, id)) lastTrip.set(player.id, Date.now());
+});
+
+Events.on("playerDisconnect", (player) => lastTrip.delete(player.id));
+```
+
+### Keeping players out
+
+The door is not a lock. Fast travel to the Room of Requirement ignores door access and native entry, and the door itself is drawn by each player's game. What keeps a player out of a room is that the server only sends a room to players whose destination it is, who are entering it or who are in it. To bar a player, clear their destination as well.
 
 ## Who is where
 
@@ -81,9 +136,10 @@ The server only knows a player is inside once their game has finished loading th
 
 Each room is its own [virtual world](/guides/core-concepts/virtual-worlds/), combined with the player's world number. Players in the same room with the same world number see and hear each other, and nobody in another room. The global world `4294967295` still sees into every room.
 
-Entities the server creates are not tied to a map, so you cannot place an NPC or an object in one particular room.
+`setVirtualWorld` places an entity in a map's world, never in one particular room. An NPC or beast created with a `preferredOwnerId` starts in that player's world and map, and so in their room.
 
 ## Where to go next
 
 - [Rooms](/guides/room-of-requirement/rooms/) for loading, decorating and saving rooms.
 - [Virtual worlds](/guides/core-concepts/virtual-worlds/) for how worlds and maps combine.
+- [Interaction prompts](/guides/user-interface/hud-and-nametags/#interaction-prompts) for the prompt a door script shows.

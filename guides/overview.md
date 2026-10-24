@@ -30,15 +30,19 @@ Use the navigation to browse the globals available to the selected environment. 
 **Players:**
 
 - [Join and spawn](/guides/players/join-and-spawn/) — admitting players, the events of a visit, spawn points, deaths and respawns.
+- [Travel between places](/guides/players/travel/) — teleports, fast travel, loading another map, and the places the game builds from several maps.
+- [Walking and seating players](/guides/players/walking-players/) — walking players to a point or after another player, seating them, and landing a scripted flight.
 - [Chat and commands](/guides/players/chat-and-commands/) — sending chat, taking over the chat relay, and slash commands.
 - [Inventory](/guides/players/inventory/) — the server-owned inventory, atomic changes, saving inventories, and items the game hands out.
-- [Appearance](/guides/players/appearance/) — saving and restoring looks, the character creator, clothes, house, size, disguises and props.
+- [Appearance](/guides/players/appearance/) — saving and restoring looks, the character creator, clothes, house, size, disguises, animal forms, props and player collision.
 - [Progression](/guides/players/progression/) — levels and experience, which spells players can cast, talents, and every talent in the game.
+- [Custom spells](/guides/players/custom-spells/) — spells of your own built on the game's, their casts, how PvP prices them and modded spells, and lessons of your own.
 
 **NPCs and creatures:**
 
 - [NPCs](/guides/npcs-and-creatures/npcs/) — spawning enemies, who runs their AI, controlling their health, targets and size, and switching their behaviour off.
-- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) — tame creatures players care for, and stationary townspeople.
+- [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/) — paths of waypoints for NPCs, beasts and characters, beasts that follow players, idles, and arrival events.
+- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) — tame creatures players care for, and townspeople, ghosts and other characters.
 - [Catching beasts](/guides/npcs-and-creatures/catching-beasts/) — the Nab-Sack, refereeing catches, keeping a player's bag across reconnects, and releasing beasts.
 
 **PvE:**
@@ -67,7 +71,9 @@ Use the navigation to browse the globals available to the selected environment. 
 - [Doors](/guides/world/doors/) — holding the game's doors locked or open for everyone, and deciding who gets in.
 - [Gates](/guides/world/gates/) — portcullises, the rune gate, goblin camp gates and crawl grates, held for everyone or set for one player.
 - [Loot](/guides/world/loot/) — server-owned chests, moonstones and foragables, per-player contents, and switching off the game's own loot.
+- [Hogwarts Express](/guides/world/hogwarts-express/) — running the train from the server, stopping it at Hogsmeade, its events, and the Foundations timetable.
 - [Line traces](/guides/world/line-traces/) — finding what a line through the world hits first, from a client script.
+- [Shapes](/guides/world/shapes/) — drawing rings, spheres, boxes, cylinders, polygons and lines in the world from a client script, to show zones or debug traces.
 
 **Room of Requirement:**
 
@@ -78,13 +84,14 @@ Use the navigation to browse the globals available to the selected environment. 
 **User interface:**
 
 - [Web views](/guides/user-interface/web-views/) — HTML interfaces in the game, and messages between the page and your scripts.
+- [Avatar preview](/guides/user-interface/avatar-preview/) — the player's own live figure framed in a web page, for gear panes and wardrobes.
 - [HUD, prompts and nametags](/guides/user-interface/hud-and-nametags/) — hiding the game's HUD, interaction prompts, and what players' nametags show.
-- [Map markers](/guides/user-interface/map-markers/) — markers, search circles and routes on the map, player blips, and the minimap.
+- [Map markers](/guides/user-interface/map-markers/) — markers, search circles and routes on the map, the player's own waypoint, player blips, and the minimap.
 - [Keys and menus](/guides/user-interface/keys-and-menus/) — key bindings, locking the controls, and keeping the game's own menus shut.
 
 **Camera and sound:**
 
-- [Camera](/guides/camera-and-sound/camera/) — taking over the view with shots, paths and orbits, fades, and handing it back.
+- [Camera](/guides/camera-and-sound/camera/) — taking over the view with shots, paths and orbits, mouse look, fades, and handing it back.
 - [Audio](/guides/camera-and-sound/audio/) — the game's sounds from the server or a client, soundbanks and music.
 - [Voice chat](/guides/camera-and-sound/voice-chat/) — who hears whom, voice ranges and tiers, muting, and each player's voice settings.
 

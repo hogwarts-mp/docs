@@ -44,6 +44,26 @@ A binding belongs to the resource that made it and goes when that resource stops
 
 A focused web view locks the controls and shows the cursor by itself while it has focus, so there is no need to lock them around `Web.focusView`.
 
+To stop the character without showing the cursor, as in a cutscene, use `LocalPlayer.stopPlayerInput()`. Movement, casting and the other controls stop, while the camera still turns. `LocalPlayer.restorePlayerInput()` hands them back. Each resource holds input once, however often it calls `stopPlayerInput`, and input stays stopped while anything holds it, another resource or a server [walk](/guides/players/walking-players/#input-during-a-walk) included. `restorePlayerInput` gives back only your own hold, and returns `true` if input runs again. A hold carries over respawns, and goes when your resource stops or reloads and when the player disconnects.
+
+### Jump and sprint
+
+`LocalPlayer.setJumpEnabled(false)` makes the jump button do nothing, and `LocalPlayer.setSprintEnabled(false)` the sprint button. A sprint already running stops at once, and a jump already in the air lands normally. Both use the game's own locks, the ones its scripted walks use, so giving yours back never frees a jump or sprint the game has locked itself.
+
+Each resource holds each one once, however often it calls, and the button stays off while any resource holds it. Passing `true` gives back only your own hold. Holds carry over respawns and travel, and go when the resource stops or reloads and when the player disconnects.
+
+`LocalPlayer.isJumpEnabled()` and `LocalPlayer.isSprintEnabled()` return `false` while any resource holds them off. `LocalPlayer.jumpState()` and `LocalPlayer.sprintState()` also list the resources holding them in `holders`, and say in `locked` whether the game's lock is on right now, whoever turned it on.
+
+```js
+// client/main.js
+// No sprinting or jumping while the stamina bar is empty.
+setInterval(() => {
+  const tired = stamina() <= 0;
+  LocalPlayer.setSprintEnabled(!tired);
+  LocalPlayer.setJumpEnabled(!tired);
+}, 100);
+```
+
 ## The game's own menus
 
 Each of these switches keeps one of the game's menus from opening, so a resource can put its own interface on the keys behind it:

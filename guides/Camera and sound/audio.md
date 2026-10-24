@@ -27,7 +27,7 @@ function thunderAt(x, y, z) {
 
 The server sends a sound once, to the players in range as it starts. A player who arrives or joins afterwards does not hear it, and a player still on a loading screen misses it.
 
-Sounds ignore [virtual worlds](/guides/core-concepts/virtual-worlds/#what-ignores-worlds): a player within range hears a sound whatever world they are in. To keep a sound to one world, send it to that world's players and [play it on their clients](#playing-sounds-on-the-client).
+`Audio.playSoundOnPlayer` reaches only players who share that player's [virtual world](/guides/core-concepts/virtual-worlds/) and map. `Audio.playSoundAt` reaches players in any world unless you give it a `virtualWorld`, a `map` (an [`areaId`](/guides/core-concepts/virtual-worlds/#worlds-and-maps)) or both; the one you leave out is world 0 or Overland. Then only players in that world of that map hear it, and a `range` of 0 reaches every one of them.
 
 ## Sounds that keep playing
 
@@ -48,14 +48,12 @@ On the server, `Audio.stopAllSounds()` stops every sound on every client, the ga
 
 A client's `Audio.playSoundAt(event, x, y, z, options)` plays a sound only its own player hears, from a point. `Audio.playSound(event, options)` plays one on the player's own character, at full volume. Both take `duration` and `stopEvent`, and return an id for `Audio.stopSound`, or 0 when the game refused the sound. `Audio.stopOnSelf()` stops everything playing on the player's character.
 
-This pair plays a sound for the players in one world only:
+This pair plays a sound from a point for the players you pick, such as one team:
 
 ```js
 // server/main.js
-function playInWorld(world, event, x, y, z) {
-  for (const player of PlayerManager.getAll()) {
-    if (player.virtualWorld === world) player.emit("sound:play", JSON.stringify({ event, x, y, z }));
-  }
+function playForTeam(team, event, x, y, z) {
+  for (const player of team) player.emit("sound:play", JSON.stringify({ event, x, y, z }));
 }
 ```
 

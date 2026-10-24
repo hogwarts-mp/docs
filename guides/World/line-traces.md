@@ -20,6 +20,8 @@ if (from) {
 
 `start` and `end` are world positions in centimetres. A trace returns the first hit, or `null` when the line hits nothing, including when it runs into an area the player's game has not loaded. A malformed argument throws.
 
+To see where a trace runs while you work on it, draw it with [Shapes](/guides/world/shapes/#debugging-a-line-trace).
+
 ## What it hits
 
 By default a trace stops where the game's visibility checks stop: the ground, buildings and objects, and players' bodies, where it also names the bone it hit. The options change that:

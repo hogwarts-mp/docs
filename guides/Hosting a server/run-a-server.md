@@ -8,7 +8,7 @@ sidebar:
 
 A HogwartsMP server is one executable plus a `server.json` configuration file and a `resources/` directory. The release ships the runtime only, with no game mode. Public servers run **HMP Foundations**, a complete resource pack that adds characters, inventory, banking, jobs, shops, administration and other common systems on top of a MySQL or MariaDB database.
 
-This guide takes a fresh machine to a server players can join, then covers keeping it running and updating it. It is for server owners. Players only need the [player guide](https://github.com/hogwarts-mp/hosting/blob/main/PLAYER_GUIDE.md).
+This guide takes a fresh machine to a server players can join, then covers keeping it running and updating it. It is for server owners. Players only need the [player guide](https://github.com/hogwarts-mp/hosting/blob/main/PLAYER_GUIDE.md) and their own PC copy of Hogwarts Legacy, from Steam or the Epic Games Store. A PC Game Pass copy also works, but its support is experimental.
 
 ## What you need
 

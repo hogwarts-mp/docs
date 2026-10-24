@@ -26,6 +26,7 @@ Out of the box nobody can hurt anybody. PvP starts when a script sets rules or p
 | `flagCombatLockSeconds` | 15 | How long after a hit, given or taken, a player who drops their flag stays flagged, and stays in a fight for [spell cooldowns](/guides/pvp/hits-and-defeat/#spell-cooldowns) |
 | `spawnProtectionSeconds` | 5 | How long a player killed in PvP cannot be hurt once they are back up; their own hit ends it |
 | `damageScale` | 1 | Multiplies every spell's [damage](/guides/pvp/hits-and-defeat/#damage) |
+| `moddedSpellCap` | 100 | The most a hit by a [modded spell](/guides/players/custom-spells/#modded-spells) can cost, before `damageScale` |
 | `cooldowns` | `"full"` | `"full"` gives spells their whole [cooldown](/guides/pvp/hits-and-defeat/#spell-cooldowns) in a PvP fight; `"fast"` keeps the game's out-of-combat recharge |
 
 ```js
