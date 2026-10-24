@@ -160,6 +160,7 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `playerHoldStrained` | `(player, owner, distanceCm)` | A held player continues reporting positions beyond the hold boundary |
 | `playerMoveEnded` | `(player, owner, reason)` | A `player.moveTo` or `player.follow` walk ends. See [Walking and seating players](/guides/players/walking-players/#when-a-walk-ends) |
 | `playerWandChanged` | `(player)` | The player's wand changes |
+| `playerSpellCast` | `(player, spell, cast)` | A player casts a [server-defined spell](/guides/players/custom-spells/#casting); `spell` is its id and `cast` its `aimYaw` and `wand` tip, as the caster's game reports them |
 | `playerGearChanged` | `(player)` | What the player wears changes |
 | `worldReady` | `(player)` | The player's world, pawn, and replication are ready |
 | `loadingFinished` | `(player)` | The player's load screen is dismissed after `worldReady` |
@@ -227,7 +228,7 @@ These events are delivered only inside the client runtime. Receiving a native cl
 | `resourceStop` | `(resourceName)` | A client JavaScript resource is about to stop |
 | `chatMessage` | `({ author, text, color })` | A chat message arrives from the server |
 | `chatSend` | `(text)` | The local player submits text through the chat overlay |
-| `spellCast` | `(spellPath)` | The local player casts a spell; the path identifies its spell record |
+| `spellCast` | `(spellPath)` | The local player casts a spell; the path identifies its spell record, or is the id of a [server-defined spell](/guides/players/custom-spells/#casting) |
 | `playerRegionChanged` | `(region)` | The local player enters a named region |
 | `creatorOpened` | `({})` | The character creator opens |
 | `creatorConfirmed` | `({ first, last })` | The character creator closes after confirmation |

@@ -109,6 +109,8 @@ A spell's lock is `Spell_` followed by the game's own name for it, which is not 
 
 `Spells.setLoadoutSlot(slot, spellName)` puts an open spell in one of the four slots of the current spell set, and `Spells.loadout()` reads a set back. `spellName` is the lock without `Spell_`, such as `"Expulso"` for Bombarda.
 
+A server can also define spells of its own, each with a lock of `Spell_` followed by its id. See [Custom spells](/guides/players/custom-spells/).
+
 ### Spell lessons
 
 `SpellLearning.start(spell)` plays the game's lesson for a spell, one of `SpellLearning.supportedSpells()`. When it ends, the client raises `spellLearningFinished` with a `status` of `"completed"`, `"cancelled"` or `"failed"`. A lesson does not unlock anything, so open the spell yourself when it completes:
@@ -121,6 +123,8 @@ Events.on("spellLearningFinished", (result) => {
 ```
 
 The server then adds the spell's lock to the player's policy.
+
+A resource can also add lessons of its own, from a stock lesson's look or a path it draws, with its own buttons and chaser. See [Lessons of your own](/guides/players/custom-spells/#lessons-of-your-own).
 
 ## Talents
 

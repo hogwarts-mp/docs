@@ -36,7 +36,7 @@ The server sets the damage of every hit itself, and ignores the attacker's game'
 | Crucio | 4 a second for 20 seconds |
 | Avada Kedavra | Lethal |
 
-Every other spell does no damage but still has its effect. `Pvp.setSpellDamage(spell, damage)` replaces a spell's price and `null` restores it. The price is then multiplied by the `damageScale` rule, the attacker's `player.damageGivenMultiplier` and the victim's `player.damageTakenMultiplier`, set with `setDamageGivenMultiplier` and `setDamageTakenMultiplier`. The Killing Curse stays lethal unless you set its price yourself.
+Every other spell of the game's does no damage but still has its effect. Spells the server defines and spells mods add are priced as [Custom spells](/guides/players/custom-spells/#spells-in-pvp) describes. `Pvp.setSpellDamage(spell, damage)` replaces a spell's price and `null` restores it. The price is then multiplied by the `damageScale` rule, the attacker's `player.damageGivenMultiplier` and the victim's `player.damageTakenMultiplier`, set with `setDamageGivenMultiplier` and `setDamageTakenMultiplier`. The Killing Curse stays lethal unless you set its price yourself.
 
 ## The policy hook
 
