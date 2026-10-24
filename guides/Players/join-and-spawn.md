@@ -66,7 +66,7 @@ Events.on("playerTeleportComplete", (player, requestId, status) => {
 
 The completion's `status` is 0 for success, 1 when a newer teleport replaced this one, 2 when the player's game could not teleport yet, 3 when they changed worlds first, 4 when the teleport failed and 5 when it timed out.
 
-A teleport stays within the map the player is in. Moving between maps takes a fast-travel point: `player.fastTravel(name)` takes one of the game's `FT_` destinations, such as `FT_CentralHogsmeade`, returns a request id, or 0 for a name it does not know, and reports through `playerFastTravelComplete`. Its `status` is 0 for success, 1 when superseded, 2 when the player's game could not travel yet, 3 when their game does not know the destination and 4 when it timed out.
+A teleport stays within the map the player is in. To move them to another map, a fast-travel point or a place the game builds from several maps, see [Travel between places](/guides/players/travel/).
 
 `player.location()` returns the map and region the player is in together with their position, or `null` until they reach a playable world and while they change worlds. `playerLocationChanged` fires whenever that changes. Both are reported by the player's client.
 

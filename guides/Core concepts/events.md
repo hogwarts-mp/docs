@@ -169,6 +169,7 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `playerAppearanceChanged` | `(player, look, revision)` | The server accepts a new look from the player's game or `player.setLook`; `look` is the checked [look](/guides/players/appearance/#the-look) and `revision` increases for the connection |
 | `playerTeleportComplete` | `(player, requestId, status, completion)` | A `player.teleport` request finishes; `completion` includes the normalized request, client-observed final transform, and ground-snap result |
 | `playerFastTravelComplete` | `(player, requestId, status)` | A `player.fastTravel` request finishes or times out |
+| `playerMapTravelComplete` | `(player, requestId, status, completion)` | A `player.travelToMap` or `player.travelToPlace` request finishes, once the player can play in the new map, or times out. See [Travel between places](/guides/players/travel/#loading-another-map) |
 | `npcDied` | `(npcId, enemyId, killerId, damagerIds)` | A server-spawned NPC dies; `killerId` is the last player to damage it, or `null`, and `damagerIds` every player who did. See [Fighting NPCs](/guides/pve/fighting-npcs/#damage-and-death) |
 | `npcDamaged` | `(npcId, attackerId, amount)` | A player reports damage to a server-spawned NPC |
 | `beastCared` | `(beast, player, kind)` | A player pets or feeds a beast; return `false` synchronously to refuse it |
