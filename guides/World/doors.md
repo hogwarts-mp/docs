@@ -116,28 +116,21 @@ Client scripts can change doors too, but only for their own player, and the serv
 - `Doors.superAlohomora(true)` lets every lock open to a key or Alohomora, whatever the player's Alohomora level, key-only locks included. Locks the server holds still refuse, and it is cleared on disconnect.
 - `Doors.held()` lists the door states the server holds, as this client received them.
 
-## With the doors resource
+## With Foundations
 
-The `doors` resource holds the doors listed under `held` in its `doors.config.js` for everyone while it runs, and releases them when it stops. The file exports one object, `module.exports = { … }`:
+HMP Foundations' [`hmp-doors`](https://github.com/hogwarts-mp/foundations/tree/main/resources/hmp-doors) decides which doors, gates and locks each player may pass, from ranked rules in its `data/hmp-doors.json`. A rule allows, denies or locks doors by name or path, can apply only to players in certain `hmp-core` groups, and can hold a padlock's `lockLevel` for everyone. Lower priorities are stronger. `shareUnlocks` turns shared unlocks on, and is `false` by default.
 
-```json5
+```json
 {
-  version: 1,
-  held: {
-    "BP_Door_BellTowers_EXT": { locked: false },
-    "BP_Door_Template4:AQsMCQ0PAAUKCgQEBAgADQ": { open: true },
-  },
-  rules: [{ priority: 1000, action: "allow", doors: "*" }],
+  "shareUnlocks": false,
+  "rules": [
+    { "priority": 1000, "action": "allow", "doors": "*" },
+    { "priority": 100, "action": "lock", "doors": ["BP_Door_Headmaster"], "lockLevel": 3 }
+  ]
 }
 ```
 
-| Command | Does |
-| --- | --- |
-| `/listdoors [radius]` | Lists the doors near you, with their names and ids, in the F8 console |
-| `/doorset <name\|id\|path> <locked\|unlocked\|open\|closed\|release>` | Holds a door's state for everyone. Needs the staff or admin role. |
-| `/doorsheld` | Lists every door state the server holds |
-
-The same resource handles gates with `heldGates`, `gates:` rules and its gate commands. See [Gates](/guides/world/gates/#with-the-doors-resource).
+That is a fragment of the file. Staff in its `adminGroups` manage it in game with `/doors`: `/doors list [radius]` lists the doors near you with their names and paths. Its README covers every rule, grant and command, and its gate rules are in [Gates](/guides/world/gates/#with-foundations).
 
 ## Where to go next
 

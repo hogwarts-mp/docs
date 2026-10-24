@@ -121,46 +121,34 @@ Each call replaces the policy before it and returns how many loaded gates it che
 
 Each field the server holds overrides the policy for that gate. A lock still beats an open, so a gate the policy locks stays shut while the server only holds it open. Hold it `{ locked: false, open: true }` to open it for everyone.
 
-## With the doors resource
+## With Foundations
 
-The `doors` resource handles gates beside doors. Its `doors.config.js` exports one object, `module.exports = { … }`, with keys like these:
+HMP Foundations' [`hmp-doors`](https://github.com/hogwarts-mp/foundations/tree/main/resources/hmp-doors) handles gates beside [doors](/guides/world/doors/#with-foundations). In its `data/hmp-doors.json`, a rule with `gates` in place of `doors` takes gate names or `"*"`, and ranks and matches groups like a door rule:
 
-```json5
+```json
 {
-  version: 1,
-  gateSchedule: "freeze",
-  heldGates: {
-    "BP_ZZS_TundraGate_2": { open: true },
-  },
-  rules: [
-    { priority: 1000, action: "allow", gates: "*", kind: "portcullis" },
-    { priority: 900, action: "allow", gates: "*", kind: "swingGate", open: true },
-    { priority: 500, action: "deny", gates: ["BP_HW_ClocktowerPortcullis_2", "BP_HW_ClocktowerPortcullis2", "BP_HW_ClocktowerPortcullis_LOD2"], lock: true },
-  ],
+  "gateSchedule": "freeze",
+  "heldGates": { "BP_ZZS_TundraGate_2": { "open": true } },
+  "rules": [
+    { "priority": 1000, "action": "allow", "gates": "*", "kind": "portcullis" },
+    { "priority": 500, "action": "lock", "gates": ["BP_HW_ClocktowerPortcullis_2", "BP_HW_ClocktowerPortcullis2", "BP_HW_ClocktowerPortcullis_LOD2"] }
+  ]
 }
 ```
 
-A `gates:` rule takes a list of names or `"*"` and follows the same priority and allow/deny rules as a `doors:` rule. An allow unlocks a gate and leaves it closed. Three modifiers apply to `gates:` rules only:
+- `allow` unlocks a gate and leaves it closed, and with `"open": true` opens it instead. `deny` withholds both.
+- `lock` closes and locks the gates it names. A kind without a lock is closed instead, until a player opens it their own way.
+- `kind` narrows a `"*"` rule to one kind or a list of them. Without it, `"*"` covers every kind.
+- `heldGates` holds gates for everyone through `Gates.set` while the resource runs, and releases what it held when it stops.
+- `gateSchedule` is `"local"` by default, which leaves the game's schedule running, or `"freeze"` to take every portcullis off the clock.
 
-- `kind` on a `"*"` rule limits it to one kind or an array of them. Without it, `"*"` covers every kind. A rule that names gates applies to them whatever their kind.
-- `open: true` on an allow opens the gate instead of only unlocking it.
-- `lock: true` on a deny closes and locks the gate, instead of only leaving it out of a wider allow.
-
-`heldGates` holds gates for everyone through `Gates.set` while the resource runs, and releases them when it stops. `gateSchedule` is `"freeze"` by default, which takes every portcullis off the clock, or `"local"` to leave the game's schedule alone.
-
-| Command | Does |
-| --- | --- |
-| `/listgates [radius]` | Lists the loaded gates, with their kind and state, in the F8 console |
-| `/gate <name\|path> [open\|close\|lock\|unlock]` | Changes one gate on your own client |
-| `/freezegates [name\|*]` | Takes portcullises off the clock on your own client |
-| `/gateset <name\|path> <locked\|unlocked\|open\|closed\|release>` | Holds a gate's state for everyone. Needs the staff or admin role. |
-| `/gatesheld` | Lists every gate state the server holds |
+Staff list the gates near them with `/doors gates [radius]`, hold one for everyone with `/doors gateset <locked|unlocked|open|closed|release> <name>`, and list what the server holds with `/doors gatesheld`.
 
 ## Things to watch for
 
 - **The Clocktower gate is three actors:** `BP_HW_ClocktowerPortcullis_2`, the one players walk through, plus the distant copies `BP_HW_ClocktowerPortcullis2` and `BP_HW_ClocktowerPortcullis_LOD2`. A rule or selector that names it must list all three, or use `"*"` with `kind: "portcullis"`.
 - **Scope wide opens with `kind`.** `openAll: true`, or an `open: true` rule on `"*"` without a `kind`, breaks every crawl grate and skips the rune gate's puzzle.
-- **Freeze portcullis schedules.** Most portcullises rise at 06:00 and lower at 20:00 on each player's own game clock, which the server's [shared clock](/guides/world/time-and-weather/#the-clock-and-calendar) does not drive, so two players can see the same gate in different places. Set `freezeSchedule: true` in the policy, or keep the doors resource's `gateSchedule: "freeze"`.
+- **Freeze portcullis schedules.** Most portcullises rise at 06:00 and lower at 20:00 on each player's own game clock, which the server's [shared clock](/guides/world/time-and-weather/#the-clock-and-calendar) does not drive, so two players can see the same gate in different places. Set `freezeSchedule: true` in the policy, or `hmp-doors`' `gateSchedule` to `"freeze"`.
 - **A gate a player opens their own way is not shared.** Solving the rune gate's puzzle, breaking a grate with a spell or opening a camp gate with Interact changes it in that player's game only, and the server is not told. Hold the gate open with `Gates.set` when everyone should find it open.
 
 ## Where to go next
