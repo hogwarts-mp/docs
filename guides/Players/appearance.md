@@ -1,6 +1,6 @@
 ---
 title: Appearance
-description: Save and restore how players look, open the character creator, change their clothes, house, size, disguise, animal form and what they hold, and choose whether players collide.
+description: Save and restore how players look, open the character creator, change their clothes, house, size, disguise, animal form and what they hold, fly a winged form, and choose whether players collide.
 sidebar:
   order: 330
 ---
@@ -150,11 +150,112 @@ Events.on("chatCommand", (player, message, command, args) => {
 
 `setAnimalForm` throws a `RangeError` for a species the catalog does not list, for the cat look on anything but a Kneazle, and for a size of 0 or less.
 
-The player is still themselves under the beast. They move at a human's pace, and their collision, camera, hitbox and nametag are fitted to the animal. Their own game does not let them cast spells, and other players see no wand or held prop. A species that flies in the game, one with `canFly` in the catalog, takes its flight poses whenever the player is more than 1.2 m above the ground, but the form does not lift them there.
+The player is still themselves under the beast. They move at a human's pace, and their collision, camera, hitbox and nametag are fitted to the animal. Their own game does not let them cast spells, and other players see no wand or held prop. A species that flies in the game, one with `canFly` in the catalog, takes its flight poses whenever the player is more than 1.2 m above the ground, but the form does not lift them there: see [Flying](#flying).
 
 `getAnimalForm()` returns the `species`, the `look`, the `size` worn and the `scale`: how large the player is against a human. That scale is held to `setScale`'s range of 0.1 to 10. A size that would take it further is cut back to fit, and `size` reads back the size worn. [`setScale`](#size) and `getScale` keep working on the human meanwhile: a size set during the form is the one the player comes back at.
 
 The form swaps the body at once, with no animation of its own. An animagus is yours to build around it: play the game's own human-to-cat clips with `LocalPlayer.playClip` and its morph effects before the swap, set `setDamageGivenMultiplier(0)` while a player is an animal if animals should not fight, leave a player who is down or riding as they are, and change players back when they die.
+
+### Flying
+
+A form gives a flier its poses, not flight. The game has no flight for a player on foot, so a client script flies the local player itself, the way a [scripted flight](/guides/players/walking-players/#landing-a-scripted-flight) does: it stops their controls, turns off their collision, and moves them a short step at a time, steered by the camera and the movement keys.
+
+Every game, the player's own included, watches the ground under each flier. One more than 1.2 m up takes off and flies, glides while it sinks, hovers when it slows and faces the way it moves, and it lands once it comes back within 40 cm of the ground. Only the player's position crosses the network, so anything that lifts a flier gives it the same poses: a script like this one, a teleport or a launch.
+
+The server checks that the form can fly and tells the player's client to take off or land:
+
+```js
+// server/main.js
+const flying = new Set();
+
+function setFlying(player, on) {
+  if (on) flying.add(player.id);
+  else flying.delete(player.id);
+  const size = player.getAnimalForm()?.size ?? 1;
+  player.emit("my-forms:fly", JSON.stringify({ on, speed: 900 * size }));
+}
+
+Events.on("chatCommand", (player, message, command) => {
+  if (command !== "fly") return;
+  const form = player.getAnimalForm();
+  if (!form || !Beast.catalog().some((beast) => beast.id === form.species && beast.canFly)) {
+    player.sendChat("Only a winged form can fly.");
+    return;
+  }
+  setFlying(player, !flying.has(player.id));
+});
+
+Events.on("playerDisconnect", (player) => flying.delete(player.id));
+```
+
+The client flies them. It sets the position on every step, even while hovering, because with collision off a player left alone falls through the ground:
+
+```js
+// client/main.js
+const STEP_MS = 16;
+const WALL_CM = 40;
+let flight = null;
+
+function groundBelow(at) {
+  const hit = World.lineTrace(at, { x: at.x, y: at.y, z: at.z - 20000 });
+  return hit && !hit.startPenetrating ? hit : null;
+}
+
+function step() {
+  const view = Camera.capture()?.rotation ?? LocalPlayer.getControlRotation();
+  if (!flight || !view) return;
+  const yaw = (view.yaw * Math.PI) / 180;
+  const pitch = ((((view.pitch + 180) % 360) - 180) * Math.PI) / 180;
+  const ahead = (Key.isDown("w") ? 1 : 0) - (Key.isDown("s") ? 1 : 0);
+  const side = (Key.isDown("d") ? 1 : 0) - (Key.isDown("a") ? 1 : 0);
+  const lift = (Key.isDown("space") ? 1 : 0) - (Key.isDown("ctrl") ? 1 : 0);
+  const wish = {
+    x: Math.cos(pitch) * Math.cos(yaw) * ahead - Math.sin(yaw) * side,
+    y: Math.cos(pitch) * Math.sin(yaw) * ahead + Math.cos(yaw) * side,
+    z: Math.sin(pitch) * ahead + lift,
+  };
+  const length = Math.hypot(wish.x, wish.y, wish.z);
+  const at = flight.at;
+  if (length > 0) {
+    const reach = (flight.speed * STEP_MS) / 1000;
+    const dir = { x: wish.x / length, y: wish.y / length, z: wish.z / length };
+    const to = { x: at.x + dir.x * reach, y: at.y + dir.y * reach, z: at.z + dir.z * reach };
+    // Nothing stops a player without collision, so the step stops short of whatever it would enter.
+    const wall = World.lineTrace(at, { x: to.x + dir.x * WALL_CM, y: to.y + dir.y * WALL_CM, z: to.z + dir.z * WALL_CM });
+    if (!wall || wall.startPenetrating) flight.at = to;
+  }
+  LocalPlayer.clearVelocity();
+  LocalPlayer.setPosition(flight.at.x, flight.at.y, flight.at.z);
+}
+
+function takeOff(speed) {
+  const at = LocalPlayer.getPosition();
+  if (flight || !at) return;
+  const ground = groundBelow(at);
+  flight = { at, speed, stand: ground ? at.z - ground.location.z : 50, timer: setInterval(step, STEP_MS) };
+  LocalPlayer.stopPlayerInput();
+  LocalPlayer.setCollision(false);
+}
+
+function land() {
+  if (!flight) return;
+  clearInterval(flight.timer);
+  const { at, stand } = flight;
+  flight = null;
+  const ground = groundBelow(at);
+  LocalPlayer.clearVelocity();
+  LocalPlayer.setPosition(at.x, at.y, ground ? ground.location.z + stand : at.z);
+  LocalPlayer.resetFall();
+  LocalPlayer.setCollision(true);
+  LocalPlayer.restorePlayerInput();
+}
+
+Events.on("my-forms:fly", (payload) => (payload.on ? takeOff(payload.speed) : land()));
+```
+
+`LocalPlayer.stopPlayerInput()` stops the hidden human from walking off on the movement keys, while the camera still turns and [`Key.isDown`](/guides/user-interface/keys-and-menus/#binding-keys) still reads them. `stand` is how far the player's middle sits above the ground at takeoff, so a landing puts any size of animal back on its feet, and `LocalPlayer.resetFall()` keeps the trip from [counting as one long fall](/guides/players/walking-players/#landing-a-scripted-flight). This flight drops straight to the ground when it lands. For a gentler landing, keep stepping down until the player is just above the ground, then land.
+
+Land a flier before turning them back, and when they die: call `setFlying(player, false)` before `player.setAnimalForm(null)`, or the client goes on flying a human.
 
 ## Holding props
 
