@@ -93,6 +93,7 @@ Use the navigation to browse the globals available to the selected environment. 
 **Camera and sound:**
 
 - [Camera](/guides/camera-and-sound/camera/) — taking over the view with shots, paths and orbits, mouse look, fades, and handing it back.
+- [Post-processing](/guides/camera-and-sound/post-processing/) — grading a player's view with photo-mode presets, settings and full-screen materials, faded in and out.
 - [Audio](/guides/camera-and-sound/audio/) — the game's sounds from the server or a client, soundbanks and music.
 - [Voice chat](/guides/camera-and-sound/voice-chat/) — who hears whom, voice ranges and tiers, muting, and each player's voice settings.
 

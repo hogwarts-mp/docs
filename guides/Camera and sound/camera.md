@@ -177,4 +177,5 @@ function cutTo(view) {
 ## Where to go next
 
 - [HUD, prompts and nametags](/guides/user-interface/hud-and-nametags/#hiding-the-hud) for hiding the HUD during a cutscene.
+- [Post-processing](/guides/camera-and-sound/post-processing/) for grading the view while it plays.
 - [Audio](/guides/camera-and-sound/audio/) for the sound that goes with it.
