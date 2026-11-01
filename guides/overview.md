@@ -35,7 +35,7 @@ Use the navigation to browse the globals available to the selected environment. 
 - [Chat and commands](/guides/players/chat-and-commands/) — sending chat, taking over the chat relay, and slash commands.
 - [Inventory](/guides/players/inventory/) — the server-owned inventory, atomic changes, saving inventories, and items the game hands out.
 - [Appearance](/guides/players/appearance/) — saving and restoring looks, the character creator, clothes, house, size, disguises, animal forms and flying them, props and player collision.
-- [Activities](/guides/players/activities/) — the game's own animated activities, such as flying a Magic Kite Battle kite, from the server or a client script.
+- [Activities](/guides/players/activities/) — the game's own animated activities, from flying a Magic Kite Battle kite to opening a Howler, from the server or a client script.
 - [Progression](/guides/players/progression/) — levels and experience, which spells players can cast, talents, and every talent in the game.
 - [Custom spells](/guides/players/custom-spells/) — spells of your own built on the game's, their casts, how PvP prices them and modded spells, and lessons of your own.
 
