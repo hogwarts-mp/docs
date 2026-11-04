@@ -1,6 +1,6 @@
 ---
 title: Travel between places
-description: Teleport within a map, fast travel to the game's own points, load any map, and reach places the game builds from several maps. Which call to use, and how each one reports back.
+description: Teleport within a map, fast travel to the game's own points, light Floo flames, load any map, and reach places the game builds from several maps. Which call to use, and how each one reports back.
 sidebar:
   order: 305
 ---
@@ -62,6 +62,33 @@ Events.on("playerFastTravelRequest", (player, request) => {
   if (request.destinationId === "FT_HW_RoomOfRequirement" && !hasRoomKey(player)) return false;
 });
 ```
+
+### Floo flames
+
+A player can pick a Floo flame on their map only once it is lit for them. Their game lights one as they find it, and every visit starts again from the flames the game lights for a new character. The server can light flames itself, and save the ones a player finds to light them again next time.
+
+| Call | What it does |
+| --- | --- |
+| `player.getFastTravelUnlocked()` | The flames lit on the player's map, by fast-travel id. Empty until their world first loads |
+| `player.setFastTravelUnlocked(ids, unlocked)` | Lights flames, given as one id or a list and matched case-insensitively. Pass `false` to dim them again |
+
+`setFastTravelUnlocked` returns how many Floo flames the ids named, each counted once. Only flames the map shows count: an id that names none, such as the fast-travel point `FT_CentralHogsmeade`, is ignored. The player's game applies the change once their world has loaded, and `getFastTravelUnlocked` reads it back at once. It lasts for the visit. Calling it with no argument, or with an id that is not a string, throws a `TypeError`. It also throws for a player who is not connected.
+
+`playerFastTravelUnlocked(player, unlock)` fires when the player's own game lights a flame, as finding it does, and `unlock.destinationId` is the flame's id. It does not fire for flames the server lights, nor for those already lit when the player's world loads. Save them from it, and light them again once the player has loaded:
+
+```js
+// server/main.js
+Events.on("playerFastTravelUnlocked", (player, unlock) => {
+  saveFlooFlame(player, unlock.destinationId);
+});
+
+Events.on("loadingFinished", async (player) => {
+  const flames = await loadFlooFlames(player);
+  if (flames.length > 0 && player.connected) player.setFastTravelUnlocked(flames);
+});
+```
+
+`saveFlooFlame` and `loadFlooFlames` stand for your own store. A lit flame is still a pick like any other: `playerFastTravelRequest` can refuse it, and `setFastTravelEnabled(false)` dims every flame whatever is lit. Both `getFastTravelUnlocked` and the event are the player's game's own report, like their position, so check a flame before you reward it.
 
 ## Loading another map
 
