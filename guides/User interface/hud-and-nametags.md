@@ -30,7 +30,7 @@ A hidden group is held by the mod, not by your resource: `showGroup` from any re
 
 ## Interaction prompts
 
-`Hud.showPrompt(key, label, x, y, z)` floats a `[key] label` prompt at a world position, in centimetres. It follows that point on screen and hides while the point is off screen. There is one prompt per client, so showing another replaces it, and `Hud.hidePrompt()` takes it away.
+`Hud.showPrompt(key, label, x, y, z)` floats a `[key] label` prompt at a world position, in centimetres. It follows that point on screen and hides while the point is off screen. There is one prompt per client, so showing another replaces it, and `Hud.hidePrompt()` takes it away. Other text at a place in the world, or text several players should see, is a [text label](/guides/world/text-labels/).
 
 The prompt only shows text. Pair it with a [key binding](/guides/user-interface/keys-and-menus/#binding-keys), and use `Key.getLabel` so the key it names matches the player's keyboard layout:
 
@@ -106,6 +106,8 @@ Events.on("emote", (payload) => {
 
 `Nametags.clearLabel(entityId)` removes a label early, and `Nametags.clearLabels()` removes all of them.
 
+For text that every nearby player sees without a client script, over a player, an NPC or a place, in a look of your own, the server can create a [text label](/guides/world/text-labels/) instead.
+
 ## Notices
 
 `Game.notify(text)` shows a line in the local chat, seen only by this player. From the server, [`player.sendChat`](/guides/players/chat-and-commands/#sending-chat) does the same for one player.
@@ -114,3 +116,4 @@ Events.on("emote", (payload) => {
 
 - [Keys and menus](/guides/user-interface/keys-and-menus/) for key bindings and the game's own menus.
 - [Web views](/guides/user-interface/web-views/) for drawing interfaces of your own in HTML.
+- [Text labels](/guides/world/text-labels/) for text the server floats in the world for every nearby player.
