@@ -1,6 +1,6 @@
 ---
 title: Camera
-description: Take over the player's view with a camera of your own, move it in shots, paths and orbits, steer it with the mouse, fade the screen, and hand the view back.
+description: Take over the player's view with a camera of your own, move it in shots, paths and orbits, steer it with the mouse, fade the screen, and hand the view back, or move the game's own camera back and free it on a broom.
 sidebar:
   order: 700
 ---
@@ -8,6 +8,8 @@ sidebar:
 Each client has one custom camera that client scripts drive with the `Camera` global. While it is active, the player sees through it instead of the game's own camera, and `Camera.restore()` hands the view back. Positions are world centimetres, rotations are degrees and durations are seconds.
 
 The camera only changes what the player sees. Their character still answers their input, so stop it with `LocalPlayer.stopPlayerInput()` for a cutscene, and hand it back with `LocalPlayer.restorePlayerInput()`.
+
+A few calls change the game's own camera instead, the one the player sees through the rest of the time; see [The game's own camera](#the-games-own-camera).
 
 ## Taking over the view
 
@@ -173,6 +175,29 @@ function cutTo(view) {
 ## Shakes and other effects
 
 `Camera.playShake(classPath, { scale, space })` plays one of the game's camera shakes by its full class path, and `Camera.stopShakes()` stops them. `Camera.playAnimation`, `Camera.addLensEffect` and `Camera.addModifier` do the same for the game's camera animations, lens effects and modifiers. A modifier cannot be removed again.
+
+## The game's own camera
+
+These calls change the game's third-person camera, not your custom one. Like the custom camera, they belong to the client rather than to your resource, so what you set stays when your resource stops: set it back yourself as it stops. It also lasts through respawns and travel.
+
+### Distance
+
+`Camera.setDistanceScale(scale)` moves the camera back from the player, or in towards them, as a factor on its usual distance: 2 is twice as far back, 0.5 half as far. It is held between 0.5 and 4 and returns the factor it kept, and a scale of 0 or less throws. The camera eases to the new distance, and walls still pull it in. `Camera.getDistanceScale()` reads the factor back, and 1 restores the game's distance.
+
+It changes the camera the player walks and runs with. Aiming, combat and riding keep the game's own distances.
+
+```js
+// client/main.js
+// A wider view while the player stands on the lookout.
+Events.on("lookout:enter", () => Camera.setDistanceScale(2.5));
+Events.on("lookout:leave", () => Camera.setDistanceScale(1));
+```
+
+A player in an [animal form](/guides/players/appearance/#animal-forms) larger than a human has their camera moved back for its size without any script, the way the game frames a graphorn when a player rides one. Your factor multiplies the form's, and `getDistanceScale()` reads only yours.
+
+### On a broom
+
+On a broom the game's camera follows the broom's pitch, ignores the mouse moving up and down, and shows no crosshair. `Camera.setBroomFreeLook(true)` lets the player look up and down while riding, and `Camera.setBroomCrosshair(true)` marks the centre of the view. Both are off by default; [Aiming from a broom](/guides/mounts-and-races/brooms-and-mounts/#aiming-from-a-broom) covers them and casting at the crosshair.
 
 ## Where to go next
 
