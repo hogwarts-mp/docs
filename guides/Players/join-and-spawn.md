@@ -1,6 +1,6 @@
 ---
 title: Join and spawn
-description: Admit or turn away joining players, the events a join raises, putting players where you want them, deaths and respawns, and leaving.
+description: Admit or turn away joining players, with tickets from your own join links, the events a join raises, putting players where you want them, deaths and respawns, and leaving.
 sidebar:
   order: 300
 ---
@@ -37,6 +37,21 @@ Events.on("playerConnecting", async (connection) => {
 ```
 
 `connection.nickname` and the platform identifiers are what the client announced, so check a ticket instead when it matters who someone is. See [Knowing who a player is](/guides/core-concepts/authority/#knowing-who-a-player-is).
+
+### Join links and tickets
+
+A `hogwartsmp://` link starts the game and joins the server it names (see [Join it](/guides/hosting-a-server/run-a-server/#7-join-it)). Besides `password` and `nickname`, a link can carry a `ticket`, such as one your website issues on its Join button:
+
+```text
+hogwartsmp://play.example.com?ticket=k7Hq2xR9vT4mWb8c
+```
+
+The client passes the ticket on untouched, and `playerConnecting` reads it as `connection.ticket` before the player takes a slot. Without one, `connection.ticket` is an empty string.
+
+- Percent-encode the ticket with `encodeURIComponent`. A bare `+` arrives as a space. A `%` without two hex digits, `..`, a double quote, a backslash or a path after the port makes the game ignore the whole link, which must be at most 2048 characters long.
+- One join can present the same ticket twice: when the game restarts to install the server's [required mods](/guides/hosting-a-server/configuration/#required-curseforge-mods), and when the player presses **Try again** on the join dialog. Accept a repeat for a short while, for example from the same `connection.hardwareId`, rather than refusing every second use.
+- A ticket only reaches the server its link names. Joining another server from the list sends an empty ticket.
+- It is not encrypted on the wire, like the password, so keep tickets short-lived.
 
 ## Putting players in place
 
@@ -104,7 +119,7 @@ Events.on("playerTeleportComplete", (player, requestId, status) => {
 | Option | Meaning |
 | --- | --- |
 | `yaw` | The heading to face, in degrees. Omitted, the player keeps theirs. |
-| `snapToGround` | Let the game drop the player onto the ground below the point. |
+| `snapToGround` | Let the game drop the player onto the ground below the point. A player on foot is held where they land until the floor under them has loaded, for up to 20 seconds, so they do not fall through ground that is still loading. |
 | `groundSnapDistance` | How far down to search for ground, in centimetres: 2000 by default, at most 100000. |
 
 The completion's `status` is 0 for success, 1 when a newer teleport replaced this one, 2 when the player's game could not teleport yet, 3 when they changed worlds first, 4 when the teleport failed and 5 when it timed out.
