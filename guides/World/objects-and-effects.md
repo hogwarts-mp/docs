@@ -114,9 +114,32 @@ Fx.create("camp-fire", campfire, { x, y, z });
 Fx.create("spawn-flash", flashPath, { x, y, z, scale: 2, ttl: 5 });
 ```
 
-`Fx.create(key, path, options)` takes a Niagara or Cascade system asset path and throws for a malformed one. Its options are a position, a rotation in degrees (`pitch`, `yaw`, `roll`), a `scale` and a `ttl`: the number of seconds before the server removes the effect on its own. Without a `ttl`, an effect lasts until you remove it with `Fx.destroy(key)` or `effect.destroy()`.
+`Fx.create(key, path, options)` takes a Niagara or Cascade system asset path and throws for a malformed one. Its options are a position, a rotation in degrees (`pitch`, `yaw`, `roll`), a `scale`, a `ttl`, and a [`streamRange` and `drawDistance`](#stream-range-and-draw-distance). The `ttl` is the number of seconds before the server removes the effect on its own. Without a `ttl`, an effect lasts until you remove it with `Fx.destroy(key)` or `effect.destroy()`.
 
 `Fx.catalog()` lists effects known to work, each with a category such as fire, explosions, smoke, weather, water, ambient or magic, a name and its path. It is a starting point rather than a limit: any well-formed effect path spawns. `FxManager.getAll()` lists every live effect.
+
+### Stream range and draw distance
+
+`streamRange` and `drawDistance` work as they do for [world objects](#world-objects), in centimetres:
+
+| Option | Meaning |
+| --- | --- |
+| `streamRange` | How close a player must be to receive the effect: 50000 (500 m) by default, from 100 to 200000 |
+| `drawDistance` | How far away players who have the effect still draw it. 0 draws it at any distance. Without it, the effect keeps the game's own culling for that system |
+
+`effect.streamRange` and `effect.drawDistance` read and change them later. A `streamRange` out of range is clamped, and a negative `drawDistance` goes back to the default, which reads back as -1.
+
+A set `drawDistance` also takes a Niagara effect out of the game's scalability culling, which would otherwise cut it off sooner, so it keeps running while out of view. Give one to a few landmark effects, such as a beacon seen across the valley, not to hundreds. The game only applies this as the effect starts, so changing `drawDistance` between the default and a set distance restarts the effect on players' screens.
+
+This lights a beacon that reaches players 1.5 km away and draws at any distance, and a hearth that is only sent to players within 30 m:
+
+```js
+// server/main.js
+const campfire = "/Game/VFX/Niagara/Basic/Fire/TorchFires/VFX_NS_Fire_Uni_Campfire_Low.VFX_NS_Fire_Uni_Campfire_Low";
+
+Fx.create("tower-beacon", campfire, { x, y, z, scale: 4, streamRange: 150000, drawDistance: 0 });
+Fx.create("hearth", campfire, { x, y, z, streamRange: 3000 });
+```
 
 ### Attaching effects
 
@@ -145,5 +168,6 @@ Like other entities they start in [virtual world](/guides/core-concepts/virtual-
 
 ## Where to go next
 
+- [Text labels](/guides/world/text-labels/) for text floating over a place or an entity.
 - [Loot](/guides/world/loot/) for chests, moonstone deposits and foragables players can take items from.
 - [Doors](/guides/world/doors/) for locking and opening the game's own doors.
