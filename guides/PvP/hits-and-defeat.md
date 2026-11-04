@@ -1,6 +1,6 @@
 ---
 title: Hits and defeat
-description: How a spell hit between players lands, what the server checks, how much it costs, how to change hits with a policy, what losing a fight does, and how spell cooldowns work in a fight.
+description: How a spell hit between players lands, what the server checks, how much it costs, how to change hits with a policy, what losing a fight does, and how spell cooldowns work in a fight and read on the client.
 sidebar:
   order: 475
 ---
@@ -138,6 +138,44 @@ Pvp.configure({ cooldowns: "fast" });
 ```
 
 Each player's own game runs their cooldowns, so a changed game can ignore them. What the server limits is hits: 12 a second from any one attacker.
+
+### Reading cooldowns on the client
+
+`Spells.cooldowns()` lists the local player's spells that are cooling down, as the game counts them, with every reduction, reset and fight rule already applied. Spells whose cast set no cooldown are not in it. Each entry has:
+
+| Field | Meaning |
+| --- | --- |
+| `spell` | The spell's name, as `Spells.loadout()` names it, such as `"Confringo"` |
+| `remaining` | Seconds left, at the rate the game drains it now |
+| `total` | The whole cooldown in seconds at that same rate; `remaining / total` is the fill the game's own spell bar draws |
+| `paused` | Whether the game holds it rather than draining it; `remaining` is then what will be left when it resumes |
+
+Out of a fight most cooldowns drain about 30 times faster, as the table above shows, so a fight that starts while a spell cools down makes its seconds left jump up.
+
+`spellCooldownChanged(spell, cooldown)` fires on the client when a spell goes on cooldown, when it comes off, with `cooldown` as `null`, and when it moves other than by counting down: a reduction, a pause, or a change of rate as the player enters or leaves combat. Counting down from the last event stays within a quarter of a second of the game's own count. The event only reports changes, so read `Spells.cooldowns()` as your script starts:
+
+```js
+// client/main.js
+// The cooldowns as last reported, to count down from without polling.
+const cooldowns = new Map(); // spell -> { cooldown, at }
+
+for (const cooldown of Spells.cooldowns()) cooldowns.set(cooldown.spell, { cooldown, at: Date.now() });
+
+Events.on("spellCooldownChanged", (spell, cooldown) => {
+  if (cooldown) cooldowns.set(spell, { cooldown, at: Date.now() });
+  else cooldowns.delete(spell);
+});
+
+// Seconds until a spell can be cast again, for a spell bar of your own.
+function secondsLeft(spell) {
+  const entry = cooldowns.get(spell);
+  if (!entry) return 0;
+  if (entry.cooldown.paused) return entry.cooldown.remaining;
+  return Math.max(0, entry.cooldown.remaining - (Date.now() - entry.at) / 1000);
+}
+```
+
+[Keys and menus](/guides/user-interface/keys-and-menus/#the-players-spells) covers following the player's spell sets and casts.
 
 ## Where to go next
 
