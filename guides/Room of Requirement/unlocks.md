@@ -35,7 +35,7 @@ const ROOM_LOCKS = [
 
 const ALL_OPEN = Object.fromEntries(ROOM_LOCKS.map((lock) => [lock, true]));
 
-Sanctuary.load("great-room", { version: 1, objects: [], locks: ALL_OPEN, lighting: "Default" });
+Sanctuary.load("great-room", { version: 1, objects: [], locks: ALL_OPEN, lighting: "Default", beasts: [] });
 ```
 
 The locks belong to the server. A player with edit rights can decorate a room but not open or close its parts, so the `locks` that `Sanctuary.get(id)` returns are always the ones you loaded, and they are saved with the rest of the layout.
