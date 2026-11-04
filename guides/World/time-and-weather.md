@@ -1,11 +1,11 @@
 ---
 title: Time and weather
-description: Set the shared clock, calendar, season and weather every player sees, change how fast time passes, and pin holiday decor, the Headmaster's office and the meals in the Great Hall.
+description: Set the shared clock, calendar, season and weather every player sees, change how fast time passes, pin holiday decor, the Headmaster's office and the Great Hall's meals and banners, and give one player a sky of their own.
 sidebar:
   order: 500
 ---
 
-The server owns one world state that every client follows: the clock, the calendar, the season, the weather, holiday decor, the Headmaster's office and the meals on the tables. Each player's game shows what the server sets, so everyone sees the same sky.
+The server owns one world state that every client follows: the clock, the calendar, the season, the weather, holiday decor, the Headmaster's office, the meals on the tables and the banners in the Great Hall. Each player's game shows what the server sets, so everyone sees the same sky, unless a client script [overrides it](#on-the-client) for its own player.
 
 ## The clock and calendar
 
@@ -92,11 +92,61 @@ function endFeast() {
 
 A meal you set holds through mealtimes. Any other value returns `false`.
 
+## The Great Hall's banners
+
+`World.setGreatHallBanners(banners)` hangs one house's banners at the head of the Great Hall for every player, and `World.greatHallBanners` reads it back:
+
+| Value | Effect |
+| --- | --- |
+| `"Gryffindor"`, `"Hufflepuff"`, `"Ravenclaw"`, `"Slytherin"` | Hangs that house's banners. The house name is matched in any case. |
+| `"none"` | Takes them down |
+| `"game"` (the default) | Stops pinning and leaves them to the story, which never hangs a house's |
+
+A change unfurls the new house's banners in place, with the game's own reveal. Every client re-applies the setting whenever its world loads or a mission changes the banners, and going back to `"game"` leaves them as they are until a mission changes them. Any other value returns `false`. The game removes the banners for good once a player's save has completed the story mission `FGB_01`.
+
+```js
+// server/main.js
+Events.on("housePointsChange", (house, points, previous) => {
+  // The first house to reach 500 points wins the cup.
+  if (previous < 500 && points >= 500 && World.greatHallBanners === "game") {
+    World.setGreatHallBanners(house);
+    Chat.sendToAll(`${house} wins the House Cup!`);
+  }
+});
+```
+
 ## Reacting to changes
 
 `World.revision` increases whenever the world state changes, for a resource that wants to notice another resource's changes. The setters change the state at once, and players' games follow within moments.
 
+## On the client
+
+A client script can show its own player a different sky from everyone else's, such as clear daylight while the character creator is open. `World.setLocalOverride(override)` lays its fields over the server's, on this client only:
+
+| Field | Shows |
+| --- | --- |
+| `weather` | A weather preset, as `World.setWeather` takes on the server |
+| `hour`, `minute` | A time of day, `hour` from 0 to 23 and `minute` from 0 to 59. This client's clock stops there. `minute` needs `hour`, and is 0 when you leave it out. |
+| `season` | 0 for spring to 3 for winter, as `World.setSeason` takes |
+
+```js
+// client/main.js
+Events.on("creatorOpened", () => {
+  World.setLocalOverride({ weather: "Clear", hour: 12, season: 1 });
+});
+
+Events.on("creatorConfirmed", () => World.clearLocalOverride());
+Events.on("creatorCancelled", () => World.clearLocalOverride());
+```
+
+Fields you leave out follow the server, and the date always does. Setting or clearing the override shows at once, without the game's usual blend from one weather to the next. A field of the wrong type or out of range throws a `TypeError`, and an empty object clears the override.
+
+- A client has one override, not one per resource: each call replaces the last, whichever resource made it.
+- It lasts until `World.clearLocalOverride()`, or until the resource that set it stops.
+- `World.localOverride()` returns it, with the resource that set it as `owner`, or `null` while the server's sky shows.
+- The server and other players are not told. Their clock, season and weather stay as the server set them.
+
 ## Where to go next
 
 - [State bags](/guides/core-concepts/state-bags/#world-state) for your own server-wide values, on `World.state`.
-- [Loot](/guides/world/loot/) for switching off the game's own loot with `World.suppressLoot`.
+- [Loot](/guides/world/loot/) for switching off the game's own loot, or running its moonstone deposits and foragables from the server.
