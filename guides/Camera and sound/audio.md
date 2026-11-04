@@ -1,6 +1,6 @@
 ---
 title: Audio
-description: Play the game's sounds at a place, on a player or for one player, stop sounds that keep playing, load soundbanks and change the music, from the server or a client.
+description: Play the game's sounds at a place, on a player or for one player, stop sounds that keep playing, load soundbanks, change the music and mute the game's own dialogue, from the server or a client.
 sidebar:
   order: 710
 ---
@@ -77,6 +77,60 @@ Wwise keeps events in soundbanks, and the game loads its banks as players move a
 `Audio.setState(group, state)` and `Audio.setRTPC(name, value)` set Wwise states and parameters for the whole sound engine, mostly useful with soundbanks of your own.
 
 Music, states, parameters and loaded banks are sent from the server once, to the players connected at the time, so set them again for players who join later.
+
+## The game's own dialogue
+
+Everyone the game voices keeps talking in multiplayer: each player's character calls out its spells and remarks on what it finds, enemies taunt, townsfolk chatter, and the Floo Network's announcer names every stop. `Audio.setDialoguePolicy(policy)` on the server mutes those lines, by who says them:
+
+| Speaker | Who |
+| --- | --- |
+| `player` | The player's own character, as their own client plays it: spell incantations, remarks while riding and exploring, and grunts |
+| `players` | Other players' characters, which speak in a stand-in student voice |
+| `npcs` | [NPCs](/guides/npcs-and-creatures/npcs/) from `NPC.create`: taunts, callouts and combat grunts |
+| `characters` | [Characters](/guides/npcs-and-creatures/beasts-and-characters/#characters) from `Character.create` |
+| `world` | The game's own people, such as townsfolk, students, vendors, ghosts and portraits, and lines the game plays at a spot rather than on someone |
+| `floo` | Ignatia Wildsmith, the Floo Network's announcer |
+
+Each speaker takes `true` for every line, the default, `"nonverbal"` for only grunts, breaths, laughs and gasps, or `false` for none. Speakers you leave out keep their setting. An unknown speaker or value changes nothing, and the call returns `false`.
+
+```js
+// server/main.js
+// No townsfolk chatter or Floo announcer, and players keep only their grunts.
+Audio.setDialoguePolicy({ world: false, floo: false, player: "nonverbal", players: "nonverbal" });
+```
+
+A muted line never starts: no sound, no subtitle and no lip movement.
+
+There is one policy for the whole server, and every client applies it, players who join later included; it cannot differ from one player to another. It belongs to the server, not to your resource, so it stays when your resource stops. `Audio.dialoguePolicy` reads it back with every speaker filled in, on the server and, as the client applies it, in a client script.
+
+### Replacing a line
+
+Each client raises `dialogueMuted` on the next frame for every line the policy kept from starting, so a client script can play a sound of its own in its place. The line comes as a `DialogueLine`:
+
+| Field | Meaning |
+| --- | --- |
+| `speaker` | Who says it, as the policy names them |
+| `networkId` | The speaking player, NPC or Character; 0 for the game's own people and the Floo announcer |
+| `voice` | The voice it is recorded in, such as `"PlayerMale"` |
+| `line` | The game's line id, such as `"PlayerMale_00414"` |
+| `event` | The game's dialogue event, such as `"VO_Spell"` or `"emote_effort_jump_short"` |
+| `nonverbal` | Whether it is a grunt, breath, laugh or gasp |
+| `position` | Where it would have played, on the speaker or at its spot, or `null` |
+
+The replacement is yours to provide: an event the game ships, or one from a [soundbank](#soundbanks) of your own.
+
+```js
+// client/main.js
+// The server mutes player speech; a voice pack of our own speaks in its place.
+const replacements = new Map([["PlayerMale_00414", "MyPack_Protego"]]);
+
+Events.on("dialogueMuted", (line) => {
+  const event = replacements.get(line.line);
+  if (!event) return;
+  if (line.speaker === "player") Audio.playSound(event);
+  else if (line.position) Audio.playSoundAt(event, line.position.x, line.position.y, line.position.z);
+});
+```
 
 ## The player's volume
 
