@@ -60,7 +60,7 @@ An NPC's multipliers carry over hand-offs and travel. A player's last until they
 ```js
 // server/main.js
 // An escort nobody can hurt, whose quest fails if it dies some other way.
-const escort = NPC.create("Goblin_Grunt", x, y, z, "friendly");
+const escort = NPC.create("Goblin_Grunt", { x, y, z, disposition: "friendly" });
 escort?.setDamageTakenMultiplier(0);
 escort?.setMaxHealth(4000);
 ```
@@ -76,4 +76,5 @@ Bosses keep the game's health phases. A troll such as `Troll_Crate` stops taking
 ## Where to go next
 
 - [Rewards and loot](/guides/pve/rewards-and-loot/) for what an NPC's death pays.
+- [Combat arenas](/guides/pve/arenas/) for waves of server NPCs that players fight together.
 - [NPCs](/guides/npcs-and-creatures/npcs/) for spawning NPCs and switching their behaviour off.

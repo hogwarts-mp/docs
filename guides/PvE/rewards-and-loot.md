@@ -1,6 +1,6 @@
 ---
 title: Rewards and loot
-description: Decide what an NPC's death pays and to whom, with reward policies for one NPC, for camps, for world events and for every NPC.
+description: Decide what an NPC's death pays and to whom, with reward policies for one NPC, for camps, for world events, for combat arenas and for every NPC.
 sidebar:
   order: 435
 ---
@@ -35,18 +35,19 @@ A malformed policy throws, and so does an item id the game does not know.
 
 ## Which policy applies
 
-An NPC's own policy wins. Then, for a camp's enemies, that camp's policy and the policy for every camp; for a world event's, the world events' policy. Last comes `NPC.setDefaultRewardPolicy`, and the fields none of them set keep their defaults.
+An NPC's own policy wins. Then, for a camp's enemies, that camp's policy and the policy for every camp; for a world event's, the world events' policy; for a combat arena's, the arenas' policy. Last comes `NPC.setDefaultRewardPolicy`, and the fields none of them set keep their defaults.
 
 | Call | Sets |
 | --- | --- |
 | `npc.setRewardPolicy(policy)` | One NPC's policy; `npc.getRewardPolicy()` reads it back |
 | `Camps.setRewardPolicy(policy, campId)` | One [camp](/guides/encounters/camps/#what-camps-pay)'s, or every camp's without `campId` |
 | `WorldEvents.setRewardPolicy(policy)` | Every [world event](/guides/encounters/world-events/#what-world-events-pay)'s |
+| `Arenas.setRewardPolicy(policy)` | Every [combat arena](/guides/pve/arenas/#what-arenas-pay)'s |
 | `NPC.setDefaultRewardPolicy(policy)` | Every NPC's |
 
-`setRewardPolicy` replaces a policy rather than merging into it: setting `{ experience: 5 }` on an NPC drops loot you set on it before. `null` clears one. A camp policy is written into each of its NPCs, so setting a camp's policy afterwards replaces one you set on its NPCs directly.
+`setRewardPolicy` replaces a policy rather than merging into it: setting `{ experience: 5 }` on an NPC drops loot you set on it before. `null` clears one. A camp or arena policy is written into each of its NPCs, so setting it afterwards replaces one you set on its NPCs directly.
 
-The policies for camps, world events and every NPC belong to the server, not your resource, and stay when it stops.
+The policies for camps, world events, arenas and every NPC belong to the server, not your resource, and stay when it stops.
 
 ## When and how it pays
 
@@ -60,7 +61,7 @@ A death from `npc.kill()` pays nobody. An NPC finished off by its owner at low h
 ```js
 // server/main.js
 // A boss that pays everyone who was there.
-const boss = NPC.create("Troll_Crate", x, y, z, "hostile");
+const boss = NPC.create("Troll_Crate", { x, y, z });
 boss?.setRewardPolicy({
   recipients: "nearby",
   radius: 5000,
@@ -73,4 +74,5 @@ boss?.setRewardPolicy({
 ## Where to go next
 
 - [Fighting NPCs](/guides/pve/fighting-npcs/) for who counts as a killer and a damager.
+- [Combat arenas](/guides/pve/arenas/#what-arenas-pay) for what arena enemies pay, and rewarding a finished arena.
 - [Loot](/guides/world/loot/) for lootables of your own.
