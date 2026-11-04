@@ -15,11 +15,13 @@ A layout's `locks` map holds every part of the room that can be closed, as the g
 | --- | --- |
 | `Nurture_SancExpansion01`, `Nurture_SancExpansion02`, `Nurture_SancExpansion03` | The room's three expansions |
 | `DEV_Nurture_SancExpansion03Available` | The third expansion's availability flag: open it together with `Nurture_SancExpansion03` |
-| `Nurture_BiomeUnlock_Forest`, `Nurture_BiomeUnlock_Grasslands`, `Nurture_BiomeUnlock_Coastal`, `Nurture_BiomeUnlock_Swamp` | The four vivarium biomes |
+| `Nurture_BiomeUnlock_Forest`, `Nurture_BiomeUnlock_Grasslands`, `Nurture_BiomeUnlock_Coastal`, `Nurture_BiomeUnlock_Swamp` | The four vivarium biomes, where the room keeps its [beasts](/guides/room-of-requirement/vivariums/) |
 | `Nurture_SancInitialDressing01` to `Nurture_SancInitialDressing04` | The room's starting dressing. The game opens `01` from the start |
 | `SanctuaryLightingAvailable` | The choice of lighting styles |
 
-`true` opens a part and `false` closes it. List all thirteen in every layout you load: a lock left out keeps whatever the player's game had from the last room they were in. A room with everything open:
+`true` opens a part and `false` closes it. Opening an expansion or a biome also takes away the walls and alcoves that close it off, as the game's unlock scene does in single player. Each player's game does this as it builds the room, whatever the layout holds for those pieces.
+
+List all thirteen locks in every layout you load: a lock left out keeps whatever the player's game had from the last room they were in. A room with everything open:
 
 ```js
 // server/main.js
@@ -35,7 +37,7 @@ const ROOM_LOCKS = [
 
 const ALL_OPEN = Object.fromEntries(ROOM_LOCKS.map((lock) => [lock, true]));
 
-Sanctuary.load("great-room", { version: 1, objects: [], locks: ALL_OPEN, lighting: "Default", beasts: [] });
+Sanctuary.load("great-room", { version: 2, objects: [], locks: ALL_OPEN, lighting: "Default", beasts: [] });
 ```
 
 The locks belong to the server. A player with edit rights can decorate a room but not open or close its parts, so the `locks` that `Sanctuary.get(id)` returns are always the ones you loaded, and they are saved with the rest of the layout.
@@ -407,4 +409,5 @@ Every conjuration lock in the game, for `RECIPE_LOCKS`:
 
 - [Rooms](/guides/room-of-requirement/rooms/) for loading, decorating and saving rooms.
 - [Doors and visits](/guides/room-of-requirement/doors-and-visits/) for getting players in and out of rooms.
+- [Vivarium beasts](/guides/room-of-requirement/vivariums/) for the beasts that live in the vivariums, and the feeders and breeding pens players conjure for them.
 - [Inventory](/guides/players/inventory/) for giving players moonstones and other materials.
