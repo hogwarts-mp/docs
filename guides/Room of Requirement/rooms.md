@@ -15,7 +15,7 @@ Nobody owns a room unless your script says so. "Every player has a room of their
 
 ```js
 // server/main.js
-const EMPTY_ROOM = { version: 1, objects: [], locks: {}, lighting: "" };
+const EMPTY_ROOM = { version: 1, objects: [], locks: {}, lighting: "", beasts: [] };
 
 function roomOf(player) {
   return `room:${player.id}`;
