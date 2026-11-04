@@ -53,7 +53,7 @@ let nextRun = 1;
 function startRun(party, guardSpots) {
   const run = nextRun++;
   for (const spot of guardSpots) {
-    const guard = NPC.create("Goblin_Grunt", spot.x, spot.y, spot.z, "hostile");
+    const guard = NPC.create("Goblin_Grunt", { x: spot.x, y: spot.y, z: spot.z });
     guard?.setVirtualWorld(run, DUNGEON);
   }
   for (const player of party) {
