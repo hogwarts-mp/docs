@@ -1,11 +1,11 @@
 ---
 title: Keys and menus
-description: Bind keyboard and mouse keys, lock the game's controls while players use your interface, and keep the game's own menus closed so your resource can replace them.
+description: Bind keyboard and mouse keys, lock the game's controls or single moves while players use your interface, keep the game's own menus closed so your resource can replace them, and follow the player's spell sets.
 sidebar:
   order: 630
 ---
 
-Client scripts can listen for keys of their own, take the game's controls away while players use an interface, and keep the game's own menus from opening so the keys behind them can open yours.
+Client scripts can listen for keys of their own, take the game's controls away while players use an interface, keep the game's own menus from opening so the keys behind them can open yours, and follow what the player does with their spells.
 
 ## Binding keys
 
@@ -46,22 +46,43 @@ A focused web view locks the controls and shows the cursor by itself while it ha
 
 To stop the character without showing the cursor, as in a cutscene, use `LocalPlayer.stopPlayerInput()`. Movement, casting and the other controls stop, while the camera still turns. `LocalPlayer.restorePlayerInput()` hands them back. Each resource holds input once, however often it calls `stopPlayerInput`, and input stays stopped while anything holds it, another resource or a server [walk](/guides/players/walking-players/#input-during-a-walk) included. `restorePlayerInput` gives back only your own hold, and returns `true` if input runs again. A hold carries over respawns, and goes when your resource stops or reloads and when the player disconnects.
 
-### Jump and sprint
+### Jump, sprint and dodge
 
-`LocalPlayer.setJumpEnabled(false)` makes the jump button do nothing, and `LocalPlayer.setSprintEnabled(false)` the sprint button. A sprint already running stops at once, and a jump already in the air lands normally. Both use the game's own locks, the ones its scripted walks use, so giving yours back never frees a jump or sprint the game has locked itself.
+`LocalPlayer.setJumpEnabled(false)` makes the jump button do nothing, `LocalPlayer.setSprintEnabled(false)` the sprint button, and `LocalPlayer.setDodgeEnabled(false)` the dodge button: the dodge roll, the combat dodge and the Swift talent's blink. A sprint already running stops at once, while a jump already in the air lands normally and a dodge under way finishes. All three use the game's own locks, the ones it sets itself during its scripted walks and lockouts, so giving yours back never frees a move the game has locked itself.
 
 Each resource holds each one once, however often it calls, and the button stays off while any resource holds it. Passing `true` gives back only your own hold. Holds carry over respawns and travel, and go when the resource stops or reloads and when the player disconnects.
 
-`LocalPlayer.isJumpEnabled()` and `LocalPlayer.isSprintEnabled()` return `false` while any resource holds them off. `LocalPlayer.jumpState()` and `LocalPlayer.sprintState()` also list the resources holding them in `holders`, and say in `locked` whether the game's lock is on right now, whoever turned it on.
+`LocalPlayer.isJumpEnabled()`, `LocalPlayer.isSprintEnabled()` and `LocalPlayer.isDodgeEnabled()` return `false` while any resource holds them off. `LocalPlayer.jumpState()`, `LocalPlayer.sprintState()` and `LocalPlayer.dodgeState()` also list the resources holding them in `holders`, and say in `locked` whether the game's lock is on right now, whoever turned it on.
 
 ```js
 // client/main.js
-// No sprinting or jumping while the stamina bar is empty.
+// No sprinting, jumping or dodging while the stamina bar is empty.
 setInterval(() => {
   const tired = stamina() <= 0;
   LocalPlayer.setSprintEnabled(!tired);
   LocalPlayer.setJumpEnabled(!tired);
+  LocalPlayer.setDodgeEnabled(!tired);
 }, 100);
+```
+
+### Gravity
+
+A client script that flies the player by moving them with `LocalPlayer.setPosition` and their collision off, as in [Landing a scripted flight](/guides/players/walking-players/#landing-a-scripted-flight), leaves them falling as far as the game can tell. A falling player who holds still for 5 seconds more than 10 m from the last ground they stood on counts as stuck in a fall and dies, and gravity's pull between your moves adds to the fall their landing counts.
+
+`LocalPlayer.suspendGravity()` takes the local player's gravity away, so neither happens, and `LocalPlayer.restoreGravity()` gives it back. Like the holds above, each resource holds it once, gravity stays off while any resource holds it, and the hold carries over respawns and goes when the resource stops or reloads and when the player disconnects. `suspendGravity` always returns `true`, and takes effect once the player has a character if they have none yet. `restoreGravity` returns `true` when gravity is back, and `false` while another resource still holds it.
+
+```js
+// client/main.js
+function startFlight() {
+  LocalPlayer.suspendGravity();
+  LocalPlayer.setCollision(false);
+}
+
+function endFlight() {
+  LocalPlayer.resetFall();
+  LocalPlayer.setCollision(true);
+  LocalPlayer.restoreGravity();
+}
 ```
 
 ## The game's own menus
@@ -87,6 +108,24 @@ Game.setToolWheelEnabled(false);
 Each resource holds a switch once, however often it calls it, and a menu stays shut while any resource holds it. Passing `true` gives back only your own hold. Holds go when the resource stops or reloads and when the player disconnects, so there is nothing to undo. A menu that is already open when you shut it stays open until the player closes it.
 
 `Game.isPauseMenuEnabled()` and its siblings return `false` while any resource keeps that menu shut. `Game.pauseMenuState()` and its siblings also name the resources holding it, for finding out which one does.
+
+## The player's spells
+
+A resource that draws its own spell bar, or keeps the action screen shut, can follow the player's spells from a client script.
+
+The spell bar holds up to four sets of four spells, and the player switches between them with F1 to F4, the mouse wheel or a controller. `Spells.currentLoadout()` returns the set the HUD shows and casts from, 0 to 3, or `null` when it cannot be read. `spellLoadoutChanged(loadout, previous)` fires whenever that set changes, whatever changed it. It only reports switches, so read `currentLoadout()` as your script starts. `Spells.loadout(index)` reads the spells in a set.
+
+```js
+// client/main.js
+Events.on("spellLoadoutChanged", (loadout) => {
+  const set = Spells.loadout(loadout);
+  if (set) Game.notify(`Spell set ${loadout + 1}: ${set.slots.filter(Boolean).join(", ")}`);
+});
+```
+
+`spellCast(spellPath)` fires as the player casts a spell. Lumos and Disillusionment stay on until the player casts them again or something else ends them, and `spellStopped(spellPath)` fires as one goes off, with the path its `spellCast` gave.
+
+For the spells cooling down, see [Reading cooldowns on the client](/guides/pvp/hits-and-defeat/#reading-cooldowns-on-the-client).
 
 ## Where to go next
 
