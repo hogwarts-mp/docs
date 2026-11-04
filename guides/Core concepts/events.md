@@ -171,11 +171,13 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `playerAppearanceChanged` | `(player, look, revision)` | The server accepts a new look from the player's game or `player.setLook`; `look` is the checked [look](/guides/players/appearance/#the-look) and `revision` increases for the connection |
 | `playerTeleportComplete` | `(player, requestId, status, completion)` | A `player.teleport` request finishes; `completion` includes the normalized request, client-observed final transform, and ground-snap result |
 | `playerFastTravelComplete` | `(player, requestId, status)` | A `player.fastTravel` request finishes or times out |
+| `playerFastTravelRequest` | `(player, request)` | A player picks a fast-travel destination on their map and their game holds the trip until the server answers; return `false` synchronously to refuse it. See [Travel between places](/guides/players/travel/) |
+| `playerFastTravelUnlocked` | `(player, unlock)` | The player's own game lit a Floo flame, as finding it does; `unlock.destinationId` is its id. Not raised for `player.setFastTravelUnlocked` or for flames already lit at load. See [Floo flames](/guides/players/travel/#floo-flames) |
 | `playerMapTravelComplete` | `(player, requestId, status, completion)` | A `player.travelToMap` or `player.travelToPlace` request finishes, once the player can play in the new map, or times out. See [Travel between places](/guides/players/travel/#loading-another-map) |
 | `npcDied` | `(npcId, enemyId, killerId, damagerIds)` | A server-spawned NPC dies; `killerId` is the last player to damage it, or `null`, and `damagerIds` every player who did. See [Fighting NPCs](/guides/pve/fighting-npcs/#damage-and-death) |
 | `npcDamaged` | `(npcId, attackerId, amount)` | A player reports damage to a server-spawned NPC |
 | `npcWaypoint` | `(npc, index, lap)` | An NPC on a path reaches `waypoints[index]`, before its wait; `lap` counts completed laps. See [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/#path-events) |
-| `npcMoveEnded` | `(npc, reason)` | An NPC's path ends: `"arrived"`, `"stopped"`, `"replaced"` or `"unreachable"` |
+| `npcMoveEnded` | `(npc, reason)` | An NPC's path or follow ends: `"arrived"`, `"stopped"`, `"replaced"`, `"unreachable"` or `"targetGone"` |
 | `beastCared` | `(beast, player, kind)` | A player pets or feeds a beast; return `false` synchronously to refuse it |
 | `beastCaptureStart` | `(beast, player)` | A player's Nab-Sack starts drawing in a beast they may catch; return `false` synchronously to make it let go. See [Catching beasts](/guides/npcs-and-creatures/catching-beasts/#refereeing-a-catch) |
 | `beastCaptureRequest` | `(beast, player)` | A player's Nab-Sack finished on a beast and the catch waits for the server; return `false` synchronously to refuse it |
@@ -184,24 +186,36 @@ The declarations type the handlers of the events in these tables, so an editor k
 | `beastWaypoint` | `(beast, index, lap)` | A beast on a path reaches `waypoints[index]`, before its wait |
 | `beastMoveEnded` | `(beast, reason)` | A beast's path or follow ends: `"arrived"`, `"stopped"`, `"replaced"`, `"unreachable"` or `"targetGone"` |
 | `characterWaypoint` | `(character, index, lap)` | A character on a path reaches `waypoints[index]`, before its wait |
-| `characterMoveEnded` | `(character, reason)` | A character's path ends: `"arrived"`, `"stopped"` or `"replaced"` |
+| `characterMoveEnded` | `(character, reason)` | A character's path or follow ends: `"arrived"`, `"stopped"`, `"replaced"` or `"targetGone"` |
 | `campActivated` | `(campId)` | A [camp](/guides/encounters/camps/)'s enemies spawn |
 | `campCleared` | `(campId)` | Every enemy of an active camp is dead |
 | `worldEventStarted` | `(spotId, kind)` | A [world event](/guides/encounters/world-events/) starts |
 | `worldEventCleared` | `(spotId)` | Every enemy of a running world event is dead |
 | `worldEventEnded` | `(spotId)` | A world event ends |
+| `arenaStarted` | `(arenaId)` | A [combat arena](/guides/pve/arenas/#arena-events) starts |
+| `arenaWaveStarted` | `(arenaId, wave)` | An arena's wave is announced; its enemies appear 2 s later |
+| `arenaWaveCleared` | `(arenaId, wave)` | Every enemy of an arena's wave, reinforcements included, is dead |
+| `arenaCompleted` | `(arenaId, players)` | An arena's last wave is cleared; `players` stood in it |
+| `arenaEnded` | `(arenaId, reason)` | An arena ends, `"completed"`, `"abandoned"`, `"stopped"` or `"disabled"`, and its enemies despawn. See [Combat arenas](/guides/pve/arenas/#when-an-arena-ends) |
 | `zoneEnter` | `(zone, entity)` | An entity comes into a [zone](/guides/encounters/zones/) |
 | `zoneExit` | `(zone, entity, reason, entityId)` | An entity leaves a zone; `reason` is `"left"` or `"gone"` |
 | `doorUnlockRequest` | `(player, door)` | A player tries to open a lock the server holds shut, by key or Alohomora |
+| `doorUnlocked` | `(player, door)` | A player opens a lock by key or Alohomora; `door.shared` says whether the server now holds it unlocked for everyone. See [Doors](/guides/world/doors/#when-a-player-unlocks-a-door) |
 | `lootableTaken` | `(player, lootableId, items)` | A player takes a server lootable; `items` is what it gave them |
+| `lootSpotTaken` | `(player, spotId, items)` | A player takes from one of the game's own [loot spots](/guides/world/loot/#loot-spots); `items` is what it gave them |
 | `trainSpawned` | `(t)` | `World.hogwartsExpress.spawn` stands the [Hogwarts Express](/guides/world/hogwarts-express/) at `t` |
 | `trainStopped` | `(t)` | The train brakes to a stop at `t`, at the end of a `moveTo` or a `halt` |
 | `trainEnded` | `(reason)` | The train is gone; `reason` is `"end"` when a departure left the track, `"despawned"` after `despawn()` or a replacing `spawn()` |
 | `housePointsChange` | `(house, points, previous)` | A house's points change |
 | `housePointsRequest` | `(player, request)` | A player's game asks to change house points; return `false` synchronously to refuse it |
-| `sanctuaryChanged` | `(id, revision, editor)` | An editor changes a [Room of Requirement](/guides/room-of-requirement/rooms/) room |
+| `sanctuaryChanged` | `(id, revision, editor)` | A [Room of Requirement](/guides/room-of-requirement/rooms/) room changes: an editor's edit, or its [vivarium beasts](/guides/room-of-requirement/vivariums/#saving-the-beasts); `editor` is `null` when no player changed it |
 | `playerSanctuaryEnter` | `(player, id)` | A player enters a room |
 | `playerSanctuaryLeave` | `(player, id)` | A player leaves a room |
+| `vivariumMove` | `(player, move)` | A room's editor moves a beast on the game's beast screens (release, take, free or summon), before it is applied; return `false` synchronously to refuse it. See [Vivarium beasts](/guides/room-of-requirement/vivariums/#moving-beasts) |
+| `beastByproductRequest` | `(beast, player)` | A player collects a vivarium beast's byproduct and the harvest waits for the server; return `false` synchronously to refuse it. See [Vivarium beasts](/guides/room-of-requirement/vivariums/#collecting-the-byproduct) |
+| `beastByproductCollected` | `(beast, player, item, count)` | A harvest went through: `count` of `item` went into the player's inventory |
+| `beastBreedRequest` | `(player, mother, father)` | A room's editor breeds a pair at a breeding pen; return `false` synchronously to refuse it. See [Vivarium beasts](/guides/room-of-requirement/vivariums/#breeding) |
+| `beastBorn` | `(mother, child)` | A vivarium mother's young is born or hatches beside her pen and joins the room |
 | `pvpHit` | `(casterId, victimId, spell, damage)` | A PvP hit has passed server arbitration and policy and was relayed to its victim; `damage` is the final amount |
 | `pvpDefeat` | `(victim, killer, kind)` | A player defeats another in [PvP](/guides/pvp/hits-and-defeat/#defeat); `kind` is `"death"` or `"kneel"` |
 | `pvpRulesChanged` | `(rules)` | The PvP rules change |
@@ -245,10 +259,16 @@ These events are delivered only inside the client runtime. Receiving a native cl
 | `creatorChanged` | `(state)` | A creator session's selections change |
 | `abilityStatus` | `(handle)` | An ability the local player plays starts or settles |
 | `spellAssignment` | `({ source, loadout, slot })` | A spell is assigned to a slot, from the game's menu or a script |
+| `spellStopped` | `(spellPath)` | A [toggle spell](/guides/user-interface/keys-and-menus/#the-players-spells) the local player cast, Lumos or Disillusionment, goes off, by a recast or anything else; `spellPath` is what its `spellCast` named |
+| `spellLoadoutChanged` | `(loadout, previous)` | The local player switches [spell sets](/guides/user-interface/keys-and-menus/#the-players-spells), 0 to 3, by F1 to F4, the mouse wheel, a controller or anything else |
+| `spellCooldownChanged` | `(spell, cooldown)` | One of the local player's spells goes on [cooldown](/guides/pvp/hits-and-defeat/#reading-cooldowns-on-the-client), comes off it (`null`), or moves other than by counting down |
 | `spellLearningFinished` | `(result)` | A spell lesson the resource started finishes; it grants no spell |
+| `fieldGuideCollectionChanged` | `(item)` | The game writes a collection item's state: a page collected, a trait learned, a beast seen. Not raised by a restore; see [Field Guide progress](/guides/players/field-guide/#following-progress) |
+| `fieldGuideChallengeChanged` | `(challenge)` | A challenge record changes: progress, a finished tier or a claimed reward, at most once per record per frame. Not raised by a restore; see [Field Guide progress](/guides/players/field-guide/#following-progress) |
 | `minimapChanged` | `(state, previous)` | The [minimap](/guides/user-interface/map-markers/#the-minimap) switches map, floor or tile |
 | `waypointChanged` | `(waypoint, previous)` | The local player places, moves or removes their [map waypoint](/guides/user-interface/map-markers/#the-players-waypoint); a removal reports `null` |
 | `mailRead` | `(key, sender)` | The local player reads an owl post letter, theirs or the game's; `sender` is the sender's id, not their display name. A letter that loads or arrives already read raises nothing |
+| `dialogueMuted` | `(line)` | The server's [dialogue policy](/guides/camera-and-sound/audio/#the-games-own-dialogue) kept one of the game's spoken lines from starting on this client; raised on the next frame, for a [replacement](/guides/camera-and-sound/audio/#replacing-a-line) |
 | `pvpRelationChanged` | `(relation)` | The local player's [PvP relation](/guides/pvp/rules-and-relations/) to another player is resolved or changes |
 | `localDowned` | `()` | The local player kneels after a PvP defeat |
 | `localDownedEnd` | `({ wasDead })` | The local player gets up, from a kneel or a respawn |
