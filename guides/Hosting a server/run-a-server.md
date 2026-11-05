@@ -18,7 +18,7 @@ This guide takes a fresh machine to a server players can join, then covers keepi
 | The release ZIP from the official `#releases` channel in the [HogwartsMP Discord](https://discord.gg/RzqENjGe99) | It must be the **same release your players run**. A mismatched client is rejected before it loads in. |
 | MySQL 8.x or MariaDB 10.6+ | Foundations stores its data there. A bare server with no resources needs no database. |
 | An [HMP Foundations release](https://github.com/hogwarts-mp/foundations/releases) | The supported starting point for a public server. Its [compatibility matrix](https://github.com/hogwarts-mp/foundations/blob/main/COMPATIBILITY.md) names the HogwartsMP release it pairs with. |
-| Control of the host firewall, and of the router on a home connection | Players reach the server on **UDP 27015**. |
+| Control of the host firewall, and of the router on a home connection | Players reach the server on port **27015 over both UDP and TCP**. |
 
 > Running in Docker or under Pterodactyl or Pelican? The server's [public image](/guides/hosting-a-server/docker/) packages this same runtime. Read on for configuration, Foundations and the masterlist, then follow that page for the container itself.
 
@@ -120,22 +120,26 @@ The database, `data/` and these secrets are server data. They are never sent to 
 | Port | Protocol | Expose it? | Purpose |
 | --- | --- | --- | --- |
 | `27015` | UDP | **Yes**, to the internet | Game traffic. Forward it through the router when hosting at home. |
-| `27016` | TCP | No | Server information HTTP API. It binds every interface by default, so firewall it. Players do not need it. |
+| `27015` | TCP | **Yes**, to the internet | Resource downloads, so players cannot join without it. It also answers the server information HTTP API at `/`. Forward it too. |
 | `3306` | TCP | **Never** | MySQL or MariaDB. Restrict it to the server host or a private network. |
 
 On Linux with ufw:
 
 ```sh
 sudo ufw allow 27015/udp
+sudo ufw allow 27015/tcp
 ```
 
 On Windows, allow the program when Windows Defender Firewall asks on first start, or add the rule from an elevated PowerShell. The rule needs administrator rights; the server does not:
 
 ```powershell
-New-NetFirewallRule -DisplayName "HogwartsMP" -Direction Inbound -Protocol UDP -LocalPort 27015 -Action Allow
+New-NetFirewallRule -DisplayName "HogwartsMP UDP" -Direction Inbound -Protocol UDP -LocalPort 27015 -Action Allow
+New-NetFirewallRule -DisplayName "HogwartsMP TCP" -Direction Inbound -Protocol TCP -LocalPort 27015 -Action Allow
 ```
 
-On a cloud host, open the same UDP port in the provider's firewall or security group as well. Test from a machine **outside** your network: connecting from the host itself proves nothing about the public path, and TCP port checkers cannot test a UDP port.
+On a cloud host, open the same port over UDP and TCP in the provider's firewall or security group as well. Test from a machine **outside** your network: connecting from the host itself proves nothing about the public path, and TCP port checkers cannot test a UDP port.
+
+> **Upgrading from before 1.11.0:** the separate HTTP port is gone. The server ignores `apiport`, `apihost`, `--apiport` and `--apihost`, so open TCP on the game port and move anything that read the old port to the game port. You can then close the old port.
 
 ## 6. Start it
 
@@ -285,6 +289,7 @@ Keep the previous runtime and the matching database backup until the new build h
 | Stops when the terminal closes, or is gone after a reboot | It was started from a shell. Run it under [systemd](#linux-systemd) or a Windows service manager. |
 | Every Foundations resource fails after a reboot, but a manual start works | The server raced the database. Add `Requires=` and `After=mysql.service` to the unit. |
 | Players cannot connect | Confirm UDP reachability from outside, router forwarding, the address and the port. A TCP port test does not validate UDP. |
+| Players connect but cannot download resources | The game port is not reachable over TCP. Open and forward TCP as well as UDP. |
 | Players connect and are rejected immediately | Client and server come from different releases. Update the server, or have players relaunch so the launcher updates them. |
 | Foundations says MySQL is not configured | Install `data/hmp-mysql.json`, or set the `HMP_MYSQL_*` variables in the server's environment. |
 | Foundations reports `ECONNREFUSED` | Start MySQL and check its host and port. Inside a container, `127.0.0.1` is the container itself. |

@@ -13,7 +13,7 @@ ghcr.io/hogwarts-mp/hogwartsmp-server:<version>
 
 The image holds the same native server the release ZIP ships, repackaged on Ubuntu 24.04 for `linux/amd64`. It is not a source build, and like the ZIP it carries **no game-mode resources**. Pulling it needs no login.
 
-Tags are exact release versions with no leading `v`, such as `1.9.0`. There is no `latest`, `stable` or `testing` tag, because the server must match the release your players run: a mismatched client is rejected before it loads in. Changing the tag is how you update.
+Tags are exact release versions with no leading `v`, such as `1.11.0`. There is no `latest`, `stable` or `testing` tag, because the server must match the release your players run: a mismatched client is rejected before it loads in. Changing the tag is how you update.
 
 This page covers the container. Configuration, Foundations, ports and the masterlist work exactly as in [Hosting a server](/guides/hosting-a-server/run-a-server/).
 
@@ -29,8 +29,8 @@ services:
     restart: unless-stopped
     init: true
     ports:
-      - "27015:27015/udp"           # game traffic: must be reachable by players
-      - "127.0.0.1:27016:27016/tcp" # information API: this host only
+      - "27015:27015/udp" # game traffic: must be reachable by players
+      - "27015:27015/tcp" # resource downloads and information API: must be reachable by players
     volumes:
       - server-data:/home/container
     stop_grace_period: 30s
@@ -42,7 +42,7 @@ volumes:
 Next to it, create a `.env` that pins the release:
 
 ```dotenv
-HOGWARTSMP_VERSION=1.9.0
+HOGWARTSMP_VERSION=1.11.0
 ```
 
 Start it and follow the log:
@@ -53,15 +53,15 @@ docker compose up -d
 docker compose logs -f server
 ```
 
-The server is up when the log shows `HogwartsMP Server successfully started`. Open UDP 27015 on the host or cloud firewall as well. Publishing a port in Compose does not open it in a firewall in front of the machine.
+The server is up when the log shows `HogwartsMP Server successfully started`. Open port 27015 over UDP and TCP on the host or cloud firewall as well. Publishing a port in Compose does not open it in a firewall in front of the machine.
 
 Without Compose, the same container is:
 
 ```sh
 docker run -d --name hogwartsmp --init --restart unless-stopped \
-  -p 27015:27015/udp -p 127.0.0.1:27016:27016/tcp \
+  -p 27015:27015/udp -p 27015:27015/tcp \
   -v hogwartsmp-data:/home/container \
-  ghcr.io/hogwarts-mp/hogwartsmp-server:1.9.0
+  ghcr.io/hogwarts-mp/hogwartsmp-server:1.11.0
 ```
 
 ## Data and resources
@@ -74,7 +74,7 @@ docker run -d --name hogwartsmp --init --restart unless-stopped \
 ├── resources/       # your game mode, e.g. the hmp-* Foundations resources
 ├── data/            # Foundations' hmp-*.json configuration
 ├── logs/
-└── .packages/       # resource package key and cache; keep it
+└── .packages/       # resource packages and cache; keep it
 ```
 
 The server runs as UID and GID `10001`, not root. A named volume handles ownership for you. To manage resources from the host instead, bind-mount a directory over `resources/` and make it writable by that UID:
@@ -106,22 +106,22 @@ services:
 
 ## Ports and flags
 
-Arguments after the image name go straight to the server, as the [command-line flags](/guides/hosting-a-server/configuration/#command-line-flags). Change the published ports to match:
+Arguments after the image name go straight to the server, as the [command-line flags](/guides/hosting-a-server/configuration/#command-line-flags). Change the published UDP and TCP ports to match:
 
 ```sh
 docker run -d --name hogwartsmp --init --restart unless-stopped \
-  -p 28015:28015/udp -p 127.0.0.1:28016:28016/tcp \
+  -p 28015:28015/udp -p 28015:28015/tcp \
   -v hogwartsmp-data:/home/container \
-  ghcr.io/hogwarts-mp/hogwartsmp-server:1.9.0 --port 28015 --apiport 28016
+  ghcr.io/hogwarts-mp/hogwartsmp-server:1.11.0 --port 28015
 ```
 
 In Compose, edit `command` and `ports` together:
 
 ```yaml
-    command: ["--port", "28015", "--apiport", "28016"]
+    command: ["--port", "28015"]
     ports:
       - "28015:28015/udp"
-      - "127.0.0.1:28016:28016/tcp"
+      - "28015:28015/tcp"
 ```
 
 Keep the container port equal to the published port, as above. Mapping `28015:27015` would have the server advertise 27015 to the masterlist while players need 28015.
@@ -146,7 +146,7 @@ The server handles `SIGTERM` and `SIGINT` by shutting down cleanly: every resour
 Each release has a ready-made egg that points at that release's exact image, so importing it pins the version. The egg ships inside the image, so you can extract it from any machine with Docker:
 
 ```sh
-docker run --rm --user 0 --entrypoint cat ghcr.io/hogwarts-mp/hogwartsmp-server:1.9.0 \
+docker run --rm --user 0 --entrypoint cat ghcr.io/hogwarts-mp/hogwartsmp-server:1.11.0 \
   /usr/share/hogwartsmp/egg-hogwartsmp.json > egg-hogwartsmp.json
 ```
 
@@ -155,10 +155,9 @@ docker run --rm --user 0 --entrypoint cat ghcr.io/hogwarts-mp/hogwartsmp-server:
 Then, in the panel:
 
 1. **Admin → Nests → Import Egg**, and upload `egg-hogwartsmp.json`.
-2. Create a server from the egg. Its **primary allocation** is the UDP game port players connect to.
-3. Assign a **second allocation** for the information API and set the **HTTP port** variable to it. The variable selects a port; it does not allocate one.
-4. Set **Masterlist token** to your [server key](/guides/hosting-a-server/run-a-server/#8-list-it-publicly), or leave it blank for an unlisted server. The panel's value overrides any `server-token` in `server.json`.
-5. Start the server. The panel marks it running once the log shows `HogwartsMP Server successfully started`.
+2. Create a server from the egg. Its **primary allocation** is the game port players connect to, over UDP and TCP. No second allocation is needed.
+3. Set **Masterlist token** to your [server key](/guides/hosting-a-server/run-a-server/#8-list-it-publicly), or leave it blank for an unlisted server. The panel's value overrides any `server-token` in `server.json`.
+4. Start the server. The panel marks it running once the log shows `HogwartsMP Server successfully started`.
 
 The install step only creates `resources/`, `logs/` and `.packages/`. Upload Foundations or your own resources into `resources/` through the panel's **File Manager** or SFTP, and edit `server.json` there for the keys the panel does not control, such as `maxplayers` and `password`. The panel stops the server with `^C`, which is the same clean shutdown as `SIGINT`.
 
@@ -176,3 +175,4 @@ To update, switch the server's Docker image to the next release's tag in its sta
 | Foundations reports `ECONNREFUSED` | `127.0.0.1` inside the container is the container. Use the database service's name or the host's address. |
 | Exits on a VPS with `CPU doesn't support invariant TSC` | Add `TRACY_NO_INVARIANT_CHECK=1` to the container's environment. |
 | Players cannot connect | Confirm the UDP port is published, opened in the host and cloud firewalls, and equal on both sides of the mapping. |
+| Players connect but cannot download resources | Confirm the same port is published and opened over TCP as well. |

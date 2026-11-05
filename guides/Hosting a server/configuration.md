@@ -11,18 +11,17 @@ The server takes its settings from `server.json` in its working directory, and c
 
 On first start, if `server.json` is missing and the directory is writable, the server writes one with every key the build understands, set to its default. That generated file is the authoritative list for your release, so edit it rather than writing one from scratch.
 
-A complete file, with a password and a custom HTTP port:
+A complete file, with a password:
 
 ```json
 {
   "host": "0.0.0.0",
   "port": 27015,
-  "apihost": "127.0.0.1",
-  "apiport": 27016,
   "map": "",
   "maxplayers": 32,
   "server-token": "",
   "password": "castle-gate",
+  "package-secret": "",
   "download-url": "",
   "mod": {
     "curseforge": {
@@ -39,14 +38,13 @@ Every key is optional: one you leave out takes its default. Restart the server a
 
 | Key | Default | Meaning |
 | --- | --- | --- |
-| `host` | `0.0.0.0` | Interface the game socket binds to. `0.0.0.0` accepts players on every interface. |
-| `port` | `27015` | Game port (**UDP**). Players connect here. |
-| `apihost` | `0.0.0.0` | Interface the [information API](#information-api) binds to. Set `127.0.0.1` to keep it off the network. |
-| `apiport` | `27016` | Information API port (**TCP**). |
+| `host` | `0.0.0.0` | Interface the server binds to. `0.0.0.0` accepts players on every interface. |
+| `port` | `27015` | Game port. Players connect here over **UDP** and download resources over **TCP**. The [information API](#information-api) is on it too. |
 | `map` | `""` | Reserved. HogwartsMP ignores it; leave it empty. |
 | `maxplayers` | `32` | Connection cap. This build allows at most **128**; a higher value logs a warning and runs with 128. |
 | `server-token` | `""` | Masterlist key from the [MafiaHub dashboard](https://mafiahub.dev/dashboard/servers). Empty keeps the server unlisted. See [List it publicly](/guides/hosting-a-server/run-a-server/#8-list-it-publicly). |
 | `password` | `""` | Password players must enter to join. Empty lets anyone in. See [Passwords](#passwords). |
+| `package-secret` | `""` | Secret the resource package key is derived from. Empty uses `server-token`. With both empty, the key follows from the mod name alone and anyone can work it out. Changing it makes every player download your resources again. |
 | `download-url` | `""` | A web address players download resources from before your server, such as a CDN. See [Serve downloads from a CDN](#serve-downloads-from-a-cdn). |
 
 ### Mod keys
@@ -72,7 +70,7 @@ The file is checked at boot, so a mistake stops the server with a reason instead
 - **An unknown `mod` key** is kept, with a warning that the build does not understand it. A config written for a newer release still loads on an older one.
 - **Unknown top-level keys** are ignored, so documentation keys such as `"_comment"` are harmless.
 
-The server also rejects a `port` or `apiport` outside 1–65535, a `download-url` that does not start with `http://` or `https://`, a `maxplayers` of zero or less, and a `password` over 255 bytes.
+The server also rejects a `port` outside 1–65535, a `download-url` that does not start with `http://` or `https://`, a `maxplayers` of zero or less, and a `password` over 255 bytes.
 
 ## Command-line flags
 
@@ -80,20 +78,19 @@ Flags override the matching `server.json` keys for that run. A flag you do not p
 
 | Flag | Overrides | Purpose |
 | --- | --- | --- |
-| `-h`, `--host` | `host` | Game bind address |
-| `-p`, `--port` | `port` | Game port (UDP) |
-| `-H`, `--apihost` | `apihost` | Information API bind address |
-| `-P`, `--apiport` | `apiport` | Information API port (TCP) |
+| `-h`, `--host` | `host` | Bind address |
+| `-p`, `--port` | `port` | Game port (UDP and TCP) |
 | `-t`, `--server-token` | `server-token` | Masterlist key |
 | `--password` | `password` | Join password |
+| `--package-secret` | `package-secret` | Secret the resource package key is derived from |
 | `--download-url` | `download-url` | Web address players download resources from first |
 | `-c`, `--config` | | Read a different configuration file instead of `server.json` |
 | `--help` | | Print the flags and exit |
 
-For example, to run a second server from another directory on the next pair of ports:
+For example, to run a second server from another directory on another port:
 
 ```sh
-./HogwartsMPServer --port 28015 --apiport 28016
+./HogwartsMPServer --port 28015
 ```
 
 `maxplayers`, `map` and the `mod` keys have no flags; set them in the file. Game panels use flags to inject the port and token they manage. That is why the [Pterodactyl egg](/guides/hosting-a-server/docker/#pterodactyl-and-pelican) overrides whatever `server.json` says for those keys.
@@ -177,14 +174,14 @@ The game checks each file's SHA-256 hash before using it. If the address fails o
 
 ## Information API
 
-The server answers `GET /` on `apiport` with a JSON summary: `mod_name`, `mod_slug`, `mod_version`, `framework_version`, `host`, `port`, `password_required`, `max_players` and `mod_config`. It is handy for a quick health check from the host itself:
+The server answers `GET /` over TCP on the game port with a JSON summary: `mod_name`, `mod_slug`, `mod_version`, `framework_version`, `host`, `port`, `password_required`, `max_players` and `mod_config`. It is handy for a quick health check from the host itself:
 
 ```sh
-curl http://127.0.0.1:27016/
+curl http://127.0.0.1:27015/
 ```
 
-Players do not need it to join, and the masterlist does not read it: the server announces itself. It binds every interface by default, so either block its port at the firewall or set `apihost` to `127.0.0.1`.
+The masterlist does not read it: the server announces itself. It shares the game port's TCP side with resource downloads, which players need in order to join, so it cannot be firewalled or bound separately.
 
 ## Changing ports
 
-Moving the game port means changing three things together: `port` (or `--port`), the firewall or router rule, and any container port mapping. Then tell players the new port, because the client assumes 27015 unless the address carries `:port`. When you run several servers on one machine, give each its own directory and its own pair of `port` and `apiport`.
+Moving the game port means changing three things together: `port` (or `--port`), the firewall or router rules for UDP and TCP, and any container port mappings. Then tell players the new port, because the client assumes 27015 unless the address carries `:port`. When you run several servers on one machine, give each its own directory and its own `port`, and open that port over both UDP and TCP.
