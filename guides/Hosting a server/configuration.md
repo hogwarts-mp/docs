@@ -23,6 +23,7 @@ A complete file, with a password and a custom HTTP port:
   "maxplayers": 32,
   "server-token": "",
   "password": "castle-gate",
+  "download-url": "",
   "mod": {
     "curseforge": {
       "mods": []
@@ -46,6 +47,7 @@ Every key is optional: one you leave out takes its default. Restart the server a
 | `maxplayers` | `32` | Connection cap. This build allows at most **128**; a higher value logs a warning and runs with 128. |
 | `server-token` | `""` | Masterlist key from the [MafiaHub dashboard](https://mafiahub.dev/dashboard/servers). Empty keeps the server unlisted. See [List it publicly](/guides/hosting-a-server/run-a-server/#8-list-it-publicly). |
 | `password` | `""` | Password players must enter to join. Empty lets anyone in. See [Passwords](#passwords). |
+| `download-url` | `""` | A web address players download resources from before your server, such as a CDN. See [Serve downloads from a CDN](#serve-downloads-from-a-cdn). |
 
 ### Mod keys
 
@@ -70,7 +72,7 @@ The file is checked at boot, so a mistake stops the server with a reason instead
 - **An unknown `mod` key** is kept, with a warning that the build does not understand it. A config written for a newer release still loads on an older one.
 - **Unknown top-level keys** are ignored, so documentation keys such as `"_comment"` are harmless.
 
-The server also rejects a `port` or `apiport` outside 1–65535, a `maxplayers` of zero or less, and a `password` over 255 bytes.
+The server also rejects a `port` or `apiport` outside 1–65535, a `download-url` that does not start with `http://` or `https://`, a `maxplayers` of zero or less, and a `password` over 255 bytes.
 
 ## Command-line flags
 
@@ -84,6 +86,7 @@ Flags override the matching `server.json` keys for that run. A flag you do not p
 | `-P`, `--apiport` | `apiport` | Information API port (TCP) |
 | `-t`, `--server-token` | `server-token` | Masterlist key |
 | `--password` | `password` | Join password |
+| `--download-url` | `download-url` | Web address players download resources from first |
 | `-c`, `--config` | | Read a different configuration file instead of `server.json` |
 | `--help` | | Print the flags and exit |
 
@@ -147,6 +150,30 @@ An install that is broken, or whose last attempt failed, is installed again at t
 With `mod.autoRespawn` at its default of `true`, a dead player stands back up on their own a few seconds after dying. Set it to `false` and a dead player stays where they fell, still watching the world, until a script respawns them with `player.respawn()`. Game modes with revives, spectating or round-based play use this.
 
 Scripts can override it for one player with `player.setAutoRespawn(on)`. Passing `null` restores the `server.json` value. See the Server API reference.
+
+## Serve downloads from a CDN
+
+Players normally download your resources from your server on its game port, over TCP. If your server's upload speed holds joins back, set `download-url` so players try another web address first, such as a CDN or your own web server. This build takes one address.
+
+```json
+{
+  "download-url": "https://cdn.example.com/my-server"
+}
+```
+
+1. Set `download-url` in `server.json`, or pass `--download-url` when you start the server. The address must start with `http://` or `https://`.
+2. Start the server. The log names the files to upload and the folder they are in, normally `.packages/`:
+
+   ```text
+   Clients download from https://cdn.example.com/my-server first; mirror these files from '<folder>' there: <file names>
+   ```
+
+3. Upload each named file directly under the address, for example `https://cdn.example.com/my-server/<file name>`. Upload only these files, not the whole `.packages/` folder.
+4. After you change a resource or the package key, upload the new files as well. Players get anything you have not uploaded yet from your server.
+
+Players send no login or token to this address, so anyone who has a file's address can download it, even if your server has a password. The host should also support range requests. Without them, a download that gets cut off starts that file again instead of resuming.
+
+The game checks each file's SHA-256 hash before using it. If the address fails or serves the wrong file, the game gets that file from your server instead, so keep the game port reachable over TCP.
 
 ## Information API
 
