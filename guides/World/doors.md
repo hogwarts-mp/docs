@@ -1,6 +1,6 @@
 ---
 title: Doors
-description: Hold the game's doors locked, unlocked, open or closed for every player, set the Alohomora level a padlock asks for, share the locks players open, find a door's name, and decide when a locked door opens for someone.
+description: Hold the game's doors locked, unlocked, open or closed for every player, set the Alohomora level a padlock asks for, share the locks players open, find a door's name, decide when a locked door opens for someone, and open other houses' common rooms to a player.
 sidebar:
   order: 520
 ---
@@ -82,7 +82,7 @@ Events.on("doorUnlocked", (player, door) => {
 });
 ```
 
-`Doors.set` or `Doors.clear` on that selector takes a shared unlock back. An unlock is not shared while the server holds the door locked.
+`Doors.set` or `Doors.clear` on that selector takes a shared unlock back. An unlock is not shared while the server holds the door locked, unless [`Doors.allowUnlock`](#letting-them-pick-the-lock) let that player open it.
 
 ## When a player tries a locked door
 
@@ -106,6 +106,50 @@ Unlocking with `Doors.set` unlocks the door for everyone, not only the player wh
 
 - On a double door, `selector` may name the other leaf, when that leaf's held lock is what refused the player.
 - A lock the player's own client policy keeps shut raises it too, with an empty `selector`.
+
+### Letting them pick the lock
+
+`Doors.set` opens the lock at once. To have the player open it the game's way instead, answer with `Doors.allowUnlock(player, selector)`: their wand cast and the lockpicking minigame play out, or their key turns. If they are still at the lock, no more than a metre from where they tried it and no more than 5 seconds later, their game tries again for them. Otherwise their next try goes through.
+
+```js
+// server/main.js
+Events.on("doorUnlockRequest", (player, door) => {
+  if (door.selector !== towerDoor) return;
+  if (isPrefect(player)) {
+    Doors.allowUnlock(player, door.selector);
+  } else {
+    player.sendChat("Only prefects may pick this lock.");
+  }
+});
+```
+
+Once they open it, the server holds the lock unlocked for everyone, as `Doors.set(selector, { locked: false })` would, and raises [`doorUnlocked`](#when-a-player-unlocks-a-door) with `shared` true, even while `Doors.setShareUnlocks(false)` is in force. If they give up on the minigame, the door stays locked.
+
+- The permission lasts 60 seconds, or until they use it.
+- It returns `false` when the selector holds no lock or the player is not connected, and throws a `TypeError` when `player` is not a player or the selector is malformed.
+- A double door held under two selectors needs both allowed.
+
+## Common rooms
+
+The game opens each house's common-room entrance only to members of that house. These entrances are not doors either, and no `Doors` call reaches them. `player.commonRooms` lists the other houses whose entrances open for a player besides their own [house](/guides/players/appearance/#house-and-gender), such as for staff:
+
+```js
+// server/main.js
+function giveStaffAccess(player) {
+  player.commonRooms = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"];
+}
+
+function takeStaffAccess(player) {
+  player.commonRooms = [];
+}
+```
+
+Those entrances open for them as they would for a member of that house, with the game's own animations. Their house, robes and crest stay as they are.
+
+- House names are matched in any case and read back spelt as above. An unknown house, or `"Unaffiliated"`, which has no common room, throws, and so does setting it on a player who is not connected.
+- An entrance decides as someone walks up to it, so a change reaches a player already standing in the doorway the next time they walk up.
+- The entrance opens only in that player's game. Other players' games still show it closed.
+- It lasts for the player's connection, so set it again when they rejoin.
 
 ## On the client
 
@@ -137,3 +181,4 @@ That is a fragment of the file. Staff in its `adminGroups` manage it in game wit
 - [Gates](/guides/world/gates/) for portcullises, the rune gate, camp gates and crawl grates.
 - [Loot](/guides/world/loot/) for chests behind your doors.
 - [Authority](/guides/core-concepts/authority/) for why a request like `doorUnlockRequest` is the server's to decide.
+- [Appearance](/guides/players/appearance/#house-and-gender) for setting a player's house.

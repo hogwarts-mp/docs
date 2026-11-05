@@ -1,11 +1,11 @@
 ---
 title: Moving NPCs and creatures
-description: Walk NPCs, beasts and characters along paths of waypoints, have a beast follow someone, choose what each does when it has nowhere to go, and hear arrivals through events.
+description: Walk NPCs, beasts and characters along paths of waypoints, have them follow someone, choose what each does when it has nowhere to go, and hear arrivals through events.
 sidebar:
   order: 410
 ---
 
-The server can walk the NPCs, beasts and characters it spawns: along a path of waypoints, to a single point, or, for a beast, after someone. A guard can patrol a wall, a house-elf can pace the kitchens and a hippogriff can follow the player who looks after it. The three kinds share one path format and the same calls, but each walks its own way.
+The server can walk the NPCs, beasts and characters it spawns: along a path of waypoints, to a single point, or after someone. A guard can patrol a wall, a house-elf can pace the kitchens and a hippogriff can follow the player who looks after it. The three kinds share one path format and the same calls, but each walks its own way.
 
 ## How each kind walks
 
@@ -35,7 +35,7 @@ Events.on("chatCommand", (player, message, command) => {
     player.sendChat(`Patrol point ${patrol.length} marked.`);
   } else if (command === "patrol" && patrol.length > 0) {
     const { x, y, z } = patrol[0];
-    const guard = NPC.create("Goblin_Grunt", x, y, z, "friendly");
+    const guard = NPC.create("Goblin_Grunt", { x, y, z, disposition: "friendly" });
     guard?.moveAlong(patrol, { loop: "pingpong" });
   }
 });
@@ -58,17 +58,29 @@ A path with one point always runs once, and a `"loop"` or `"pingpong"` path runs
 
 ### Reading a path
 
-`entity.movement` reads where its path stands:
+`entity.movement` reads where its path or follow stands:
 
 | Field | Meaning |
 | --- | --- |
-| `mode` | `"path"` while a path runs, waits and pauses included; `"follow"` while a beast follows; `"idle"` otherwise |
+| `mode` | `"path"` while a path runs, waits and pauses included; `"follow"` while it [follows](#following) someone; `"idle"` otherwise |
 | `waypoint` | The index of the point it is walking to or waiting at |
-| `waypoints` | How many points the path has; 0 when idle |
+| `waypoints` | How many points the path has; 0 when idle or following |
 | `lap` | How many laps a `"loop"` or `"pingpong"` path has completed |
 | `paused` | Whether `pause()`, or an NPC's or beast's `aiPaused`, holds it |
+| `targetId` | The id of the entity it follows; 0 otherwise |
 
-`entity.waypoints` returns the running path's points as you gave them, each with the gait it walks at filled in (a character's with its `speed`), or an empty array.
+`entity.waypoints` returns the running path's points as you gave them, each with the gait it walks at filled in (a character's with its `speed`), or an empty array when idle or following.
+
+## Following
+
+`follow(target, options)` walks the entity after a player, beast, NPC or character until `stop()` or a new command, and ends the path it was on as `"replaced"`. It throws for anything else, and for the entity itself, and returns `false` as `moveAlong` does. A follower rests near its target and walks on once the target moves off. `pause()` and `resume()` hold and continue a follow as they do a path.
+
+| Option | Meaning |
+| --- | --- |
+| `gait` | Its pace: `"walk"` by default, or a beast's own `gait` |
+| `teleportBeyond` | Metres behind the target past which the server puts it beside the target, at most once every 5 seconds: 60 by default, 0 never |
+
+A follow raises no waypoint events. It ends as `"targetGone"` when the target leaves, and as `"stopped"` or `"replaced"` the way a path does (see [Path events](#path-events)). Each kind follows its own way and adds options of its own, in its section below.
 
 ## Path events
 
@@ -77,17 +89,17 @@ Each kind raises its own pair of events:
 | Event | Handler arguments | When it fires |
 | --- | --- | --- |
 | `npcWaypoint`, `beastWaypoint`, `characterWaypoint` | `(entity, index, lap)` | It reaches `waypoints[index]`, before the wait there |
-| `npcMoveEnded`, `beastMoveEnded`, `characterMoveEnded` | `(entity, reason)` | Its path ends |
+| `npcMoveEnded`, `beastMoveEnded`, `characterMoveEnded` | `(entity, reason)` | Its path or follow ends |
 
-`lap` counts completed laps, so on a `"loop"` path the arrival back at point 0 reports lap 1. `reason` says why the path ended:
+`lap` counts completed laps, so on a `"loop"` path the arrival back at point 0 reports lap 1. `reason` says why the path or follow ended:
 
 | Reason | Meaning |
 | --- | --- |
 | `"arrived"` | A `"once"` path reached its last point and finished the wait there |
 | `"stopped"` | `stop()` ended it, a script set a beast's or character's `position`, or the NPC died |
-| `"replaced"` | A new path, or a beast's new command, took over. It fires before the new path's events |
+| `"replaced"` | A new path or follow, or a beast's new command, took over. It fires before the new command's events |
 | `"unreachable"` | NPCs and beasts: the game found no way to a point |
-| `"targetGone"` | Beasts: the entity it was following left |
+| `"targetGone"` | A follow: the entity it was following left |
 
 Destroying an entity ends its path without an event.
 
@@ -104,7 +116,7 @@ Events.on("npcMoveEnded", (npc, reason) => {
 
 ## What other players see
 
-A character's path travels with it: its points, when it started and whether it is paused. A player who comes into range mid-path sees the character where everyone else does, partway along a leg, because every player's game plays the walk on the server's clock. On the server, `character.position` follows the walk, and a client script reads where a character is on its own player's screen with `Character.pose(id)`.
+A character's path travels with it: its points, when it started and whether it is paused. A player who comes into range mid-path sees the character where everyone else does, partway along a leg, because every player's game plays the walk on the server's clock. On the server, `character.position` follows the walk, and a client script reads where a character is on its own player's screen with `Character.pose(id)`. A character's follow travels the same way, as legs the server lays one at a time.
 
 An NPC's or beast's path is held on the server, and its owner's game walks it; everyone else sees it move as they see any NPC. When the owner changes, the new owner's game carries on from the next waypoint, or finishes the wait it was in, so no arrival is reported twice.
 
@@ -120,9 +132,33 @@ An NPC walks with the game's own pathfinding and its family's own gaits: walk is
 
 A fight takes over. An NPC that gets into one holds its path and carries on once it is calm again. `pause()`, `aiPaused` and `movementFrozen` hold the path too, and stop the clock of a wait (see [Switching behaviour off](/guides/npcs-and-creatures/npcs/#switching-behaviour-off)).
 
+The game puts an enemy far from a player's camera to sleep. While an NPC is on a path or follow, its owner's game keeps it awake, so it walks on out of that player's sight.
+
+### Following
+
+An NPC follows with the game's own pathfinding, in its family's gaits, and rests within `distanceCm` of its target. While it follows a player in its own virtual world, that player's game runs it. A fight holds the follow as it holds a path, and so do `pause()`, `aiPaused` and `movementFrozen`. Its options add:
+
+| Option | Meaning |
+| --- | --- |
+| `distanceCm` | How near it rests, 100 to 3000 cm: 200 by default. It walks again once the target is 100 cm past that |
+| `speedScale` | As on a path |
+| `then` | The idle it takes up where it stands once `stop()` or the target leaving ends the follow: `"stand"` by default. See [Idling](#idling) |
+
+Its calm walk is slower than a walking player in some families, so give a follower `"jog"` to keep up. A follow never ends `"unreachable"`: when the game finds no way to the target, such as while the target flies, the NPC waits and tries again. While the target is in another virtual world, it waits where it is.
+
+```js
+// server/main.js
+Events.on("chatCommand", (player, message, command) => {
+  if (command !== "escort") return;
+  const { x, y, z } = player.position;
+  const escort = NPC.create("Goblin_Grunt", { x: x + 300, y, z, disposition: "friendly", preferredOwnerId: player.id });
+  escort?.follow(player, { gait: "jog", distanceCm: 300 });
+});
+```
+
 ### Idling
 
-`npc.idle` decides what an NPC does while no path runs:
+`npc.idle` decides what an NPC does while no path or follow runs:
 
 | Idle | What it does |
 | --- | --- |
@@ -130,14 +166,14 @@ A fight takes over. An NPC that gets into one holds its path and carries on once
 | `"stand"` | Holds at its home, and walks back whenever it ends up more than 3 m away, such as after a fight |
 | `"wander"` | Roams around its home |
 
-`npc.home` is that home, a player's position, or `null` until one is set. The first `"stand"` or `"wander"` makes the spot the NPC stands on its home, and you can set it yourself. A `"once"` path that arrives moves the home to its last point and takes up the path's `then` idle, so by default an NPC stands guard where its path ends:
+`npc.home` is that home, a player's position, or `null` until one is set. The first `"stand"` or `"wander"` makes the spot the NPC stands on its home, and you can set it yourself. A `"once"` path that arrives moves the home to its last point and takes up the path's `then` idle, and a follow that ends does the same where the NPC stands. So by default an NPC stands guard where its path or follow ends:
 
 ```js
 // server/main.js
 Events.on("chatCommand", (player, message, command) => {
   if (command !== "guard") return;
   const { x, y, z } = player.position;
-  const guard = NPC.create("Goblin_Grunt", x + 1500, y, z, "friendly");
+  const guard = NPC.create("Goblin_Grunt", { x: x + 1500, y, z, disposition: "friendly" });
   guard?.moveTo(x, y, z, { gait: "jog" }); // then stands guard here
 });
 ```
@@ -158,13 +194,11 @@ A beast's path options add `then`, the idle a `"once"` path ends in, which becom
 
 ### Following
 
-`beast.follow(target, options)` walks after a player, beast, NPC or character and keeps about 1.5 m off, until `stop()` or a new command. It throws for anything else, and for the beast itself. While it follows a player in its own virtual world, that player's game runs it. `movement.targetId` is the id of the entity it follows.
+A beast follows through the game's own creature AI and keeps about 1.5 m off. While it follows a player in its own virtual world, that player's game runs it. Its options add:
 
 | Option | Meaning |
 | --- | --- |
-| `gait` | As on a path |
-| `teleportBeyond` | Metres behind the target past which the server puts the beast beside it: 60 by default, 0 never |
-| `air` | Fliers only: fly after the target while it is airborne or more than 30 m away, about 4 m behind and 3 m above it, and land beside it once it is back on the ground nearby |
+| `air` | Fliers only: fly after the target while it is airborne or more than 30 m away, about 4 m behind and 3 m above it, and land beside it once it is back on the ground nearby, touching down before it walks on |
 
 ```js
 // server/main.js
@@ -203,9 +237,9 @@ Its gaits are fixed speeds: walk is 150 cm/s, jog 475 and sprint 700. Waypoints 
 | `ground` | `"snap"`, the default, stands the body on the floor under it in each player's game, and uses the path's height where there is none; `"path"` follows the heights you gave |
 | `turnRate` | How fast it turns at corners and waits, 1 to 3600 degrees a second: 270 by default |
 
-A new path starts from wherever the character is, even partway along a leg. `pause()` stops the walk's clock and its events until `resume()`. Setting `character.position` moves it there on every player's screen and ends its path as `"stopped"`.
+A new path starts from wherever the character is, even partway along a leg. `pause()` stops the walk's clock and its events until `resume()`. Setting `character.position` moves it there on every player's screen and ends its path or follow as `"stopped"`.
 
-`Character.isMovable(characterId)` tells whether a body can walk. The Sorting Hat, the Howler and the busts cannot, and `moveAlong` and `moveTo` throw for them.
+`Character.isMovable(characterId)` tells whether a body can walk. The Sorting Hat, the Howler and the busts cannot, and `moveAlong`, `moveTo` and `follow` throw for them. A new path or follow ends the clip a character plays (see [Clips, wands and props](/guides/npcs-and-creatures/beasts-and-characters/#clips-wands-and-props)).
 
 ```js
 // server/main.js
@@ -222,8 +256,37 @@ Events.on("characterWaypoint", (character) => {
 });
 ```
 
+### Following
+
+A character follows in straight legs the server lays one at a time, each ending `distanceCm` short of the target, and lays a new one as the target moves on. It rests inside `distanceCm` facing the target, and walks again once the target is 100 cm past that. Its legs are straight lines, as a path's are, so keep a follower where nothing stands between it and its target.
+
+It waits where it is while the target is in another virtual world, on a broom or riding a mount in the air, or is a beast in flight. Its options add:
+
+| Option | Meaning |
+| --- | --- |
+| `speed` | Its speed, 20 to 1000 cm/s, instead of `gait` |
+| `distanceCm` | How near it rests, 100 to 3000 cm: 200 by default |
+| `ground`, `turnRate` | As on a path |
+
+Walk, at 150 cm/s, is a little slower than a walking player. A faster gait closes up, then stands until the target pulls ahead again.
+
+```js
+// server/main.js
+Events.on("chatCommand", (player, message, command) => {
+  if (command !== "elf") return;
+  const { x, y, z } = player.position;
+  const elf = Character.create(`elf-${player.id}`, "T3HouseElfMale1", { x: x + 200, y, z, label: "Tilly" });
+  elf?.follow(player, { gait: "jog", distanceCm: 250 });
+});
+
+// The player it followed has left.
+Events.on("characterMoveEnded", (character, reason) => {
+  if (reason === "targetGone") character.destroy();
+});
+```
+
 ## Where to go next
 
 - [NPCs](/guides/npcs-and-creatures/npcs/) for who runs an NPC's AI and switching its behaviour off.
-- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) for spawning beasts and the bodies a character can have.
+- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) for spawning beasts, the bodies a character can have and the clips it can play.
 - [Authority](/guides/core-concepts/authority/#what-clients-report) for what an owner's game reports and how far to trust it.

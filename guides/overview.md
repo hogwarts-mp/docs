@@ -30,26 +30,28 @@ Use the navigation to browse the globals available to the selected environment. 
 **Players:**
 
 - [Join and spawn](/guides/players/join-and-spawn/) — admitting players, the events of a visit, spawn points, deaths and respawns.
-- [Travel between places](/guides/players/travel/) — teleports, fast travel, loading another map, and the places the game builds from several maps.
+- [Travel between places](/guides/players/travel/) — teleports, fast travel and Floo flames, loading another map, and the places the game builds from several maps.
 - [Walking and seating players](/guides/players/walking-players/) — walking players to a point or after another player, seating them, and landing a scripted flight.
 - [Chat and commands](/guides/players/chat-and-commands/) — sending chat, taking over the chat relay, and slash commands.
-- [Inventory](/guides/players/inventory/) — the server-owned inventory, atomic changes, saving inventories, and items the game hands out.
+- [Inventory](/guides/players/inventory/) — the server-owned inventory, atomic changes, saving inventories, items the game hands out, gear capacity and using tools.
 - [Appearance](/guides/players/appearance/) — saving and restoring looks, the character creator, clothes, house, size, disguises, animal forms and flying them, props and player collision.
 - [Activities](/guides/players/activities/) — the game's own animated activities, from flying a Magic Kite Battle kite to opening a Howler, from the server or a client script.
 - [Progression](/guides/players/progression/) — levels and experience, which spells players can cast, talents, and every talent in the game.
+- [Field Guide progress](/guides/players/field-guide/) — reading a character's collections and challenges, saving and restoring them between visits, and following progress as it is made.
 - [Custom spells](/guides/players/custom-spells/) — spells of your own built on the game's, their casts, how PvP prices them and modded spells, and lessons of your own.
 
 **NPCs and creatures:**
 
 - [NPCs](/guides/npcs-and-creatures/npcs/) — spawning enemies, who runs their AI, controlling their health, targets and size, and switching their behaviour off.
-- [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/) — paths of waypoints for NPCs, beasts and characters, beasts that follow players, idles, and arrival events.
-- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) — tame creatures players care for, and townspeople, ghosts and other characters.
+- [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/) — paths of waypoints for NPCs, beasts and characters, having them follow players and each other, idles, and arrival events.
+- [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) — tame creatures players care for, and townspeople, ghosts and other characters with looks, clips, wands and props.
 - [Catching beasts](/guides/npcs-and-creatures/catching-beasts/) — the Nab-Sack, refereeing catches, keeping a player's bag across reconnects, and releasing beasts.
 
 **PvE:**
 
 - [Fighting NPCs](/guides/pve/fighting-npcs/) — how several players fight one NPC, damage and death events, damage multipliers, and bosses.
 - [Rewards and loot](/guides/pve/rewards-and-loot/) — what an NPC's death pays and to whom.
+- [Combat arenas](/guides/pve/arenas/) — the Overland's two combat arenas run on the server: starting them, their waves and events, and what they pay.
 
 **Encounters:**
 
@@ -66,12 +68,14 @@ Use the navigation to browse the globals available to the selected environment. 
 
 **World:**
 
-- [Time and weather](/guides/world/time-and-weather/) — the shared clock, calendar, season and weather, holiday decor, the Headmaster's office and Great Hall meals.
+- [Time and weather](/guides/world/time-and-weather/) — the shared clock, calendar, season and weather, holiday decor, the Headmaster's office, the Great Hall's meals and banners, and one client's own sky.
+- [Crowds](/guides/world/crowds/) — bringing back the game's own students, townsfolk and shopkeepers on a client, keeping chosen NPCs out, and thinning the crowd by area.
 - [Objects and effects](/guides/world/objects-and-effects/) — placing and moving props from the game's meshes and Blueprints, and visual effects that can follow an entity.
+- [Text labels](/guides/world/text-labels/) — text the server floats over a place or an entity for every nearby player: its look, markup, attaching it, and who sees it.
 - [Physics objects](/guides/world/physics-objects/) — objects that fall, roll and fly, pushing and throwing them, and letting players carry them.
-- [Doors](/guides/world/doors/) — holding the game's doors locked or open for everyone, and deciding who gets in.
+- [Doors](/guides/world/doors/) — holding the game's doors locked or open for everyone, deciding who gets in, and opening other houses' common rooms to a player.
 - [Gates](/guides/world/gates/) — portcullises, the rune gate, goblin camp gates and crawl grates, held for everyone or set for one player.
-- [Loot](/guides/world/loot/) — server-owned chests, moonstones and foragables, per-player contents, and switching off the game's own loot.
+- [Loot](/guides/world/loot/) — server-owned chests, moonstones and foragables, per-player contents, switching off the game's own loot, and running its deposits and foragables from the server.
 - [Hogwarts Express](/guides/world/hogwarts-express/) — running the train from the server, stopping it at Hogsmeade, its events, and the Foundations timetable.
 - [Line traces](/guides/world/line-traces/) — finding what a line through the world hits first, from a client script.
 - [Shapes](/guides/world/shapes/) — drawing rings, spheres, boxes, cylinders, polygons and lines in the world from a client script, to show zones or debug traces.
@@ -81,25 +85,26 @@ Use the navigation to browse the globals available to the selected environment. 
 - [Rooms](/guides/room-of-requirement/rooms/) — loading rooms under ids of your own, letting players decorate them, and saving what they build.
 - [Doors and visits](/guides/room-of-requirement/doors-and-visits/) — where each player's door leads, taking players in, visitors, and who is where.
 - [Wings, vivariums and recipes](/guides/room-of-requirement/unlocks/) — opening a room's expansions, vivarium biomes and lighting, and giving players the conjuration recipes.
+- [Vivarium beasts](/guides/room-of-requirement/vivariums/) — the beasts a room keeps in its vivariums, refereeing players' moves, harvests and breeds, and saving the beasts with the room.
 
 **User interface:**
 
 - [Web views](/guides/user-interface/web-views/) — HTML interfaces in the game, and messages between the page and your scripts.
-- [Avatar preview](/guides/user-interface/avatar-preview/) — the player's own live figure framed in a web page, for gear panes and wardrobes.
+- [Avatar preview](/guides/user-interface/avatar-preview/) — the player's own live figure framed in a web page, for gear panes and wardrobes, on a backdrop that can match the page.
 - [HUD, prompts and nametags](/guides/user-interface/hud-and-nametags/) — hiding the game's HUD, interaction prompts, and what players' nametags show.
-- [Map markers](/guides/user-interface/map-markers/) — markers, search circles and routes on the map, the player's own waypoint, player blips, and the minimap.
-- [Keys and menus](/guides/user-interface/keys-and-menus/) — key bindings, locking the controls, and keeping the game's own menus shut.
+- [Map markers](/guides/user-interface/map-markers/) — markers, search circles and routes on the map, the player's own waypoint, player blips, the game's own map icons, and the minimap.
+- [Keys and menus](/guides/user-interface/keys-and-menus/) — key bindings, locking the controls, jump, sprint, dodge and gravity holds, keeping the game's own menus shut, and following the player's spell sets.
 
 **Camera and sound:**
 
-- [Camera](/guides/camera-and-sound/camera/) — taking over the view with shots, paths and orbits, mouse look, fades, and handing it back.
+- [Camera](/guides/camera-and-sound/camera/) — taking over the view with shots, paths and orbits, mouse look, fades and handing it back, and moving the game's own camera back.
 - [Post-processing](/guides/camera-and-sound/post-processing/) — grading a player's view with photo-mode presets, settings and full-screen materials, faded in and out.
-- [Audio](/guides/camera-and-sound/audio/) — the game's sounds from the server or a client, soundbanks and music.
+- [Audio](/guides/camera-and-sound/audio/) — the game's sounds from the server or a client, soundbanks, music, and muting the game's own dialogue.
 - [Voice chat](/guides/camera-and-sound/voice-chat/) — who hears whom, voice ranges and tiers, muting, and each player's voice settings.
 
 **Mounts and races:**
 
-- [Brooms and mounts](/guides/mounts-and-races/brooms-and-mounts/) — giving players brooms and creatures, mounting and dismounting, flight overrides, and keeping riders out.
+- [Brooms and mounts](/guides/mounts-and-races/brooms-and-mounts/) — giving players brooms and creatures, mounting and dismounting, flight overrides, aiming from a broom, and keeping riders out.
 - [Races](/guides/mounts-and-races/races/) — the game's broom races on tracks of your own, for several players, timed by the server.
 
 **Quidditch:**
@@ -118,7 +123,7 @@ Use the navigation to browse the globals available to the selected environment. 
 Events.on("playerConnect", (player) => {
   player.sendChat(`Welcome to Hogwarts, ${player.nickname}!`);
 
-  const npc = NPC.create("Goblin_Grunt", 250, 120, 0, "hostile");
+  const npc = NPC.create("Goblin_Grunt", { x: 250, y: 120, z: 0 });
   if (npc) {
     npc.setMaxHealth(500);
   }

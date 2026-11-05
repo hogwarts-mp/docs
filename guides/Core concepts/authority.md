@@ -36,11 +36,14 @@ Everything a client sends is a claim about its own game, and a modified client c
 | `npcDamaged` | Clamped and rate-capped by the server, but reported by the attacker's client. |
 | `playerInventoryChanged`, `playerInventoryNativeDelta` | The client's account of its game's inventory. Adopt a delta with `player.inventory.adoptNative()` only for items on an allowlist. |
 | `playerLocationChanged`, teleport and fast-travel completions | The client's account of where it is and how a request went. |
+| `playerFastTravelUnlocked` | The client's account of a Floo flame it lit. Save it, but check it before rewarding it. |
 | `housePointsRequest`, `beastCared`, `beastCaptureStart`, `beastCaptureRequest` | Requests. They take effect unless a handler refuses them by returning `false`. |
 | `doorUnlockRequest` | A request. The door stays locked unless a script releases it. |
-| `steamId`, `epicId`, `discordId`, `hardwareId` | Announced by the client. Never authorize anyone with them. |
+| `steamId`, `epicId`, `discordId`, `discordName`, `hardwareId` | Announced by the client. Never authorize anyone with them. |
 
 `pvpHit` is different: it reports a hit the server has already arbitrated, so its amounts are the server's.
+
+`player.discordName` and `connection.discordName` are the username of the Discord account the player's client is signed in to, or an empty string without one. A name longer than 32 bytes arrives empty. Show it, but never key anything on it. On the client, `Discord.getUsername()` reads the same name, or an empty string until Discord has signed the player in.
 
 ## Handling what a client sends
 
@@ -81,7 +84,7 @@ Events.on("playerConnecting", async (connection) => {
 });
 ```
 
-The join waits while a handler's promise is pending, so the check can call out to your own service.
+The join waits while a handler's promise is pending, so the check can call out to your own service. A `hogwartsmp://` link carries the ticket as `?ticket=`; [Join links and tickets](/guides/players/join-and-spawn/#join-links-and-tickets) covers encoding it and the joins that present it twice.
 
 ## Client scripts belong to the player
 

@@ -168,14 +168,27 @@ A client script can fly the local player itself: `LocalPlayer.setCollision(false
 
 `LocalPlayer.resetFall()` treats the player as just teleported: the next landing deals no fall damage, and a later fall is measured from where they are now. Call it before turning collision back on. It returns `false` with no character.
 
+To the game, the player is falling for the whole flight. One who holds still in the air for 5 seconds, more than 10 m from the last ground they stood on, reads as stuck in a fall, and the game kills them. Gravity's pull between steps also adds to the fall a landing counts. Take the player's gravity away for the flight with `LocalPlayer.suspendGravity()`, and give it back with `LocalPlayer.restoreGravity()` as they land. [Gravity](/guides/user-interface/keys-and-menus/#gravity) explains how the hold works.
+
 ```js
 // client/main.js
+let flightTimer = null;
+
+function startFlying() {
+  LocalPlayer.suspendGravity();
+  LocalPlayer.setCollision(false);
+  flightTimer = setInterval(step, 16);
+}
+
 function stopFlying() {
   clearInterval(flightTimer);
   LocalPlayer.resetFall();
+  LocalPlayer.restoreGravity();
   LocalPlayer.setCollision(true);
 }
 ```
+
+`step` stands for your own code that moves the player one step.
 
 ## Where to go next
 

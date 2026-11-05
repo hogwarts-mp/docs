@@ -5,7 +5,7 @@ sidebar:
   order: 340
 ---
 
-A player's level, spells and talents live in their own game. A client script applies them through `Progression`, `Spells` and `Talents`, and the server decides what they should be. Don't count on the game keeping any of it between visits: store it on the server and apply it again on every `worldReady`.
+A player's level, spells and talents live in their own game. A client script applies them through `Progression`, `Spells` and `Talents`, and the server decides what they should be. Don't count on the game keeping any of it between visits: store it on the server and apply it again on every `worldReady`. The Field Guide's collections and challenges are kept the same way: see [Field Guide progress](/guides/players/field-guide/).
 
 The game runs on the player's machine, so a modified client can raise its own level or grant itself talents. Base anything the server decides, such as rewards or access, on the server's own records, not on what a client reports. See [Authority](/guides/core-concepts/authority/).
 
@@ -298,3 +298,4 @@ These are talents to the game but belong to none of the five trees. Their level 
 - [Events](/guides/core-concepts/events/) for `worldReady` and sending data between the server and clients.
 - [Rewards and loot](/guides/pve/rewards-and-loot/) for what defeating an NPC pays.
 - [Inventory](/guides/players/inventory/) for items, which a server also keeps between visits itself.
+- [Field Guide progress](/guides/players/field-guide/) for saving and restoring a character's collections and challenges.

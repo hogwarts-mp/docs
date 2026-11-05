@@ -1,11 +1,11 @@
 ---
 title: Map markers
-description: Put markers, search circles and gold routes on the map and minimap, read the player's own waypoint, choose which players get a blip and in what colour, and read what the minimap shows.
+description: Put markers, search circles and gold routes on the map and minimap, read the player's own waypoint, choose which players get a blip and in what colour, hide or retitle the game's own map icons, and read what the minimap shows.
 sidebar:
   order: 620
 ---
 
-The game's map and minimap draw a blip for every other player, and client scripts can add markers and circles of their own and draw the game's gold route to one. All of this lives on each client, in the `Blips` global, so the server decides what each player should see and tells their client.
+The game's map and minimap draw a blip for every other player, and client scripts can add markers and circles of their own and draw the game's gold route to one. All of this lives on each client, in the `Blips` global, so the server decides what each player should see and tells their client. The game's own icons, such as shops and Floo Flames, are in the `MapIcons` global: see [The game's own icons](#the-games-own-icons).
 
 ## Markers and circles
 
@@ -130,6 +130,56 @@ Events.on("party:members", (payload) => {
 `Blips.setPlayerColor(networkId, r, g, b, a)` colours one player's blip, with components from 0 to 1. Leave out the colour to go back to their house colour. `Blips.setAllPlayerColors(r, g, b, a)` colours every blip, and `Blips.setBlipScale(scale)` sizes them.
 
 Hiding a blip hides an icon, not a player: their position still reaches the client. To keep players apart, use [virtual worlds](/guides/core-concepts/virtual-worlds/), and to hide one from everyone, `player.setVisible(false)` on the server, which takes their blip with them.
+
+## The game's own icons
+
+The game puts icons of its own on the map and the minimap: shops, Floo Flames, collectibles, quests and more. A client script can hide them, by kind or one by one, and put its own title on their tooltips, with the `MapIcons` global. Blips your scripts set are never touched.
+
+`MapIcons.list(category)` returns every icon the game has registered, or only one category's:
+
+| Field | Meaning |
+| --- | --- |
+| `id` | The game's name for it, such as `"HM_JPippensPotions"` |
+| `category` | Its kind, such as `"fasttravel"` for Floo Flames or `"locationshogsmeade"` for places in Hogsmeade |
+| `state` | What the game makes of it now, such as `"undiscovered"`, `"discovered"` or `"fast_travel_unlocked"` |
+| `title` | Its tooltip title in the game's language, such as `"J. Pippin's Potions"`; `null` when that text is not loaded |
+| `titleKey` | The game's localization key for the title |
+| `label` | The title `setLabel` put over it, or `null` |
+| `position` | Where it is, in world centimetres |
+| `hidden` | Whether the current rules keep it off the map and the minimap |
+
+The list grows as the world streams in around the player. It includes icons the player has not discovered yet, which the game only draws once they find them. `MapIcons.categories()` names every category, and `list` throws for a category that is not one of them.
+
+### Hiding icons
+
+`MapIcons.setHidden(target, hidden)` hides icons on the map and the minimap. `target` is a category, or else one icon's id, in any case. Icons the game registers later follow the rule as they arrive. `false` lifts your rule; for one id, it also shows that icon through a category that is hidden.
+
+- A rule for an id beats a rule for its category, so a script can hide a category and keep one of its icons.
+- Between resources, hidden wins: an icon one resource hides by its id stays hidden, whatever another does.
+- A name that is not a category counts as an id, so a misspelt category hides nothing.
+
+```js
+// client/main.js
+// This server runs its own travel network, so the game's Floo Flames leave the map.
+MapIcons.setHidden("fasttravel", true);
+```
+
+Hiding an icon only hides it. To stop players fast travelling, use [`player.setFastTravelEnabled(false)`](/guides/players/travel/#players-own-fast-travel) on the server.
+
+### Tooltips
+
+`MapIcons.setLabel(id, title, description)` puts your title on an icon's tooltip on the map. Leave out `description`, or pass `null`, to keep the game's description, or pass `""` to show none. Only the tooltip changes: the name stays the game's everywhere else, such as in quests. When the game will not fast travel to a Floo Flame, its tooltip says so, label or not.
+
+```js
+// client/main.js
+MapIcons.setLabel("HM_JPippensPotions", "The Bubbling Cauldron", "Potions brewed to order.");
+```
+
+The last label set for an id wins, whichever resource set it. `MapIcons.clearLabel(id)` gives the icon its own tooltip back, and returns `false` when it had no label.
+
+### Who owns a rule
+
+Unlike blips, hide rules and labels belong to the resource that set them, and go when it stops. `MapIcons.reset()` drops every rule and label your resource set. Everything goes when the player disconnects. Like blips, they live on each client: a client script that sets them as it starts sets them for every player who runs it, and the server tells a client when one player should see something else.
 
 ## The minimap
 

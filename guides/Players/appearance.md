@@ -15,11 +15,12 @@ A player's look is their body, face, hair, voice and name. Their own game builds
 | --- | --- |
 | `format`, `version` | Always `"hogwartsmp-look"`, and the version of the format |
 | `gender` | `"male"` or `"female"` |
-| `presets` | The creator's choice for each category, such as `{ hairStyle: "HairFemale040" }` |
+| `presets` | The creator's choice for each category, such as `{ hairStyle: "HairFemale040" }`. `hairColour` is either a preset or a picked `"#rrggbb"` colour |
 | `gear` | What the player wears, as the game's appearance ids |
 | `faceGear`, `house`, `scale`, `voice`, `name`, `hood`, `wandStyle` | Present when set: glasses, house colours, size, voice, character name, hood and wand style |
 | `facialHair` | The beard or moustache, such as `"M_Facial_zBase_FullBeard"`. Absent or `""` is clean-shaven. |
 | `facialHairColor` | `"hair"` to match the hair, or a `"#rrggbb"` colour. Absent, the facial hair keeps its own colour. |
+| `pronoun` | `"witch"` or `"wizard"`: the creator's Witch or Wizard pick, which decides the dormitory the game lets the player into. Absent, it follows the body: a female body is a witch. |
 
 `playerAppearanceChanged` fires with the player, their new look and its revision whenever the look changes, and `player.appearanceRevision` counts those changes for the current visit. A player's game sends at most two looks a second.
 
@@ -78,6 +79,10 @@ A resource can build a creator of its own. `Creator.begin()` starts an editing s
 
 Facial hair is two categories, `facialHair` and `facialHairColor`, which take the look's own values. The schema lists the game's beards and moustaches and a few natural shades, `applyPatch` also takes any `"#rrggbb"` colour, and an empty id takes the facial hair off or gives it back its own colour. Offer them only when `Creator.getCapabilities().facialHair` is `true`, as older builds do not have them.
 
+`hairColour` takes a `"#rrggbb"` colour too, in `applyPatch` and in a look's `presets`, beside the game's own hair colours. A later hair colour preset, or a full-body `preset`, replaces it. Offer a colour picker only when `Creator.getCapabilities().hairColourHex` is `true`.
+
+The creator's dormitory choice, witch or wizard, reaches the look as `pronoun` when the player confirms. `Creator.getState().pronoun` reads the pick the game holds, when `Creator.getCapabilities().pronoun` is `true`.
+
 `Portrait.capture(request)` renders a picture of a player, or of a saved look, for a [web view](/guides/user-interface/web-views/). One capture runs at a time and takes a second or so: check `Portrait.busy()`, then `Portrait.lastImage()` returns it as a data URI.
 
 ## Clothes
@@ -99,7 +104,7 @@ function wearUniform(player) {
 
 `player.house` reads or sets the player's house: `"Gryffindor"`, `"Hufflepuff"`, `"Ravenclaw"`, `"Slytherin"` or `"Unaffiliated"`, the default. Setting it changes their robes and crest.
 
-`player.gender` sets which dormitory the game treats the player as belonging to. It does not change their body, which follows the look's `gender`.
+`player.gender` is the player's Witch or Wizard pronoun: `"female"` for a witch and `"male"` for a wizard, which the dormitory staircases check. It follows the [look](#the-look)'s `pronoun` whenever the player wears a look that has one. Setting it changes the pronoun in the player's game without rebuilding their character, and their next look carries it. It does not change their body, which follows the look's `gender`.
 
 ## Size
 
@@ -130,6 +135,8 @@ A disguise is not part of the look: `getLook` never includes it, and `setLook` t
 | `species` | Any species in [`Beast.catalog()`](/guides/npcs-and-creatures/beasts-and-characters/#beasts), such as `"Niffler"`, `"Hippogriff"` or `"KneazleOffspring"` |
 | `look` | `"species"`, the default, or `"cat"`, which dresses a Kneazle as the castle's grey cat |
 | `size` | The animal against its natural size: 1 by default, 2 for twice as big |
+| `color` | The coat: one of the species' `colors` in the catalog. The cat look has its own ten: `"Default"`, the castle cat's grey, and `"Variation1"` to `"Variation9"`, which are black, calico, orange, Siamese, Somali, spotted, striped, tortoiseshell and Turkish Van |
+| `gender` | `"male"` or `"female"` |
 
 ```js
 // server/main.js
@@ -148,13 +155,15 @@ Events.on("chatCommand", (player, message, command, args) => {
 });
 ```
 
-`setAnimalForm` throws a `RangeError` for a species the catalog does not list, for the cat look on anything but a Kneazle, and for a size of 0 or less.
+Every client draws the same coat and sex. Left out, `color` and `gender` stay as they are when a call keeps the species and look, as one that only changes the size does. For a new animal, the server picks a coat on the game's own spawn odds, and the sex follows the player's own [`gender`](#house-and-gender).
+
+`setAnimalForm` throws a `RangeError` for a species the catalog does not list, for the cat look on anything but a Kneazle, for a colour the form does not have, for a `gender` other than the two, and for a size of 0 or less.
 
 The player is still themselves under the beast. They move at a human's pace, and their collision, camera, hitbox and nametag are fitted to the animal. Their own game does not let them cast spells, and other players see no wand or held prop. A species that flies in the game, one with `canFly` in the catalog, takes its flight poses whenever the player is more than 1.2 m above the ground, but the form does not lift them there: see [Flying](#flying).
 
-`getAnimalForm()` returns the `species`, the `look`, the `size` worn and the `scale`: how large the player is against a human. That scale is held to `setScale`'s range of 0.1 to 10. A size that would take it further is cut back to fit, and `size` reads back the size worn. [`setScale`](#size) and `getScale` keep working on the human meanwhile: a size set during the form is the one the player comes back at.
+`getAnimalForm()` returns the `species`, the `look`, the `color` and `gender` worn, the `size` worn and the `scale`: how large the player is against a human. That scale is held to `setScale`'s range of 0.1 to 10. A size that would take it further is cut back to fit, and `size` reads back the size worn. [`setScale`](#size) and `getScale` keep working on the human meanwhile: a size set during the form is the one the player comes back at.
 
-The form swaps the body at once, with no animation of its own. An animagus is yours to build around it: play the game's own human-to-cat clips with `LocalPlayer.playClip` and its morph effects before the swap, set `setDamageGivenMultiplier(0)` while a player is an animal if animals should not fight, leave a player who is down or riding as they are, and change players back when they die.
+The form swaps the body at once, with no animation of its own. An animagus is yours to build around it: play the game's own human-to-cat clips with `LocalPlayer.playClip` and its morph effects before the swap, set `setDamageGivenMultiplier(0)` while a player is an animal if animals should not fight, leave a player who is down or riding as they are, and change players back when they die. The hidden human still rolls on the dodge key, and blinks with the Swift talent, so hold [dodge](/guides/user-interface/keys-and-menus/#jump-sprint-and-dodge) off on the player's client with `LocalPlayer.setDodgeEnabled(false)` while they are an animal, and pass `true` when they change back.
 
 ### Flying
 
@@ -188,7 +197,7 @@ Events.on("chatCommand", (player, message, command) => {
 Events.on("playerDisconnect", (player) => flying.delete(player.id));
 ```
 
-The client flies them. It sets the position on every step, even while hovering, because with collision off a player left alone falls through the ground:
+The client flies them, setting the position on every step, even while hovering. It also takes the player's gravity away for the flight. With collision off, gravity would drop the player through the ground, and to the game a flier is a player falling: one that hovers for 5 seconds more than 10 m above the last ground it stood on reads as stuck in a fall, which kills them:
 
 ```js
 // client/main.js
@@ -234,6 +243,7 @@ function takeOff(speed) {
   const ground = groundBelow(at);
   flight = { at, speed, stand: ground ? at.z - ground.location.z : 50, timer: setInterval(step, STEP_MS) };
   LocalPlayer.stopPlayerInput();
+  LocalPlayer.suspendGravity();
   LocalPlayer.setCollision(false);
 }
 
@@ -246,6 +256,7 @@ function land() {
   LocalPlayer.clearVelocity();
   LocalPlayer.setPosition(at.x, at.y, ground ? ground.location.z + stand : at.z);
   LocalPlayer.resetFall();
+  LocalPlayer.restoreGravity();
   LocalPlayer.setCollision(true);
   LocalPlayer.restorePlayerInput();
 }
@@ -253,7 +264,7 @@ function land() {
 Events.on("my-forms:fly", (payload) => (payload.on ? takeOff(payload.speed) : land()));
 ```
 
-`LocalPlayer.stopPlayerInput()` stops the hidden human from walking off on the movement keys, while the camera still turns and [`Key.isDown`](/guides/user-interface/keys-and-menus/#binding-keys) still reads them. `stand` is how far the player's middle sits above the ground at takeoff, so a landing puts any size of animal back on its feet, and `LocalPlayer.resetFall()` keeps the trip from [counting as one long fall](/guides/players/walking-players/#landing-a-scripted-flight). This flight drops straight to the ground when it lands. For a gentler landing, keep stepping down until the player is just above the ground, then land.
+`LocalPlayer.stopPlayerInput()` stops the hidden human from walking off on the movement keys, while the camera still turns and [`Key.isDown`](/guides/user-interface/keys-and-menus/#binding-keys) still reads them. `stand` is how far the player's middle sits above the ground at takeoff, so a landing puts any size of animal back on its feet, and `LocalPlayer.resetFall()` keeps the trip from [counting as one long fall](/guides/players/walking-players/#landing-a-scripted-flight). [Gravity](/guides/user-interface/keys-and-menus/#gravity) explains `suspendGravity` and `restoreGravity`. This flight drops straight to the ground when it lands. For a gentler landing, keep stepping down until the player is just above the ground, then land.
 
 Land a flier before turning them back, and when they die: call `setFlying(player, false)` before `player.setAnimalForm(null)`, or the client goes on flying a human.
 

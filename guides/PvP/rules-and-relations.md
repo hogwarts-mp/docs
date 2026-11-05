@@ -20,7 +20,7 @@ Out of the box nobody can hurt anybody. PvP starts when a script sets rules or p
 | `friendlyFire` | `false` | Whether players on the same team may hurt each other |
 | `aim` | `"lock"` | `"lock"` lets players lock on to hostile players; `"skillshot"` does not, though spells still hit |
 | `defeat` | `"death"` | What losing does: the game's own `"death"`, or a `"kneel"` that the player gets up from |
-| `curses` | `"on"` | `"off"` stops the Killing, Cruciatus and Imperius curses doing anything to players |
+| `curses` | `"on"` | `"off"` stops the Killing, Cruciatus and Imperius curses doing anything to players; `"crosshair"` also lets them reach players fought in skill-shot, as [Curses](#curses) explains |
 | `kneelHp` | 1 | The health at which a kneel defeat starts, and the health a kneeling player is held at |
 | `kneelSeconds` | 4 | How long a [kneel](/guides/pvp/hits-and-defeat/#how-long-a-kneel-lasts) lasts; `0` keeps the player kneeling until `player.endKneel()` |
 | `flagCombatLockSeconds` | 15 | How long after a hit, given or taken, a player who drops their flag stays flagged, and stays in a fight for [spell cooldowns](/guides/pvp/hits-and-defeat/#spell-cooldowns) |
@@ -35,6 +35,17 @@ Pvp.configure({ who: "everyone", aim: "skillshot", curses: "off" });
 ```
 
 An unknown rule or a value of the wrong kind throws, and so does a negative number; nothing changes then. `pvpRulesChanged` fires with the rules whenever they change.
+
+### Curses
+
+The game casts Avada Kedavra, Crucio and Imperio only at a target the caster has locked on to. A player fought with `"skillshot"` aim cannot be locked on to, so with `curses: "on"` the curses reach only players fought with `"lock"`.
+
+`curses: "crosshair"` works like `"on"`, and also lets a curse take a hostile player the caster fights in skill-shot, while the caster's crosshair is on them and the caster holds no lock. Lock-on still never picks that player.
+
+```js
+// server/main.js
+Pvp.configure({ who: "everyone", aim: "skillshot", curses: "crosshair" });
+```
 
 ## How a relation is decided
 

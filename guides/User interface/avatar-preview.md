@@ -1,6 +1,6 @@
 ---
 title: Avatar preview
-description: Show the player their own live figure inside a web page, for a gear pane or a wardrobe, framed into a rect the page reports, with clips to play and a backdrop behind it.
+description: Show the player their own live figure inside a web page, for a gear pane or a wardrobe, framed into a rect the page reports, with clips to play and a backdrop behind it that can match the page's colour.
 sidebar:
   order: 605
 ---
@@ -53,7 +53,7 @@ function closeGear() {
 | --- | --- |
 | `anchor` | The rect to frame the figure into. `{ view, rect: { x, y, w, h, visible } }` is in CSS pixels relative to a web view, as its page measures it. `{ screen: { x, y, w, h } }` is in pixels relative to the screen. |
 | `camera` | `framing`, how much of the figure fills the rect's height: `"full"` by default, `"body"` or `"head"`. `yaw`, degrees added to the figure facing the camera: -15 by default, a slight turn. |
-| `backdrop` | `color`, and `gradient` for a second colour it blends to at the bottom. Colours are `"#rrggbb"` or linear `[r, g, b]` components. `"none"` leaves the backdrop out. `{ color: "#16181e" }` by default. |
+| `backdrop` | `color`, and `gradient` for a second colour it blends to at the bottom. Colours are `"#rrggbb"` or linear `[r, g, b]` components. `match: true` makes them the colours the backdrop shows on screen; see [Matching a colour](#matching-a-colour). `"none"` leaves the backdrop out. `{ color: "#16181e" }` by default. |
 | `light` | The figure's own studio lights: `rig` is `"studio"` by default, or `"none"` to leave it to the world's light. `scale` sets their strength, 1 by default. |
 | `world` | `scale`, the figure's size from 0.05 to 10, which sets how near the camera it stands: 0.6 by default. `depth`, centimetres from the figure to the backdrop: 40 by default. `margin`, pixels the backdrop runs past the rect: 8 by default. `isolate`: see [Lighting](#lighting). |
 
@@ -159,13 +159,46 @@ A clip that does not load leaves a note in `status`. `state(id).debug.animating`
 
 The figure and the backdrop stand in the world, so the game treats them like the rest of it:
 
-- The backdrop does not match a CSS colour exactly. The game's exposure, tone curve and time-of-day grading apply to it like any other pixel of the world. In daylight a dark colour reads near black, and at night brighter. Frame the hole so the seam does not matter, or pick a family of colours rather than one exact shade.
+- Without `backdrop.match`, the backdrop does not match a CSS colour exactly. The game's exposure, tone curve and time-of-day grading apply to it like any other pixel of the world. In daylight a dark colour reads near black, and at night brighter. [Matching a colour](#matching-a-colour) fixes that.
 - The figure is not cut to the rect. Where it reaches past the hole, only the page's opaque parts hide it, so keep it inside with `camera.framing`.
 - Anything in the world nearer the camera than the backdrop draws over it. The backdrop stands about 2.5 m from the camera at the default size. A smaller `world.scale` brings the figure and the backdrop nearer, so less gets in front.
 
+### Matching a colour
+
+With `match: true` in the backdrop, `color` and `gradient` are the colours the backdrop must show on screen, as the page's CSS writes them. The game measures a band just inside the backdrop's edge, in its own picture before any web view is drawn over it, and corrects the backdrop until that band shows the colour. It keeps correcting as the exposure moves, so the colour holds in daylight, at night and indoors, and the rest of the view is untouched.
+
+```jsx
+// client/main.js
+function createWardrobePreview(view) {
+  return AvatarPreview.create({
+    anchor: { view, rect: { x: 0, y: 0, w: 0, h: 0, visible: false } },
+    backdrop: { color: "#15120e", match: true },
+  });
+}
+```
+
+- The backdrop comes up first, and the figure shows once the colour matches, after about a second at most. Until then, for a preview anchored to a view, the game asks the page to cover the hole in the colour: it dispatches an `hmp:hole:cover` event on the page's `window`, whose `detail.cover` is the CSS to paint, a colour or a gradient, and then `null` once the figure shows.
+- The colour is exact at the band where the backdrop meets the page, and close elsewhere: outdoors in daylight, the game's glow can lighten one side and darken the other by a few steps.
+- A cut, a flash or a teleport changes the exposure at once, and the backdrop is off for a few frames before it catches up.
+- A gradient matches at both ends, and blends between them in linear light rather than as CSS would.
+- `[r, g, b]` colours are linear display light from 0 to 1, and anything above 1 shows as white.
+- It needs a standard-range display. On an HDR display `state(id).match.status` is `"unsupported"`, and the colour works as it does without `match`.
+
+The page paints the cover over its hole:
+
+```js
+// ui/gear.js, running in the page
+// While a matched backdrop settles, the hole shows the colour it is settling on.
+window.addEventListener("hmp:hole:cover", (event) => {
+  hole.style.background = event.detail.cover ?? "";
+});
+```
+
+`state(id).match` follows the match: its `status` goes from `"waiting"` to `"converging"` to `"converged"`, `error` is the furthest any channel is from the colour, in steps of 0 to 255, and `sampled` is what the band reads now.
+
 ## Lighting
 
-The studio lights take the sun's place on the figure, but the sky's light and the game's ambient light still reach it, so it shifts a little with the hour.
+The studio lights take the sun's place on the figure, but the sky's light and the game's ambient light still reach it, so it shifts a little with the hour. With `backdrop.match`, the studio lights also follow the view's exposure once the colour matches, so the figure no longer washes out at night or indoors. Without it, they keep one strength.
 
 `world.isolate: true` takes fog, sky light, ambient light and reflections out of the whole view and fixes its exposure, so the studio lights alone light the figure. Because it changes every pixel of the world, it only takes effect while the rect covers at least 75% of the screen, as a full-screen wardrobe does. Destroying the preview puts the view back.
 
@@ -181,6 +214,7 @@ The studio lights take the sun's place on the figure, but the sky's light and th
 | `rect` | Where the anchor is on screen, in pixels; `null` while hidden |
 | `backdrop` | Whether the backdrop is up |
 | `hold` | `"isolate"` while `world.isolate` is in effect, otherwise `"none"` |
+| `match` | How [`backdrop.match`](#matching-a-colour) stands: `status` is `"off"` without it |
 | `status` | The last failure or note, cleared once read |
 
 `backend`, `isolation`, `worldLitMeshes` and `debug` are diagnostics.

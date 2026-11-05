@@ -1,6 +1,6 @@
 ---
 title: Brooms and mounts
-description: Give players brooms and creatures to ride, put them on and take them off from a client script, set how fast brooms fly, change how a broom handles, and keep riders out of an area.
+description: Give players brooms and creatures to ride, put them on and take them off from a client script, set how fast brooms fly, change how a broom handles, aim from a broom, and keep riders out of an area.
 sidebar:
   order: 800
 ---
@@ -97,6 +97,34 @@ Events.on("broom:stun", () => {
 });
 ```
 
+## Aiming from a broom
+
+On a broom the game's camera follows the broom's pitch: the mouse turns the view left and right, but not up and down, and the game shows no crosshair in flight. Two client switches change that for the local player's rides:
+
+| Call | Does |
+| --- | --- |
+| `Camera.setBroomFreeLook(enabled)` | Lets the mouse and the right stick look up and down; the view stays where the player puts it instead of following the broom's pitch |
+| `Camera.setBroomCrosshair(shown)` | Draws a crosshair at the centre of the view, and steps the camera right over the rider's shoulder so they are not under it |
+
+Both are off by default, return the setting they kept, and `Camera.getBroomFreeLook()` and `Camera.getBroomCrosshair()` read them back. A setting holds for every ride until you change it: dismounting hands the pitch back to the game, and the next ride frees it again, while turning free look off mid-ride hands it back at once. The broom still climbs and dives on its own keys. On a gamepad those are on the right stick, so climbing tilts the view as well. The crosshair hides with the game's HUD, behind a game menu, and while a [custom camera](/guides/camera-and-sound/camera/) has the view.
+
+`Spells.broomCastTry(slot, 5)` casts the spell in one of the four slots of the spell bar, 0 to 3, where the crosshair points: at the first thing the centre of the view covers beyond the rider, their broom ignored, or 40 m out along the view when nothing is there. The `5` picks that aim. It returns a line describing the cast, for your logs. `Spells.broomCastReady()` turns true once a player with a wand has sat on a broom for a second and a half, so a key bound to cast stays inert on foot and does not fire as they mount:
+
+```js
+// client/main.js
+// Keys 1 to 4 cast the spell bar's spells from a broom, at the crosshair.
+Camera.setBroomFreeLook(true);
+Camera.setBroomCrosshair(true);
+
+["1", "2", "3", "4"].forEach((key, slot) => {
+  Key.bind(key, () => {
+    if (Spells.broomCastReady()) Spells.broomCastTry(slot, 5);
+  });
+});
+```
+
+The two camera switches belong to the client, not to your resource, and `Broom.resetOverrides()` leaves them alone, so turn them off as your resource stops.
+
 ## Creatures
 
 `FlyingMount` rides the hippogriffs and the thestral, and `GroundMount` the graphorn. They work like `Broom`:
@@ -146,3 +174,4 @@ The server's part is the one that holds: a client script can be changed by its p
 
 - [Races](/guides/mounts-and-races/races/) for running the game's broom races on tracks of your own.
 - [Inventory](/guides/players/inventory/) for giving and taking items.
+- [Camera](/guides/camera-and-sound/camera/#the-games-own-camera) for the rest of what scripts change about the game's camera.

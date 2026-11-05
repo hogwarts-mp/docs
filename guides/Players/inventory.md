@@ -1,6 +1,6 @@
 ---
 title: Inventory
-description: Give, take and move items in a server-owned inventory, change several things at once safely, save inventories between visits, adopt items the game hands out, and decide what gear's stats are worth.
+description: Give, take and move items in a server-owned inventory, change several things at once safely, save inventories between visits, adopt items the game hands out, use tools from a script, and decide how much gear a player holds and what its stats are worth.
 sidebar:
   order: 320
 ---
@@ -139,6 +139,38 @@ An addition outside the allowlists fails with `NATIVE_DELTA_NOT_ALLOWED`, and a 
 ## Using consumables
 
 `player.inventory.use(itemId, options, callback)` uses one potion or plant on the player's game, and completes only once the game shows that exact item was used up. The authoritative inventory changes with it and `playerInventoryConsumed` fires. It fails with `ITEM_NOT_USABLE` for an item the game cannot use from the inventory, and `USE_IN_PROGRESS` while another use is still running.
+
+## Using tools
+
+On the client, `LocalPlayer.useTool(itemId)` uses one of the player's tools the way picking it on the tool wheel does: the Nab-Sack, `"CaptureDevice"`, the petting brush, `"CreaturePettingBrush"`, or creature feed, `"CreatureFeed"`. The game picks the target, runs its own checks, shows its own message when it refuses, and plays the use. The Nab-Sack still waits at each gate for the player's own confirm, and a catch goes through the server's [catch events](/guides/npcs-and-creatures/catching-beasts/#refereeing-a-catch) as usual.
+
+It works with the tool wheel [held shut](/guides/user-interface/keys-and-menus/#the-games-own-menus), so a resource can put a tool on a key of its own:
+
+```js
+// client/main.js
+Game.setToolWheelEnabled(false);
+Key.bind("g", () => LocalPlayer.useTool("CaptureDevice"));
+```
+
+It returns `true` when the game took the use, and `false` for an item that is not a tool or that the player does not hold.
+
+## Gear capacity
+
+Every piece of gear takes a slot of its own, and the game holds a player to 20 of them, plus the slots Merlin trials add. `player.inventory.gearCapacity` sets the total instead, from 1 to 200. `null`, the default, goes back to the game's own limit.
+
+Gear the player already holds past the limit stays theirs: their game refuses only new pieces. The setting reaches their game ahead of the rows that come with it, so set it before you grant the gear that needs the room. It lasts for the visit, like the inventory, so set it again when the player returns:
+
+```js
+// server/main.js
+Events.on("loadingFinished", async (player) => {
+  const saved = await loadInventory(player);
+  if (!player.connected) return;
+  if (isSupporter(player)) player.inventory.gearCapacity = 60;
+  if (saved) player.inventory.replace(saved);
+});
+```
+
+Setting it publishes a new `inventory.revision` but raises no `playerInventoryUpdated`, since no row changes. A value that is not a whole number throws a `TypeError`, and one outside 1 to 200 a `RangeError`.
 
 ## Gear stats
 

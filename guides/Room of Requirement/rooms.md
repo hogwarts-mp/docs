@@ -15,7 +15,7 @@ Nobody owns a room unless your script says so. "Every player has a room of their
 
 ```js
 // server/main.js
-const EMPTY_ROOM = { version: 1, objects: [], locks: {}, lighting: "", beasts: [] };
+const EMPTY_ROOM = { version: 2, objects: [], locks: {}, lighting: "", beasts: [] };
 
 function roomOf(player) {
   return `room:${player.id}`;
@@ -47,7 +47,7 @@ The server checks that an edit is well formed, not that it makes sense, so a pla
 
 Rooms live in the server's memory. They survive your resource restarting, and are gone when the server stops. To keep them, save each room as it changes and load it again when you need it.
 
-`sanctuaryChanged` fires with the room's id, its new revision and the player who edited it, after every accepted edit. An editor's game reports changes twice a second while they work, so wait for a pause before saving. `Sanctuary.get(id)` returns the room's layout, ready to store as JSON:
+`sanctuaryChanged` fires with the room's id, its revision and the player who edited it, after every accepted edit. It also fires when the room's [vivarium beasts](/guides/room-of-requirement/vivariums/#saving-the-beasts) change, with `null` in place of the player when no player changed them. An editor's game reports changes twice a second while they work, so wait for a pause before saving. `Sanctuary.get(id)` returns the room's layout, ready to store as JSON:
 
 ```js
 // server/main.js
@@ -69,12 +69,13 @@ Events.on("sanctuaryChanged", (id) => {
 
 | Field | Holds |
 | --- | --- |
-| `version` | 1 |
+| `version` | 2. `load` also reads version 1 layouts, which have no `beasts` |
 | `objects` | Every conjured or changed piece: its type, position, rotation, scale and colour. A piece of the room's own that was vanished has the type `"None"`. |
 | `locks` | Which parts of the room are open: the expansions, the vivarium biomes, the initial dressing and the lighting choice ([the lock ids](/guides/room-of-requirement/unlocks/#the-rooms-locks)) |
 | `lighting` | The lighting style: `"Default"`, `"Potnr"`, `"Hbgst"`, `"Mzoo"` or `"Dwiz"` (the potioneer's, herbologist's, magizoologist's and dark wizard's) |
+| `beasts` | The beasts living in its vivariums, with their needs, byproducts and pregnancies ([the entries](/guides/room-of-requirement/vivariums/#what-a-beast-entry-holds)) |
 
-A room holds at most 8192 objects. A layout does not hold what goes on at the room's stations, its beasts, who may edit it or where anyone's door leads.
+A room holds at most 8192 objects, and each vivarium at most 12 beasts. A layout does not hold what goes on at the room's stations, who may edit it or where anyone's door leads. Loading a layout without `beasts` empties the room's vivariums.
 
 Give every layout its `locks` and `lighting`. A layout that leaves them empty keeps whatever the player's game had from the last room they were in.
 
@@ -82,4 +83,5 @@ Give every layout its `locks` and `lighting`. A layout that leaves them empty ke
 
 - [Doors and visits](/guides/room-of-requirement/doors-and-visits/) for getting players in and out of rooms.
 - [Wings, vivariums and recipes](/guides/room-of-requirement/unlocks/) for opening parts of a room and giving players the conjuration recipes.
+- [Vivarium beasts](/guides/room-of-requirement/vivariums/) for the beasts a room keeps and what players do with them.
 - [Virtual worlds](/guides/core-concepts/virtual-worlds/) for who sees whom inside a room.

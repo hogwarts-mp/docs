@@ -98,6 +98,8 @@ Events.on("playerConnect", async (player) => {
 
 `saveBag` and `loadBag` stand for your own store, such as the database behind [Persisting state](/guides/getting-started/first-resource/#persisting-state). Call `keepBag` after your own `giveCaptured` and `takeCaptured` calls too.
 
+A Room of Requirement's editors also move beasts between their bag and the room's vivariums with the game's beast screens: a release into a vivarium takes a beast out of the bag, and a take puts one in. These raise `vivariumMove` rather than `beastReleased` or `beastCaptured`, so save the bag after them as well, as [Vivarium beasts](/guides/room-of-requirement/vivariums/#beasts-and-the-bag) shows.
+
 ## Releasing beasts
 
 When a player releases a beast from their Field Guide, the game drops it from the bag, and `beastReleased(player, released, at)` fires. `released` is the entry as it was, and `at` is where the player stood. The game does not put the beast back in the world, so bring it back yourself if you want it there:
@@ -140,4 +142,5 @@ function releaseInFront(player, entryId) {
 
 - [Beasts and characters](/guides/npcs-and-creatures/beasts-and-characters/) for spawning beasts, their options, and petting and feeding them.
 - [Virtual worlds](/guides/core-concepts/virtual-worlds/) for keeping a beast to the players who should see it.
+- [Vivarium beasts](/guides/room-of-requirement/vivariums/) for the beasts a Room of Requirement keeps, which players release into it from their bag.
 - [Keys and menus](/guides/user-interface/keys-and-menus/) for putting your own interface in place of the game's menus.

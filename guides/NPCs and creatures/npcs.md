@@ -11,21 +11,25 @@ sidebar:
 
 ```js
 // server/main.js
-const grunt = NPC.create("Goblin_Grunt", x, y, z, "hostile");
+const grunt = NPC.create("Goblin_Grunt", { x, y, z, yaw: 90 });
 if (grunt) {
   grunt.setScale(1.5);
   grunt.setMaxHealth(2000);
 }
 ```
 
-`NPC.create(enemyId, x, y, z, disposition, preferredOwnerId)` takes:
+`NPC.create(enemyId, options)` spawns the enemy `enemyId` names: one of the game's enemy ids, one of the Mod's short names such as `Goblin_Grunt`, or an enemy's class path. The server does not check it for you: a misspelled id returns an NPC that never appears. Its options are:
 
-- `enemyId`: one of the game's enemy ids, one of the Mod's short names such as `Goblin_Grunt`, or an enemy's class path. The server does not check it for you: a misspelled id returns an NPC that never appears.
-- A position in world centimetres.
-- `disposition`: `"hostile"` (the default) or `"friendly"`.
-- `preferredOwnerId`: the player whose client should run its AI. The NPC starts in that player's virtual world and map.
+| Option | Meaning |
+| --- | --- |
+| `x`, `y`, `z` | Where it spawns, in world centimetres. Required |
+| `yaw` | The heading it faces, in degrees: 0 faces +X and 90 faces +Y. 0 by default |
+| `disposition` | `"hostile"`, the default, or `"friendly"` |
+| `preferredOwnerId` | The player whose client should run its AI. The NPC starts in that player's virtual world and map |
 
-It returns the NPC, or `undefined` if it could not be created. `setScale` takes effect best right after `create`, before the NPC first reaches anyone. Pass `"visual"` as its second argument to resize only the body and keep native collision.
+It returns the NPC, or `undefined` if it could not be created, and throws for options without a finite `x`, `y` and `z`. The older positional form, `NPC.create(enemyId, x, y, z, disposition, preferredOwnerId)`, is deprecated: it still works, but cannot set a heading.
+
+`setScale` takes effect best right after `create`, before the NPC first reaches anyone. Pass `"visual"` as its second argument to resize only the body and keep native collision.
 
 Without a `preferredOwnerId`, NPCs start in [virtual world](/guides/core-concepts/virtual-worlds/#placing-entities) 0. The NPCs a resource creates are destroyed when that resource stops; [camp](/guides/encounters/camps/) and [world event](/guides/encounters/world-events/) enemies, and enemies an NPC summons, belong to no resource.
 
@@ -56,7 +60,7 @@ An NPC never gets its health back by itself, and its owner finishes off any NPC 
 
 `launch` returns `false` for a dormant NPC; `true` means it was sent. Pass `{ overrideXY: true }` or `{ overrideZ: true }` to replace the NPC's own speed instead of adding to it, and `{ space: "local" }` to launch along its own facing.
 
-To walk an NPC to a spot, send it on a patrol or choose what it does when idle, see [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/#npcs).
+To walk an NPC to a spot, send it on a patrol, have it follow someone or choose what it does when idle, see [Moving NPCs and creatures](/guides/npcs-and-creatures/movement/#npcs).
 
 ## Switching behaviour off
 
@@ -73,7 +77,7 @@ Five properties switch parts of an NPC's behaviour off. They are held on the ser
 ```js
 // server/main.js
 function trainingDummy(x, y, z) {
-  const dummy = NPC.create("Goblin_Grunt", x, y, z, "hostile");
+  const dummy = NPC.create("Goblin_Grunt", { x, y, z });
   if (!dummy) return undefined;
   dummy.aiPaused = true;
   dummy.combatEnabled = false;
