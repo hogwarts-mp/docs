@@ -138,7 +138,7 @@ Spells.define({ id: "Mend", base: "ArrestoMomentum", name: "Mend", description: 
 
 Events.on("playerSpellCast", (player, spell) => {
   if (spell !== "Mend") return;
-  const vitals = /** @type {{ hp: number; max: number } | null} */ (Pvp.getVitals(player.id));
+  const vitals = Pvp.getVitals(player.id);
   if (vitals) player.setHealth(Math.min(vitals.max, vitals.hp + 40));
 });
 ```

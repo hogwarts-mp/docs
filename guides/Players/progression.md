@@ -37,7 +37,7 @@ Events.on("worldReady", (player) => {
 ```js
 // client/main.js
 Events.on("progression:level", (data) => {
-  const bounds = /** @type {{ start: number; end: number } | null} */ (Progression.getLevelBounds(data.level));
+  const bounds = Progression.getLevelBounds(data.level);
   if (bounds) Progression.setPoints(bounds.start);
 });
 ```
