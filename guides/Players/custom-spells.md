@@ -5,13 +5,13 @@ sidebar:
   order: 345
 ---
 
-A server can add spells to the game. A defined spell runs one of the game's player spells for its look and behaviour, with its own name, icon, numbers and lock, and can take parts from other spells: a Confringo that freezes what it hits, or a silent Depulso whose cast summons a Patronus. No mod is needed. Every player's game adds the spell to its own spell table, then casts it, cools it down and shows it to other players like any other spell.
+A server can add spells to the game. A defined spell runs one of the game's player spells for its look and behaviour, with its own name, icon, numbers and lock, and can take parts from other spells: a Confringo that freezes what it hits, or a silent Depulso whose cast summons a Patronus. It can also leave out what only its base's own code does, cast with any of the game's cast animations, and tell the server what its bolt strikes, so a script can supply the effect. No mod is needed. Every player's game adds the spell to its own spell table, then casts it, cools it down and shows it to other players like any other spell.
 
 On the server, `Spells` defines spells. On a client, `Spells` is the [spell policy and spell bar](/guides/players/progression/#spells), and `SpellLearning` runs spell lessons, including [lessons of your own](#lessons-of-your-own).
 
 ## Defining a spell
 
-```jsx
+```js
 // server/main.js
 Spells.define({
   id: "Firestorm",
@@ -36,6 +36,8 @@ Spells.define({
 | `incantation` | Another player spell whose line the caster says, or `"none"` for a silent cast. The base's line by default |
 | `stats` | Numbers that replace the base's; see [Stats](#stats) |
 | `parts` | Parts taken from other player spells; see [Parts](#parts) |
+| `plain` | `true` to run the base without its own code; see [Plain spells](#plain-spells). `false` by default |
+| `castAbility` | The full-body animation it casts with, one of `Spells.castAbilities()`; see [Cast animations](#cast-animations). Its `cast` part's by default |
 
 `name` and `description` can't hold `<`, `>`, `{` or `}`. The game finds a spell's title by its id, so an id the game already uses for some text of its own shows that text instead of `name`. If your name doesn't show, pick a more distinctive id.
 
@@ -60,16 +62,21 @@ A stat left out, or `null`, keeps the base's value, and a value out of range is 
 
 ### Parts
 
-`parts` takes pieces of other player spells, each named like `base`. A part left out stays the base's.
+`parts` takes pieces of other player spells, each named like `base`. A part left out stays the base's. The parts marked below also take `"none"`, which leaves that part out altogether.
 
-| Part | What it takes |
-| --- | --- |
-| `projectile` | What the spell fires and how that lands |
-| `onHit` | The effect it leaves on what it hits, such as a burn or a freeze, and the effects that effect ends |
-| `cast` | The cast's animation and timing |
-| `muzzle` | The effects and sounds at the wand tip as it charges and fires |
+| Part | What it takes | `"none"` |
+| --- | --- | --- |
+| `projectile` | What the spell fires and how that flies | |
+| `onHit` | The effect it leaves on what it hits, such as a burn or a freeze, and the effects that effect ends | Yes |
+| `cast` | The full-body cast: its animation, stance and timing, and how long the bolt waits to leave the wand | |
+| `muzzle` | The effects and sounds at the wand tip as it charges and fires | |
+| `reaction` | How what it hits reacts: the stagger, knockdown or tumble it plays | Yes |
+| `hitFx` | The effects where it lands, on what it hits and as it fizzles out | Yes |
+| `noise` | What nearby NPCs notice when it is cast and lands | Yes |
 
-```jsx
+A spell's impact effects travel with its projectile, so `projectile` brings the other spell's unless `hitFx` names one too. `reaction: "none"` stops both characters and players from reacting to its hits; `noise: "none"` makes a spell no NPC hears.
+
+```js
 // server/main.js
 // Confringo's fireball, carrying Glacius's freeze to whatever it hits.
 Spells.define({
@@ -83,7 +90,38 @@ Spells.define({
 });
 ```
 
-With `parts: { projectile: "Glacius", onHit: "Glacius" }`, the same Confringo fires an ice bolt that freezes.
+With `parts: { projectile: "Glacius", onHit: "Glacius" }`, the same Confringo fires an ice bolt that freezes. With `parts: { hitFx: "Glacius" }`, it stays a fireball that bursts into ice where it lands.
+
+### Plain spells
+
+Some of what a spell does is not in any part: it is the base's own code, such as Flipendo's flip and its charged blast. `plain: true` runs the base without that code, as the game's plain bolt, and keeps everything else: its projectile, effects, cast, sounds, numbers and parts.
+
+```js
+// server/main.js
+// Flipendo's bolt and cast, with nothing happening to what it hits. The effect comes from a script.
+Spells.define({
+  id: "Hex",
+  base: "Flipendo",
+  name: "Hex",
+  plain: true,
+  parts: { reaction: "none", onHit: "none" },
+  stats: { damage: 0 },
+});
+```
+
+What a plain spell hits still reacts to its base's hit, a tumble for Flipendo, unless `reaction` is `"none"` or another spell's. Only a base that fires a bolt can be plain: Flipendo, Confringo, Expulso, Depulso, Descendo, Glacius, Incendio, Levioso, Petrificus, Arresto Momentum, Expelliarmus, Confundo, Obliviate, the Stupefy family, the Unforgivables and the like. `define` throws for one that doesn't, such as Accio or Diffindo.
+
+### Cast animations
+
+A spell casts with the full-body animation its `cast` part brings: Avada Kedavra's, Crucio's and Imperius's own, the spells with a cast of their own such as Diffindo or Revelio, and for most bolts the wand's light or heavy combo. `castAbility` picks one directly, from `Spells.castAbilities()`:
+
+```js
+// server/main.js
+Spells.define({ id: "Lunge", base: "Confringo", castAbility: "ABL_WandCast_HeavyCombo2" });
+Spells.define({ id: "Doom", base: "Glacius", parts: { cast: "AvadaKedavra" } });
+```
+
+The list holds the game's light, heavy, casual and dodge combos and their finishers, the Unforgivables' casts, and the casts of Diffindo, Disillusionment, Episkey, Oppugno, Revelio and a few more: every animation that releases the spell it plays for. Other players see the animation too. `cast` also brings the other spell's timing, so its bolt leaves the wand when that cast's would; `castAbility` changes only the animation.
 
 ### Icons
 
@@ -95,7 +133,7 @@ With `parts: { projectile: "Glacius", onHit: "Glacius" }`, the same Confringo fi
 
 ### Reading and removing spells
 
-`Spells.get(id)` returns one spell, matching the id whatever its case, or `null`. `Spells.list()` returns every one. A definition reads back as the server keeps it: the spells it names are spelled the game's way, `name` is filled in, and `icon` and `incantation` are `null` where they are the base's. Its `lock` is `Spell_` followed by its id.
+`Spells.get(id)` returns one spell, matching the id whatever its case, or `null`. `Spells.list()` returns every one. A definition reads back as the server keeps it: the spells it names are spelled the game's way, `name` is filled in, and `icon`, `incantation` and `castAbility` are `null` where they are the base's. Its `lock` is `Spell_` followed by its id.
 
 The server holds up to 32 defined spells, across every resource. They belong to the server, not to the resource that defined them, so they stay when it stops. Defining the same spell again when it starts back changes nothing.
 
@@ -105,7 +143,7 @@ The server holds up to 32 defined spells, across every resource. They belong to 
 
 A defined spell starts locked for every player. Open its lock through the [spell policy](/guides/players/progression/#spells), the way you open any spell, and it joins the player's spell menu. Players then put it on the spell bar from that menu, and `Spells.setLoadoutSlot(slot, id)` slots it from a client script. Closing the lock again takes it away and clears it from the spell bar.
 
-```jsx
+```js
 // server/main.js
 const firestorm = Spells.define({ id: "Firestorm", base: "Confringo", name: "Firestorm", stats: { damage: 40, cooldown: 6 } });
 
@@ -129,9 +167,9 @@ On the server, `playerSpellCast(player, spell, cast)` fires when a player casts 
 | `aimYaw` | The world yaw the cast was aimed along, in degrees: where the caster's camera pointed, or the caster's facing when their game sent none |
 | `wand` | The caster's wand tip as the cast began, as `{ x, y, z }`. Their position when their game sent none, or one more than 5 m from them |
 
-What a cast does to what it hits comes from its base and parts. Anything more is a script: heal on a cast, summon something, or change its PvP hits in the [policy](/guides/pvp/hits-and-defeat/#the-policy-hook).
+What a cast does to what it hits comes from its base and parts. Anything more is a script: heal on a cast, summon something where the bolt lands, or change its PvP hits in the [policy](/guides/pvp/hits-and-defeat/#the-policy-hook).
 
-```jsx
+```js
 // server/main.js
 // Mend runs Arresto Momentum, which only slows what it hits. The heal is ours.
 Spells.define({ id: "Mend", base: "ArrestoMomentum", name: "Mend", description: "Restores some of the caster's health.", incantation: "none", stats: { cooldown: 12 } });
@@ -144,6 +182,33 @@ Events.on("playerSpellCast", (player, spell) => {
 ```
 
 The caster's game reports each cast, at most 4 a second per player, and the server drops the rest. A modified game can report casts it never made, so use the event for effects like these, not for anything a cheater must not be able to trigger. See [Authority](/guides/core-concepts/authority/).
+
+### Hits
+
+`playerSpellHit(player, spell, hit)` fires when a player's bolt of a defined spell strikes something: a player, an NPC, a creature, an object or just the ground. `hit` says what and where:
+
+| Field | Meaning |
+| --- | --- |
+| `target` | `"player"`, `"npc"` for a server NPC, `"character"` for any other character such as a native enemy or creature, `"object"`, or `"world"` for terrain and walls |
+| `player` | The player struck, for a `"player"` hit, else `null` |
+| `npcId` | The server NPC struck, for an `"npc"` hit, else `null` |
+| `point` | Where it struck, as `{ x, y, z }` |
+| `normal` | Which way the struck surface faces there |
+
+```js
+// server/main.js
+// Hex (see Plain spells) does nothing by itself: where it lands, a shockwave plays, and a player it strikes is slowed.
+const SHOCKWAVE = "/Game/VFX/Particles/Magic/Patronus/VFX_NS_Patronus_Shockwave.VFX_NS_Patronus_Shockwave";
+let bursts = 0;
+
+Events.on("playerSpellHit", (player, spell, hit) => {
+  if (spell !== "Hex") return;
+  Fx.create(`my-spells:hex:${++bursts}`, SHOCKWAVE, { x: hit.point.x, y: hit.point.y, z: hit.point.z, ttl: 2 });
+  if (hit.player) hit.player.emit("my-spells:slowed", JSON.stringify({ seconds: 3 }));
+});
+```
+
+The caster's game reports its own bolts, at most 8 hits a second, and the server drops a hit further from the caster than the spell reaches. Like casts, hits are the caster's word: fine for effects, not for anything a cheater must not be able to trigger.
 
 ## Spells in PvP
 
@@ -177,9 +242,9 @@ The cap never applies to a defined spell: the server knows its numbers.
 
 ## Summoning a Patronus
 
-A spell can summon something the game's spells never do. This one runs Depulso, silently and without damage, and the Patronus is not part of the spell: on `playerSpellCast`, the script creates a [world object](/guides/world/objects-and-effects/#world-objects) from one of the game's creatures, gives it the glow of the game's own Patronus, and sends it galloping off along the cast's `aimYaw` for three seconds. A shockwave plays at the wand tip. What the cast hits still gets Depulso's knock-back.
+A spell can summon something the game's spells never do. This one runs Depulso, silently and without damage, and the Patronus is not part of the spell: on `playerSpellCast`, the script creates a [world object](/guides/world/objects-and-effects/#world-objects) from one of the game's creatures, gives it the glow of the game's own Patronus, and sends it galloping off along the cast's `aimYaw` for three seconds. A shockwave plays at the wand tip. What the cast hits still gets Depulso's knock-back; `plain: true` and `parts: { reaction: "none" }` take that away.
 
-```jsx
+```js
 // server/main.js
 const asset = (path) => `/Game/${path}.${path.split("/").pop()}`;
 
