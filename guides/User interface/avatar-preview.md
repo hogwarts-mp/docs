@@ -19,7 +19,7 @@ Each client has one figure. A new preview replaces the last, whichever resource 
 
 This gear pane creates the preview hidden, and shows it once the page reports where its hole is:
 
-```jsx
+```js
 // client/main.js
 const GEAR_URL = "fw://resources/wardrobe/ui/gear.html";
 let gearView = -1;
@@ -167,7 +167,7 @@ The figure and the backdrop stand in the world, so the game treats them like the
 
 With `match: true` in the backdrop, `color` and `gradient` are the colours the backdrop must show on screen, as the page's CSS writes them. The game measures a band just inside the backdrop's edge, in its own picture before any web view is drawn over it, and corrects the backdrop until that band shows the colour. It keeps correcting as the exposure moves, so the colour holds in daylight, at night and indoors, and the rest of the view is untouched.
 
-```jsx
+```js
 // client/main.js
 function createWardrobePreview(view) {
   return AvatarPreview.create({
