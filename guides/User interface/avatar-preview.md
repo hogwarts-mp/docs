@@ -108,6 +108,7 @@ const hole = document.getElementById("hole");
 let sent = "";
 
 function reportHole(force) {
+  if (!hole) return;
   const box = hole.getBoundingClientRect();
   const json = JSON.stringify({
     x: Math.round(box.left),
@@ -123,7 +124,7 @@ function reportHole(force) {
 
 window.addEventListener("resize", () => reportHole(false));
 window.addEventListener("gear:refresh", () => reportHole(true));
-document.getElementById("close").addEventListener("click", (event) => {
+document.getElementById("close")?.addEventListener("click", (event) => {
   event.preventDefault();
   callEvent("gear:close", null);
 });
