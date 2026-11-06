@@ -11,7 +11,7 @@ On the server, `Spells` defines spells. On a client, `Spells` is the [spell poli
 
 ## Defining a spell
 
-```jsx
+```js
 // server/main.js
 Spells.define({
   id: "Firestorm",
@@ -69,7 +69,7 @@ A stat left out, or `null`, keeps the base's value, and a value out of range is 
 | `cast` | The cast's animation and timing |
 | `muzzle` | The effects and sounds at the wand tip as it charges and fires |
 
-```jsx
+```js
 // server/main.js
 // Confringo's fireball, carrying Glacius's freeze to whatever it hits.
 Spells.define({
@@ -105,7 +105,7 @@ The server holds up to 32 defined spells, across every resource. They belong to 
 
 A defined spell starts locked for every player. Open its lock through the [spell policy](/guides/players/progression/#spells), the way you open any spell, and it joins the player's spell menu. Players then put it on the spell bar from that menu, and `Spells.setLoadoutSlot(slot, id)` slots it from a client script. Closing the lock again takes it away and clears it from the spell bar.
 
-```jsx
+```js
 // server/main.js
 const firestorm = Spells.define({ id: "Firestorm", base: "Confringo", name: "Firestorm", stats: { damage: 40, cooldown: 6 } });
 
@@ -131,14 +131,14 @@ On the server, `playerSpellCast(player, spell, cast)` fires when a player casts 
 
 What a cast does to what it hits comes from its base and parts. Anything more is a script: heal on a cast, summon something, or change its PvP hits in the [policy](/guides/pvp/hits-and-defeat/#the-policy-hook).
 
-```jsx
+```js
 // server/main.js
 // Mend runs Arresto Momentum, which only slows what it hits. The heal is ours.
 Spells.define({ id: "Mend", base: "ArrestoMomentum", name: "Mend", description: "Restores some of the caster's health.", incantation: "none", stats: { cooldown: 12 } });
 
 Events.on("playerSpellCast", (player, spell) => {
   if (spell !== "Mend") return;
-  const vitals = /** @type {{ hp: number; max: number } | null} */ (Pvp.getVitals(player.id));
+  const vitals = Pvp.getVitals(player.id);
   if (vitals) player.setHealth(Math.min(vitals.max, vitals.hp + 40));
 });
 ```
@@ -179,7 +179,7 @@ The cap never applies to a defined spell: the server knows its numbers.
 
 A spell can summon something the game's spells never do. This one runs Depulso, silently and without damage, and the Patronus is not part of the spell: on `playerSpellCast`, the script creates a [world object](/guides/world/objects-and-effects/#world-objects) from one of the game's creatures, gives it the glow of the game's own Patronus, and sends it galloping off along the cast's `aimYaw` for three seconds. A shockwave plays at the wand tip. What the cast hits still gets Depulso's knock-back.
 
-```jsx
+```js
 // server/main.js
 const asset = (path) => `/Game/${path}.${path.split("/").pop()}`;
 

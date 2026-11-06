@@ -66,10 +66,10 @@ window.addEventListener("shop:stock", (event) => {
     item.addEventListener("click", () => callEvent("shop:buy", JSON.stringify({ wandId: wand.id })));
     return item;
   });
-  document.getElementById("wands").replaceChildren(...items);
+  document.getElementById("wands")?.replaceChildren(...items);
 });
 
-document.getElementById("close").addEventListener("click", () => callEvent("shop:close", null));
+document.getElementById("close")?.addEventListener("click", () => callEvent("shop:close", null));
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape") callEvent("shop:close", null);
 });

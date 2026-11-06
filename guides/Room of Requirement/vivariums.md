@@ -22,7 +22,7 @@ Each vivarium holds at most 12 beasts of at most 4 species. A young counts as it
 
 This puts a beast in a player's room as a reward, if its vivarium has room:
 
-```jsx
+```js
 // server/main.js
 function giveRoomBeast(player, species, vivarium) {
   const beast = Sanctuary.addBeast(roomOf(player), vivarium, { species });
@@ -52,16 +52,20 @@ Assigning `byproduct` or `needs` throws on a beast that lives in no vivarium, an
 
 A layout carries its beasts, so a new room can start with some. This gives every new room a pair of Mooncalves in its Grassland vivarium:
 
-```jsx
+```js
 // server/main.js
-// An entry needs only its vivarium and species; the rest has defaults.
-const STARTERS = [
-  { vivarium: "Grassland", species: "Mooncalf", gender: "female", name: "Clover" },
-  { vivarium: "Grassland", species: "Mooncalf", gender: "male", name: "Moss" },
-];
-
 function openNewRoom(id) {
-  Sanctuary.load(id, { version: 2, objects: [], locks: roomLocks, lighting: "Default", beasts: STARTERS });
+  Sanctuary.load(id, {
+    version: 2,
+    objects: [],
+    locks: roomLocks,
+    lighting: "Default",
+    // An entry needs only its vivarium and species; the rest has defaults.
+    beasts: [
+      { vivarium: "Grassland", species: "Mooncalf", gender: "female", name: "Clover" },
+      { vivarium: "Grassland", species: "Mooncalf", gender: "male", name: "Moss" },
+    ],
+  });
 }
 ```
 

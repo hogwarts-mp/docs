@@ -58,16 +58,20 @@ const extractSamples = (guide, source) => {
 };
 
 // A sample opening with a comment that names one environment (`// server`, `// client/main.js`) is checked
-// against that environment alone. Any other sample passes when it type-checks against at least one.
+// against that environment alone. Any other sample passes when it type-checks against at least one. Code that
+// runs inside a web view (`// ui/shop.js, running in the page`) sees the DOM and the bridge the game adds to the
+// page, scripts/page.d.ts, rather than the contract, and is checked there alone.
+const pageComment = /\brunning in the page\b/;
 const environmentsFor = (sample, environments) => {
   const comment = /^\s*\/\/(.*)/.exec(sample.code)?.[1] ?? "";
+  if (pageComment.test(comment)) return ["page"];
   const named = environments.filter((environment) => new RegExp(`\\b${environment}\\b`).test(comment));
   return named.length === 1 ? named : environments;
 };
 
-const checkEnvironment = (contractRoot, environment, samples) => {
+const checkEnvironment = (contractRoot, environment, samples, declarations, compilerOptions = options) => {
   const files = new Map(samples.map((sample, index) => [path.join(contractRoot, "samples", environment, `${index}${sample.extension}`), `${sample.code}\nexport {};\n`]));
-  const host = ts.createCompilerHost(options);
+  const host = ts.createCompilerHost(compilerOptions);
   const { fileExists, readFile: read, getSourceFile } = host;
   const sample = (name) => files.get(path.resolve(name));
   host.fileExists = (name) => sample(name) !== undefined || fileExists.call(host, name);
@@ -76,8 +80,7 @@ const checkEnvironment = (contractRoot, environment, samples) => {
     const code = sample(name);
     return code === undefined ? getSourceFile.call(host, name, languageVersion, ...rest) : ts.createSourceFile(name, code, languageVersion, true);
   };
-  const declarations = [path.join(contractRoot, "targets", "shared.d.ts"), path.join(contractRoot, "targets", environment, "api.d.ts")];
-  const program = ts.createProgram([...declarations, ...files.keys()], options, host);
+  const program = ts.createProgram([...declarations, ...files.keys()], compilerOptions, host);
   const global = [...program.getOptionsDiagnostics(), ...program.getGlobalDiagnostics()];
   if (global.length) throw new Error(ts.formatDiagnostics(global, host));
   return [...files.keys()].map((file, index) => {
@@ -95,7 +98,11 @@ const guides = (await readdir(guidesRoot, { recursive: true })).filter((file) =>
 const samples = [];
 for (const guide of guides) samples.push(...extractSamples(path.posix.join("guides", guide.split(path.sep).join("/")), await readFile(path.join(guidesRoot, guide), "utf8")));
 
-const results = Object.fromEntries(environments.map((environment) => [environment, checkEnvironment(contractRoot, environment, samples)]));
+const contractDeclarations = (environment) => [path.join(contractRoot, "targets", "shared.d.ts"), path.join(contractRoot, "targets", environment, "api.d.ts")];
+const results = Object.fromEntries(environments.map((environment) => [environment, checkEnvironment(contractRoot, environment, samples, contractDeclarations(environment))]));
+// Only the page samples compile there; the rest stand in as empty files so the indexes line up.
+const pageSamples = samples.map((sample) => (environmentsFor(sample, environments)[0] === "page" ? sample : { ...sample, code: "" }));
+results.page = checkEnvironment(contractRoot, "page", pageSamples, [path.join(root, "scripts", "page.d.ts")], { ...options, lib: [...options.lib, "lib.dom.d.ts"] });
 let failures = 0;
 samples.forEach((sample, index) => {
   const candidates = environmentsFor(sample, environments).map((environment) => ({ environment, diagnostics: results[environment][index] }));
